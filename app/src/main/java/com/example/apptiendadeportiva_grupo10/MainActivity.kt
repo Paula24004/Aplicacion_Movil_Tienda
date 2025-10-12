@@ -12,14 +12,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.apptiendadeportiva_grupo10.ui.theme.AppTiendaDeportiva_Grupo10Theme
-import com.example.apptiendadeportiva_grupo10.ui.theme.HomeScreen
+import com.example.apptiendadeportiva_grupo10.ui.theme.AppNavigation
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             AppTiendaDeportiva_Grupo10Theme {
-                HomeScreen()
+                AppNavigation()
                 }
             }
         }
