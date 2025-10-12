@@ -62,7 +62,6 @@ fun HomeScreen(onLogout: () -> Unit) { // Ahora acepta una función para el Logo
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
-                // ... (código de Image)
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "Logo de la tienda",
                 modifier = Modifier
