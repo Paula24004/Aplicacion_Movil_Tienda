@@ -1,5 +1,4 @@
-
-package com.example.apptiendadeportiva_grupo10.ui.theme
+package com.example.apptiendadeportiva_grupo10.ui.screen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -18,8 +17,10 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
     val validUsername = "usuario"
     val validPassword = "123"
+    val validEmail = "test@gmail.com"
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Iniciar Sesión") }) }
@@ -67,14 +68,18 @@ fun LoginScreen(
             )
             Spacer(modifier = Modifier.height(32.dp))
 
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email  = it },
+                label = { Text("Email")},
+                modifier = Modifier.fillMaxWidth()
+            )
             //Login
             Button(
                 onClick = {
                     // validacion
-                    if (username == validUsername && password == validPassword) {
+                    if (username == validUsername && password == validPassword && email == validEmail) {
                         onLoginSuccess()
-                    } else {
-                        println("ERROR: Credenciales inválidas")
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
