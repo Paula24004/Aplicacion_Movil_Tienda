@@ -15,7 +15,7 @@ import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
 fun AppNavigation() {
     val navController = rememberNavController()
 
-    val AuthViewModel: AuthViewModel = viewModel()
+    val authViewModel: AuthViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -23,6 +23,7 @@ fun AppNavigation() {
     ) {
         composable(route = "login") {
             LoginScreen (
+                viewModel = authViewModel,
                 onLoginSuccess = {
                     navController.navigate("productos"){
                         popUpTo("login") {inclusive = true}
@@ -35,6 +36,7 @@ fun AppNavigation() {
         }
         composable(route = "register") {
             RegisterScreen(
+                viewModel = authViewModel,
                 onRegisterSuccess = {
                     navController.navigate("productos") {
                         popUpTo("register") { inclusive = true }
@@ -49,10 +51,10 @@ fun AppNavigation() {
         }
 
         composable(route = "productos") {
-            productosScreen(navController, AuthViewModel)
+            productosScreen(navController, authViewModel)
         }
         composable(route = "Home") {
-            HomeScreen(navController, AuthViewModel)
+            HomeScreen(navController, authViewModel)
         }
     }
 }

@@ -11,17 +11,20 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.apptiendadeportiva_grupo10.R
+import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
-    onNavigateToRegister: () -> Unit){
+    onNavigateToRegister: () -> Unit,
+    viewModel: AuthViewModel) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
-    val validUsername = "usuario"
-    val validPassword = "123"
-    val validEmail = "test@gmail.com"
+
+    val loginMessage by viewModel.mensaje
+
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Iniciar Sesión") }) }
@@ -78,8 +81,8 @@ fun LoginScreen(
             //Login
             Button(
                 onClick = {
-                    // validacion
-                    if (username == validUsername && password == validPassword) {
+                    val loginExitoso = viewModel.login(email,password)
+                    if (loginExitoso){
                         onLoginSuccess()
                     }
                 },
