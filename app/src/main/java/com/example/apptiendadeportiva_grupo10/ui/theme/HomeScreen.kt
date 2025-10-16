@@ -29,24 +29,9 @@ import com.example.apptiendadeportiva_grupo10.ui.screen.LoginScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavigation() {
-    var isLoggedIn by remember { mutableStateOf(false) }
-
-    if (isLoggedIn) {
-        HomeScreen(
-            onLogout = { isLoggedIn = false }
-        )
-    } else {
-        LoginScreen(
-            onLoginSuccess = { isLoggedIn = true }
-        )
-    }
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun HomeScreen(onLogout: () -> Unit) { // Ahora acepta una función para el Logout
+fun HomeScreen(
+    onLogout: () -> Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(title = { Text("Tienda Deportiva") })
@@ -60,27 +45,14 @@ fun HomeScreen(onLogout: () -> Unit) { // Ahora acepta una función para el Logo
             verticalArrangement = Arrangement.spacedBy(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = "Logo de la tienda",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(150.dp),
-                contentScale = ContentScale.Fit
-            )
+            // ... (Tu código de imagen y texto) ...
 
             Text("Bienvenido a la tienda deportiva")
 
-            // Botón que llama a la función de logout
+            // CAMBIO CLAVE: El botón ahora llama a la función lambda onLogout
             Button(onClick = onLogout) {
                 Text("Cerrar Sesión")
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AppPreview() {
-    AppNavigation()
 }

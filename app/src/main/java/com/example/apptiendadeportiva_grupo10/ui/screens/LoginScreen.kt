@@ -14,7 +14,8 @@ import com.example.apptiendadeportiva_grupo10.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    onLoginSuccess: () -> Unit ) {
+    onLoginSuccess: () -> Unit,
+    onNavigateToRegister: () -> Unit){
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -87,6 +88,11 @@ fun LoginScreen(
             ) {
                 Text("Ingresar")
             }
+            //Registro
+            Spacer(modifier = Modifier.height(16.dp))
+                TextButton(
+                onClick = onNavigateToRegister
+            ) {Text("Registrate") }
         }
     }
 }
