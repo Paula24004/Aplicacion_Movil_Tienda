@@ -24,8 +24,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.apptiendadeportiva_grupo10.R
-
-
+import com.example.apptiendadeportiva_grupo10.ui.screen.LoginScreen
 
 
 @OptIn(ExperimentalMaterial3Api::class)

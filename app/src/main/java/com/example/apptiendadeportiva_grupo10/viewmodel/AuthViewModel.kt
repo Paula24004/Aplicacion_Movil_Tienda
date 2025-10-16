@@ -1,5 +1,10 @@
 package com.example.apptiendadeportiva_grupo10.viewmodel
 
+import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.ViewModel
+import com.example.apptiendadeportiva_grupo10.model.FakeDatabase
+import com.example.apptiendadeportiva_grupo10.model.Productos
+import com.example.apptiendadeportiva_grupo10.model.Usuario
 import kotlin.collections.forEach
 
 class AuthViewModel: ViewModel() {
