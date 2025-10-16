@@ -78,7 +78,7 @@ fun LoginScreen(
             Button(
                 onClick = {
                     // validacion
-                    if (username == validUsername && password == validPassword && email == validEmail) {
+                    if (username == validUsername && password == validPassword) {
                         onLoginSuccess()
                     }
                 },

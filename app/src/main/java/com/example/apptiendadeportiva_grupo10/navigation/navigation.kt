@@ -21,7 +21,11 @@ fun AppNavigation() {
         startDestination = "Home"
     ) {
         composable(route = "login") {
-            LoginScreen {  }
+            LoginScreen (onLoginSuccess = {
+                navController.navigate("productos"){
+                    popUpTo("login") {inclusive = true}
+                }
+            })
         }
         composable(route = "productos") {
             productosScreen(navController, AuthViewModel)
