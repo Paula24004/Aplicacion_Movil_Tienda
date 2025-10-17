@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.apptiendadeportiva_grupo10.ui.screen.*
 import com.example.apptiendadeportiva_grupo10.ui.screenspackage.RegisterScreen
+import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
 
 
 @Composable

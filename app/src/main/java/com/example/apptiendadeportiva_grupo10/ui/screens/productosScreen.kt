@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.apptiendadeportiva_grupo10.navigation.AppNavigation
+import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
 
 @Composable
 fun productosScreen (
