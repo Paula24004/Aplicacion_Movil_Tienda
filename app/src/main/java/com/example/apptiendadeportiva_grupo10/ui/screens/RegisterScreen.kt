@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -100,12 +101,18 @@ fun RegisterScreen(
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
-                if (registerMessage.isNotBlank()) {
+
+                if(registerMessage.isNotBlank()){
                     Text(
                         text = registerMessage,
-                        color = if (registerMessage == "Registro exitoso") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-                    )
+                        color = Color.Red,)
                 }
+                LaunchedEffect(registerMessage) {
+                    if (registerMessage == "Registro exitoso") {
+                        onNavigateToLogin()
+                    }
+                }
+
 
                 // Botón/Texto para volver al Login
                 TextButton(onClick = onNavigateToLogin) {
