@@ -1,5 +1,4 @@
-
-package com.example.apptiendadeportiva_grupo10.ui.theme
+package com.example.apptiendadeportiva_grupo10.ui.screen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -12,14 +11,19 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.apptiendadeportiva_grupo10.R
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    onLoginSuccess: () -> Unit ) {
+    onLoginSuccess: () -> Unit,
+    onNavigateToRegister: () -> Unit,
+    viewModel: AuthViewModel) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    val validUsername = "usuario"
-    val validPassword = "123"
+    var email by remember { mutableStateOf("") }
+
+    val loginMessage by viewModel.mensaje
+
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Iniciar Sesión") }) }
@@ -67,14 +71,18 @@ fun LoginScreen(
             )
             Spacer(modifier = Modifier.height(32.dp))
 
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email  = it },
+                label = { Text("Email")},
+                modifier = Modifier.fillMaxWidth()
+            )
             //Login
             Button(
                 onClick = {
-                    // validacion
-                    if (username == validUsername && password == validPassword) {
+                    val loginExitoso = viewModel.login(email,password)
+                    if (loginExitoso){
                         onLoginSuccess()
-                    } else {
-                        println("ERROR: Credenciales inválidas")
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -82,6 +90,11 @@ fun LoginScreen(
             ) {
                 Text("Ingresar")
             }
+            //Registro
+            Spacer(modifier = Modifier.height(16.dp))
+                TextButton(
+                onClick = onNavigateToRegister
+            ) {Text("Registrate") }
         }
     }
 }
