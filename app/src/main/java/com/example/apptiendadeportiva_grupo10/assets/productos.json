@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "nombre": "zapatillas urbana",
+    "descripcion": "zapatillas deportivas color negro",
+    "precio": 64990,
+    "imagen": "https://api-prd.ynk.cl/medias/515Wx515H-BELSPORT-PM40049705-VIEW3.webp?context=bWFzdGVyfGltYWdlc3w1MjEwfGltYWdlL3dlYnB8YURJeUwyaGlOaTg1T1RJMU56STNOamd5TlRrd0x6VXhOVmQ0TlRFMVNGOUNSVXhUVUU5U1ZGOVFUVFF3TURRNU56QTFYMVpKUlZjekxuZGxZbkF8NThhYzBjYTEzMTZkZGY4YmY5ODNkOGE4MDAxY2YxZWZkYWU5ZmNjMGQ2NWIwMDU1ZjEzNGYzNTAzOWQ5ZmQ3Zg"
+  },
+  {
+    "id": 2,
+    "nombre": "pantalon deprotivo",
+    "descripcion": "pantalon deportivo color negro",
+    "precio": 32990,
+    "imagen": "https://api-prd.ynk.cl/medias/515Wx515H-BELSPORT-PM68261001-VIEW1.webp?context=bWFzdGVyfGltYWdlc3w0NzkwfGltYWdlL3dlYnB8YURFMUwyaG1PQzg1T0RnMU16TTFOVGcwTnprNEx6VXhOVmQ0TlRFMVNGOUNSVXhUVUU5U1ZGOVFUVFk0TWpZeE1EQXhYMVpKUlZjeExuZGxZbkF8MGU0MDhmZDY5ZGIyYThkY2FlNzRlOWQwMDI2MzNmMGEwZjg3M2IzM2RhYzVlZTA2YzA5M2ZjODVmZDEzOTBhMA"
+  },
+  {
+    "id": 3,
+    "nombre": "camiseta futbol",
+    "descripcion": "camiseta de futbol para mujer de la universidad de chile",
+    "precio": 59990,
+    "imagen": "https://api-prd.ynk.cl/medias/515Wx515H-BELSPORT-ADIV6033-VIEW1.jpg?context=bWFzdGVyfGltYWdlc3wxNzgyNnxpbWFnZS9qcGVnfGFHVTJMMmcyTlM4NU9EUTFNRFUxTURrME9ERTBMelV4TlZkNE5URTFTRjlDUlV4VFVFOVNWRjlCUkVsV05qQXpNMTlXU1VWWE1TNXFjR2N8NGMyYTA1MjAyOTBhMWIwNTE0ZjkwNDgwOWFiY2FiMzYwMDJkMjg2MWQ5NWQ0MzA4ODIyNTUxMjdiZWNkNGVkZQ"
+  },
+  {
+    "id": 4,
+    "nombre": "conjunto deportivo",
+    "descripcion": "conjunto deportivo para niños",
+    "precio": 44990,
+    "imagen": "https://api-prd.ynk.cl/medias/515Wx515H-BELSPORT-ADJL7479-VIEW1.webp?context=bWFzdGVyfGltYWdlc3w4ODAyfGltYWdlL3dlYnB8YURJeUwyaG1ZeTg1T1RRME1UTTNPREkyTXpNMEx6VXhOVmQ0TlRFMVNGOUNSVXhUVUU5U1ZGOUJSRXBNTnpRM09WOVdTVVZYTVM1M1pXSnd8MWFmNmNmMWI3ODcxMzVhNTcwZGE5NWYzNTlmNTI4ZDAwMzU4MTNiZThjMTExYTRkMGQ3YjVhNmEyNTAwMWQ5Yg"
+  }
+]
