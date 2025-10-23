@@ -10,11 +10,16 @@ import com.example.apptiendadeportiva_grupo10.ui.screen.LoginScreen
 import com.example.apptiendadeportiva_grupo10.ui.screen.HomeScreen
 import com.example.apptiendadeportiva_grupo10.ui.screen.CatalogoScreen
 import com.example.apptiendadeportiva_grupo10.ui.screenspackage.RegisterScreen
+import com.example.apptiendadeportiva_grupo10.ui.screens.CarritoScreen
 import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
 import com.example.apptiendadeportiva_grupo10.viewmodel.CatalogoViewModel
+import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
 
 @Composable
-fun AppNavigation(authViewModel: AuthViewModel) {
+fun AppNavigation(
+    authViewModel: AuthViewModel,
+    carritoViewModel: CarritoViewModel
+) {
     val navController = rememberNavController()
 
     NavHost(
@@ -54,6 +59,7 @@ fun AppNavigation(authViewModel: AuthViewModel) {
         }
 
         composable(route = "catalogo") {
+            // CatalogoViewModel se crea con el ciclo de vida del composable
             val catalogoViewModel: CatalogoViewModel = viewModel()
 
             CatalogoScreen(navController = navController, viewModel = catalogoViewModel)
@@ -62,16 +68,33 @@ fun AppNavigation(authViewModel: AuthViewModel) {
         composable(route = "detalle/{productoId}") { backStackEntry ->
             val id = backStackEntry.arguments?.getString("productoId")?.toIntOrNull() ?: 0
 
-            DetalleScreen(navController = navController, idProducto = id, authViewModel = authViewModel)
+            DetalleScreen(
+                navController = navController,
+                idProducto = id,
+                authViewModel = authViewModel,
+                carritoAuthViewModel = carritoViewModel
+            )
         }
 
         composable(route = "Home") {
             HomeScreen(navController, authViewModel)
         }
+
+        composable(route = "carrito") {
+            CarritoScreen(
+                navController = navController,
+                viewModel = carritoViewModel
+            )
+        }
     }
 }
 
 @Composable
-fun DetalleScreen(navController: NavHostController, idProducto: Int, authViewModel: AuthViewModel) {
-    TODO("Not yet implemented")
+fun DetalleScreen(
+    navController: NavHostController,
+    idProducto: Int,
+    authViewModel: AuthViewModel,
+    carritoAuthViewModel: CarritoViewModel // ✅ Nombre del parámetro en DetalleScreen
+) {
+    TODO("Implementación de DetalleScreen, incluyendo la lógica de 'Agregar al carrito' usando carritoAuthViewModel")
 }
