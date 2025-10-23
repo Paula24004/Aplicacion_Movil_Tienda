@@ -6,14 +6,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.apptiendadeportiva_grupo10.ui.screen.LoginScreen
 import com.example.apptiendadeportiva_grupo10.ui.screen.HomeScreen
 import com.example.apptiendadeportiva_grupo10.ui.screen.CatalogoScreen
 import com.example.apptiendadeportiva_grupo10.ui.screenspackage.RegisterScreen
 import com.example.apptiendadeportiva_grupo10.ui.screens.CarritoScreen
+import com.example.apptiendadeportiva_grupo10.ui.screens.DetalleProductoScreen // Importar la pantalla de detalle
 import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
 import com.example.apptiendadeportiva_grupo10.viewmodel.CatalogoViewModel
 import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
@@ -24,6 +27,10 @@ fun AppNavigation(
     carritoViewModel: CarritoViewModel
 ) {
     val navController = rememberNavController()
+
+    // 1. Crear una única instancia de CatalogoViewModel para todo el NavHost
+    // Esto es crucial para que la pantalla de detalle acceda a la lista de productos cargada.
+    val catalogoViewModel: CatalogoViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -62,20 +69,22 @@ fun AppNavigation(
         }
 
         composable(route = "catalogo") {
-            // CatalogoViewModel se crea con el ciclo de vida del composable
-            val catalogoViewModel: CatalogoViewModel = viewModel()
-
+            // Se usa la instancia de CatalogoViewModel creada arriba
             CatalogoScreen(navController = navController, viewModel = catalogoViewModel)
         }
 
-        composable(route = "detalle/{productoId}") { backStackEntry ->
-            val id = backStackEntry.arguments?.getString("productoId")?.toIntOrNull() ?: 0
+        // --- RUTA DETALLE CORREGIDA ---
+        composable(
+            route = "detalle/{productoId}",
+            arguments = listOf(navArgument("productoId") { type = NavType.IntType }) // Importar NavType
+        ) { backStackEntry ->
+            // Obtener el ID como entero
+            val idProducto = backStackEntry.arguments?.getInt("productoId") ?: 0
 
-            DetalleScreen(
-                navController = navController,
-                idProducto = id,
-                authViewModel = authViewModel,
-                carritoAuthViewModel = carritoViewModel
+            DetalleProductoScreen(
+                productoId = idProducto,
+                catalogoViewModel = catalogoViewModel, // Usamos el VM que tiene la función buscarProductoPorId
+                carritoViewModel = carritoViewModel // Pasamos el VM para la acción de agregar al carrito
             )
         }
 
@@ -88,34 +97,6 @@ fun AppNavigation(
                 navController = navController,
                 viewModel = carritoViewModel
             )
-        }
-    }
-}
-
-@Composable
-fun DetalleScreen(
-    navController: NavHostController,
-    idProducto: Int,
-    authViewModel: AuthViewModel,
-    carritoAuthViewModel: CarritoViewModel
-) {
-    Column {
-        Text("Detalle del Producto ID: $idProducto")
-
-        // Aquí iría la información detallada del producto
-
-        Button(
-            // Al hacer clic, llama a la función de tu ViewModel para agregar el producto
-            onClick = {
-                // 1. Crear un objeto Producto o pasar la ID
-                // (Debes tener una función 'agregarProducto' en CarritoViewModel)
-                carritoAuthViewModel.agregar(idProducto)
-
-                // Opcional: Navegar al carrito o mostrar un mensaje
-                // navController.navigate("carrito")
-            }
-        ) {
-            Text("Agregar al Carrito 🛒")
         }
     }
 }
