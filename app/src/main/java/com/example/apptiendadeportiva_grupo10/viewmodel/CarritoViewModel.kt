@@ -23,14 +23,14 @@ class CarritoViewModel : ViewModel() {
         .map { lista -> lista.sumOf { it.producto.precio * it.cantidad } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0.0)
 
-    fun agregar(producto: Producto, cantidad: Int = 1) {
+    fun agregar(productoId: Int, cantidad: Int = 1) {
         val actual = _items.value.toMutableList()
-        val i = actual.indexOfFirst { it.producto.id == producto.id }
+        val i = actual.indexOfFirst { it.producto.id == productoId }
         if (i >= 0) {
             val previo = actual[i]
             actual[i] = previo.copy(cantidad = (previo.cantidad + cantidad).coerceAtLeast(1))
         } else {
-            actual += ItemCarrito(producto, cantidad.coerceAtLeast(1))
+            println("no se encontro el producto")
         }
         _items.value = actual
     }
