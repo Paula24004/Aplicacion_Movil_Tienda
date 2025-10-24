@@ -17,10 +17,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -58,7 +62,18 @@ fun CatalogoScreen(navController: NavController, viewModel: CatalogoViewModel) {
     }
 
     Scaffold(topBar = {
-        TopAppBar(title = { Text("Catálogo") })
+        TopAppBar(
+            title = { Text("Catálogo de Productos") },
+            //boton añadir carrito
+            actions = {
+                IconButton(onClick = { navController.navigate("carrito") }) {
+                    Icon(
+                        imageVector = Icons.Default.ShoppingCart,
+                        contentDescription = "Ir al Carrito de Compras"
+                    )
+                }
+            }
+        )
     }) { padding ->
         Box(modifier = Modifier.padding(padding)) {
             if (loading) {
@@ -78,6 +93,7 @@ fun CatalogoScreen(navController: NavController, viewModel: CatalogoViewModel) {
             LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(items = productos, key = { it.id }) { producto ->
                     ProductoCard(producto = producto, onClick = {
+                        // Navegación al detalle
                         navController.navigate("detalle/${producto.id}")
                     })
                 }
@@ -85,7 +101,6 @@ fun CatalogoScreen(navController: NavController, viewModel: CatalogoViewModel) {
         }
     }
 }
-
 @Composable
 fun ProductoCard(producto: Producto, onClick: () -> Unit) {
     val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale("es", "CL")) }

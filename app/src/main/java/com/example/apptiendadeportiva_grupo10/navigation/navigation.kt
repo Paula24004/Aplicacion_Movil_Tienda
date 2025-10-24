@@ -73,7 +73,6 @@ fun AppNavigation(
             CatalogoScreen(navController = navController, viewModel = catalogoViewModel)
         }
 
-        // --- RUTA DETALLE CORREGIDA ---
         composable(
             route = "detalle/{productoId}",
             arguments = listOf(navArgument("productoId") { type = NavType.IntType }) // Importar NavType

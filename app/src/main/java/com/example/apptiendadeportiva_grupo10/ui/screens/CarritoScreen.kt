@@ -8,7 +8,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
@@ -19,9 +18,8 @@ import java.util.Locale
 @Composable
 fun CarritoScreen(navController: NavHostController,viewModel: CarritoViewModel) {
 
-    val vm: CarritoViewModel = viewModel()
-    val items = vm.items.collectAsState().value
-    val total = vm.total.collectAsState().value
+    val items = viewModel.items.collectAsState().value
+    val total = viewModel.total.collectAsState().value
     val formato = remember { NumberFormat.getCurrencyInstance(Locale("es","CL")) }
 
     Scaffold(topBar = { TopAppBar(title = { Text("Tu Carrito") }) }) { padding ->
@@ -40,14 +38,14 @@ fun CarritoScreen(navController: NavHostController,viewModel: CarritoViewModel) 
                         Text("Subtotal: ${formato.format(item.producto.precio * item.cantidad)}")
                         Row {
                             OutlinedButton(onClick = {
-                                vm.cambiarCantidad(item.producto.id, item.cantidad - 1)
+                                viewModel.cambiarCantidad(item.producto.id, item.cantidad - 1)
                             }) { Text("–") }
                             Spacer(Modifier.width(8.dp))
                             OutlinedButton(onClick = {
-                                vm.cambiarCantidad(item.producto.id, item.cantidad + 1)
+                                viewModel.cambiarCantidad(item.producto.id, item.cantidad + 1)
                             }) { Text("+") }
                             Spacer(Modifier.width(8.dp))
-                            TextButton(onClick = { vm.quitar(item.producto.id) }) { Text("Eliminar") }
+                            TextButton(onClick = { viewModel.quitar(item.producto.id) }) { Text("Eliminar") }
                         }
                         Divider()
                     }
@@ -59,7 +57,7 @@ fun CarritoScreen(navController: NavHostController,viewModel: CarritoViewModel) 
                 Text(formato.format(total), style = MaterialTheme.typography.titleMedium)
             }
             Spacer(Modifier.height(8.dp))
-            Button(onClick = { vm.vaciar() }, modifier = Modifier.fillMaxWidth()) {
+            Button(onClick = { viewModel.vaciar() }, modifier = Modifier.fillMaxWidth()) {
                 Text("Finalizar compra")
             }
         }
