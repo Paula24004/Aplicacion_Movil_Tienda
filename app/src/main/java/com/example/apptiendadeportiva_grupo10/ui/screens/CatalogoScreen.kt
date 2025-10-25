@@ -1,4 +1,4 @@
-package com.example.apptiendadeportiva_grupo10.ui.screen
+package com.example.apptiendadeportiva_grupo10.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -51,6 +51,9 @@ import java.util.Locale
 
 
 @OptIn(ExperimentalMaterial3Api::class)
+
+
+
 @Composable
 fun CatalogoScreen(navController: NavController, viewModel: CatalogoViewModel) {
     val context = LocalContext.current

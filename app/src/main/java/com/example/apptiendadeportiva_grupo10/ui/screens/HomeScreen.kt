@@ -1,15 +1,8 @@
-package com.example.apptiendadeportiva_grupo10.ui.screen
+package com.example.apptiendadeportiva_grupo10.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -26,73 +19,70 @@ import androidx.navigation.NavController
 import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
 import com.example.apptiendadeportiva_grupo10.R
 
+// Pantalla principal visible
 @Composable
-fun HomeScreenContent(
-    onNavigationProductos: (() -> Unit)? = null,
+fun HomeContent(
     onNavigationLogin: (() -> Unit)? = null
 ) {
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background) // Fondo consistente
+            .background(MaterialTheme.colorScheme.background)
     ) {
 
-        // --- ## 1. Banner Principal / Imagen de Marca ---
+        // HEADER con Logo + Nombre de la tienda
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp) // Altura considerable para el banner
-                .background(MaterialTheme.colorScheme.primaryContainer), // Un color de fondo primario
+                .height(200.dp),
             contentAlignment = Alignment.Center
         ) {
-            // Placeholder: Si tuvieras una imagen de fondo o logo para la tienda
+
             Image(
-                painter = painterResource(id = R.drawable.logotienda), // Reemplaza con tu imagen
-                contentDescription = "logo de tienda",
+                painter = painterResource(id = R.drawable.logotienda),
+                contentDescription = "Logo de tienda",
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
 
-            Column(
-                modifier = Modifier.align(Alignment.BottomStart).padding(16.dp)
-            ) {
+            Column(modifier = Modifier.align(Alignment.BottomStart).padding(16.dp)) {
                 Text(
-                    text = "SportWear", // Nombre de la Tienda
+                    text = "Tienda Deportiva CP",
                     fontSize = 32.sp,
-                    fontWeight = FontWeight.Bold// Color del texto
+                    fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Tu destino para el mejor equipo.",
+                    text = "Tu destino para la mejor ropa deportiva",
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                 )
             }
         }
 
-        // Área de Botones Principales
+        Spacer(modifier = Modifier.height(40.dp))
+
+        // Botón principal
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp), // Más padding para que respire
+                .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // Botón de Login/Registro
             Button(
-                onClick =  { onNavigationLogin?.invoke() },
+                onClick = { onNavigationLogin?.invoke() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer, // Un color secundario
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             ) {
                 Text(
-                    text = "👤 Iniciar Sesión / Registrarse",
+                    text = "Iniciar Sesión / Registrarse",
                     fontSize = 16.sp
                 )
             }
@@ -100,11 +90,14 @@ fun HomeScreenContent(
     }
 }
 
-// --- HomeScreen se mantiene igual para la navegación ---
+
 @Composable
 fun HomeScreen(navController: NavController, viewModel: AuthViewModel) {
-    HomeScreenContent(
-        onNavigationProductos = { navController.navigate("productos") },
-        onNavigationLogin = { navController.navigate("login") }
+    HomeContent(
+        onNavigationLogin = {
+            navController.navigate("login") {
+                popUpTo("Home") { inclusive = true }
+            }
+        }
     )
 }

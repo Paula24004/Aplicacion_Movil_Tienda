@@ -1,8 +1,12 @@
 package com.example.apptiendadeportiva_grupo10.model
 
-data class Usuario (
+
+
+data class Usuario(
     val id: Int,
-    val username: String?,
+    val nombre: String?,
     val password: String?,
-    val email: String?
+    val email: String?,
+    val esAdmin: Boolean = false,
+    val usernameAdmin: String? = null
 )

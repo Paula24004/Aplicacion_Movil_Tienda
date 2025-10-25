@@ -1,4 +1,4 @@
-package com.example.apptiendadeportiva_grupo10.ui.screen
+package com.example.apptiendadeportiva_grupo10.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
