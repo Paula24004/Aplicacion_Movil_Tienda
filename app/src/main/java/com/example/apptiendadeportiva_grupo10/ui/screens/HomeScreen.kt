@@ -22,7 +22,9 @@ import com.example.apptiendadeportiva_grupo10.R
 // Pantalla principal visible
 @Composable
 fun HomeContent(
-    onNavigationLogin: (() -> Unit)? = null
+    onNavigationLogin: (() -> Unit)? = null,
+    onNavigationAdmin: () -> Unit,
+    onNavigationCatalogo: () -> Unit
 ) {
 
     Column(
@@ -31,46 +33,17 @@ fun HomeContent(
             .background(MaterialTheme.colorScheme.background)
     ) {
 
-        // HEADER con Logo + Nombre de la tienda
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp),
-            contentAlignment = Alignment.Center
-        ) {
-
-            Image(
-                painter = painterResource(id = R.drawable.logotienda),
-                contentDescription = "Logo de tienda",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
-
-            Column(modifier = Modifier.align(Alignment.BottomStart).padding(16.dp)) {
-                Text(
-                    text = "Tienda Deportiva CP",
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "Tu destino para la mejor ropa deportiva",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-                )
-            }
-        }
-
         Spacer(modifier = Modifier.height(40.dp))
 
-        // Botón principal
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp),
+                .padding(horizontal = 24.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
+            // Botón 1: Iniciar Sesión
             Button(
                 onClick = { onNavigationLogin?.invoke() },
                 modifier = Modifier
@@ -86,18 +59,57 @@ fun HomeContent(
                     fontSize = 16.sp
                 )
             }
+
+            // ✅ NUEVO BOTÓN 2: Navegar al Catálogo
+            Button(
+                onClick = onNavigationCatalogo,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary, // Color primario
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            ) {
+                Text(
+                    text = "Ver Catálogo sin Iniciar Sesión",
+                    fontSize = 16.sp
+                )
+            }
+
+            // ✅ NUEVO BOTÓN 3: Navegar al Login de Administrador
+            Button(
+                onClick = onNavigationAdmin,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer, // Color terciario
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                )
+            ) {
+                Text(
+                    text = "Acceso de Administrador",
+                    fontSize = 16.sp
+                )
+            }
         }
     }
 }
 
 
 @Composable
-fun HomeScreen(navController: NavController, viewModel: AuthViewModel) {
+fun HomeScreen(
+    navController: NavController,
+    viewModel: AuthViewModel,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToAdmin: () -> Unit,
+    onNavigateToCatalogo: () -> Unit
+) {
+    // La función HomeScreen simplemente mapea los lambdas de navegación a HomeContent
     HomeContent(
-        onNavigationLogin = {
-            navController.navigate("login") {
-                popUpTo("Home") { inclusive = true }
-            }
-        }
+        onNavigationLogin = onNavigateToLogin,
+        onNavigationAdmin = onNavigateToAdmin,
+        onNavigationCatalogo = onNavigateToCatalogo
     )
 }

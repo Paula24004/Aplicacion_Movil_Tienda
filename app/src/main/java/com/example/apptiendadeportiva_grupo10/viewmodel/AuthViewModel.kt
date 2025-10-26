@@ -40,17 +40,21 @@ class AuthViewModel : ViewModel() {
 
     // ---------- ADMIN ----------
     fun loginAdmin(usernameAdmin: String, passwordAdmin: String): Boolean {
-        if (usernameAdmin.isBlank() || passwordAdmin.isBlank()) {
-            mensajeadmin.value = "Credenciales inválidas"
+        // ✅ 1. Llamar a la FakeDatabase para la verificación
+        val loginExitoso = FakeDatabase.loginAdmin(usernameAdmin, passwordAdmin)
+
+        if (loginExitoso) {
+            // 2. Si el login es exitoso según la BD
+            mensajeadmin.value = "Login exitoso"
+            return true
+        } else {
+            // 3. Si el login falla según la BD
+            mensajeadmin.value = "Usuario o contraseña incorrectos"
             return false
         }
-
-        val ok = (usernameAdmin == "admin" && passwordAdmin == "admin123")
-        mensajeadmin.value = if (ok) "Login exitoso" else "Usuario o contraseña incorrectos"
-        return ok
     }
 
-    // ---------- PRODUCTOS (puede usarse en panel admin) ----------
+
     fun agregarProducto(producto: Producto) {
         listaProductos.add(producto)
     }

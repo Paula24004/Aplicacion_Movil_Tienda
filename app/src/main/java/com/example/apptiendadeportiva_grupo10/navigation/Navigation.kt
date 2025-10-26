@@ -33,15 +33,30 @@ fun AppNavigation(
 
     NavHost(
         navController = navController,
-        startDestination = "iniciar_sesion"
+        // ✅ 1. Inicia en la pantalla 'home'
+        startDestination = "home"
     ) {
+
+        // ✅ 2. AGREGAR HomeScreen como punto de inicio
+        composable("home") {
+            HomeScreen(
+                navController = navController,
+                // ✅ Passing AuthViewModel
+                viewModel = authViewModel,
+
+                // ✅ Passing all required navigation lambdas
+                onNavigateToLogin = { navController.navigate("iniciar_sesion") },
+                onNavigateToAdmin = { navController.navigate("admin_iniciar") },
+                onNavigateToCatalogo = { navController.navigate("catalogo") } // Added this one
+            )
+        }
 
         composable("iniciar_sesion") {
             LoginScreen(
                 viewModel = authViewModel,
                 onLoginSuccess = {
                     navController.navigate("catalogo") {
-                        popUpTo("iniciar_sesion") { inclusive = true }
+                        popUpTo("home") { inclusive = true } // popUpTo "home" si quieres resetear la pila
                     }
                 },
                 onNavigateToRegister = {
@@ -55,7 +70,7 @@ fun AppNavigation(
                 viewModel = authViewModel,
                 onRegisterSuccess = {
                     navController.navigate("catalogo") {
-                        popUpTo("registrarse") { inclusive = true }
+                        popUpTo("home") { inclusive = true } // popUpTo "home" si quieres resetear la pila
                     }
                 },
                 onNavigateToLogin = {
@@ -97,7 +112,7 @@ fun AppNavigation(
                 viewModel = authViewModel,
                 onLoginSuccess = {
                     navController.navigate("admin_panel") {
-                        popUpTo("admin_iniciar") { inclusive = true }
+                        popUpTo("home") { inclusive = true } // popUpTo "home" si quieres resetear la pila
                     }
                 },
                 onNavigateToRegister = {
@@ -126,6 +141,7 @@ fun AppNavigation(
             HomeAdmin(
                 viewModel = authViewModel,
                 onLogout = {
+                    // Usando la función corregida de logout
                     authViewModel.loginAdmin()
                     navController.navigate("admin_iniciar") {
                         popUpTo("admin_panel") { inclusive = true }

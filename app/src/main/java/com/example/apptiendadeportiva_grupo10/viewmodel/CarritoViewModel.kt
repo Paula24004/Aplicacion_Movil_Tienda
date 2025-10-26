@@ -19,7 +19,7 @@ class CarritoViewModel : ViewModel() {
     private val _items = MutableStateFlow<List<ItemCarrito>>(emptyList())
     val items: StateFlow<List<ItemCarrito>> = _items
 
-    val total: StateFlow<Double> = _items
+    val total: StateFlow<Any> = _items
         .map { lista -> lista.sumOf { it.producto.precio * it.cantidad } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0.0)
 
