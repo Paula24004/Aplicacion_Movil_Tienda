@@ -33,21 +33,18 @@ fun AppNavigation(
 
     NavHost(
         navController = navController,
-        // ✅ 1. Inicia en la pantalla 'home'
+        //Inicio
         startDestination = "home"
     ) {
 
-        // ✅ 2. AGREGAR HomeScreen como punto de inicio
         composable("home") {
             HomeScreen(
                 navController = navController,
-                // ✅ Passing AuthViewModel
                 viewModel = authViewModel,
 
-                // ✅ Passing all required navigation lambdas
                 onNavigateToLogin = { navController.navigate("iniciar_sesion") },
                 onNavigateToAdmin = { navController.navigate("admin_iniciar") },
-                onNavigateToCatalogo = { navController.navigate("catalogo") } // Added this one
+                onNavigateToCatalogo = { navController.navigate("catalogo") }
             )
         }
 
@@ -56,7 +53,7 @@ fun AppNavigation(
                 viewModel = authViewModel,
                 onLoginSuccess = {
                     navController.navigate("catalogo") {
-                        popUpTo("home") { inclusive = true } // popUpTo "home" si quieres resetear la pila
+                        popUpTo("home") { inclusive = true }
                     }
                 },
                 onNavigateToRegister = {
@@ -70,7 +67,7 @@ fun AppNavigation(
                 viewModel = authViewModel,
                 onRegisterSuccess = {
                     navController.navigate("catalogo") {
-                        popUpTo("home") { inclusive = true } // popUpTo "home" si quieres resetear la pila
+                        popUpTo("home") { inclusive = true }
                     }
                 },
                 onNavigateToLogin = {
