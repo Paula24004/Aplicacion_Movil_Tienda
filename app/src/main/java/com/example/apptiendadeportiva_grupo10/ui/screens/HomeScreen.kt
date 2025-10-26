@@ -1,7 +1,6 @@
 package com.example.apptiendadeportiva_grupo10.ui.screens
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -12,7 +11,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -26,72 +24,81 @@ fun HomeContent(
     onNavigationAdmin: () -> Unit,
     onNavigationCatalogo: () -> Unit
 ) {
+    Box (modifier = Modifier.fillMaxSize())
+    {
+        //Imagen de Fondo
+        Image(
+            painter = painterResource(id = R.drawable.fondo_login),
+            contentDescription = "Fondo de home",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-
-        Spacer(modifier = Modifier.height(40.dp))
-
+        //Columna de Contenido (Botones)
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Center
         ) {
 
-            // Botón 1: Iniciar Sesión
-            Button(
-                onClick = { onNavigationLogin?.invoke() },
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                )
+                    .padding(horizontal = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = "Iniciar Sesión / Registrarse",
-                    fontSize = 16.sp
-                )
-            }
 
-            // ✅ NUEVO BOTÓN 2: Navegar al Catálogo
-            Button(
-                onClick = onNavigationCatalogo,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary, // Color primario
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            ) {
-                Text(
-                    text = "Ver Catálogo sin Iniciar Sesión",
-                    fontSize = 16.sp
-                )
-            }
+                // boton Iniciar Sesion
+                Button(
+                    onClick = { onNavigationLogin?.invoke() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                ) {
+                    Text(
+                        text = "Iniciar Sesión / Registrarse",
+                        fontSize = 16.sp
+                    )
+                }
 
-            // ✅ NUEVO BOTÓN 3: Navegar al Login de Administrador
-            Button(
-                onClick = onNavigationAdmin,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.tertiaryContainer, // Color terciario
-                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-                )
-            ) {
-                Text(
-                    text = "Acceso de Administrador",
-                    fontSize = 16.sp
-                )
+                // Ver Catálogo
+                Button(
+                    onClick = onNavigationCatalogo,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                ) {
+                    Text(
+                        text = "Ver Catálogo sin Iniciar Sesión",
+                        fontSize = 16.sp
+                    )
+                }
+
+                // Acceso de Administrador
+                Button(
+                    onClick = onNavigationAdmin,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                    )
+                ) {
+                    Text(
+                        text = "Acceso de Administrador",
+                        fontSize = 16.sp
+                    )
+                }
             }
         }
     }
