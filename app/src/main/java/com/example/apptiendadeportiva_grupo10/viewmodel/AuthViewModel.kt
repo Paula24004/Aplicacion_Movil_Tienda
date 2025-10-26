@@ -14,10 +14,10 @@ class AuthViewModel : ViewModel() {
     var usuarioActual = mutableStateOf("")
     var listaProductos = mutableStateListOf<Producto>()
 
-    // ---- Estado para ADMIN ----
+    // estado de admin
     val mensajeadmin = mutableStateOf("")
 
-    // ---------- USUARIO ----------
+    // usuario
     fun registrar(id: Int, nombre: String?, password: String?, email: String?) {
         val nuevo = Usuario(id, nombre, password, email)
         if (FakeDatabase.registrar(nuevo)) {
@@ -38,17 +38,15 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    // ---------- ADMIN ----------
+    // admin
     fun loginAdmin(usernameAdmin: String, passwordAdmin: String): Boolean {
-        // ✅ 1. Llamar a la FakeDatabase para la verificación
+        //Llamar a la FakeDatabase para la verificación
         val loginExitoso = FakeDatabase.loginAdmin(usernameAdmin, passwordAdmin)
 
         if (loginExitoso) {
-            // 2. Si el login es exitoso según la BD
             mensajeadmin.value = "Login exitoso"
             return true
         } else {
-            // 3. Si el login falla según la BD
             mensajeadmin.value = "Usuario o contraseña incorrectos"
             return false
         }
@@ -74,13 +72,13 @@ class AuthViewModel : ViewModel() {
 
 
 
-    // ---------- ADMIN: Logout ----------
+    // Admin logout
     fun loginAdmin() {
         usuarioActual.value = ""
         mensajeadmin.value = "Sesión cerrada"
     }
 
-    // ---------- ADMIN: Registro ----------
+    // Admin registro
     fun registrarAdmin(usernameAdmin: String, passwordAdmin: String, emailAdmin: String): Boolean {
         if (FakeDatabase.registrarAdmin(usernameAdmin, passwordAdmin, emailAdmin)) {
             mensajeadmin.value = "Registro exitoso"
