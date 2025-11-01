@@ -2,6 +2,7 @@ package com.example.apptiendadeportiva_grupo10.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -11,11 +12,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
 import com.example.apptiendadeportiva_grupo10.R
+import com.example.apptiendadeportiva_grupo10.components.ImgManagement
 
 // Pantalla principal visible
 @Composable
@@ -24,9 +27,8 @@ fun HomeContent(
     onNavigationAdmin: () -> Unit,
     onNavigationCatalogo: () -> Unit
 ) {
-    Box (modifier = Modifier.fillMaxSize())
-    {
-        //Imagen de Fondo
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Imagen de fondo
         Image(
             painter = painterResource(id = R.drawable.fondo_login),
             contentDescription = "Fondo de home",
@@ -34,22 +36,29 @@ fun HomeContent(
             modifier = Modifier.fillMaxSize()
         )
 
-        //Columna de Contenido (Botones)
         Column(
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-
-            Column(
+            // Imagen del logo, centrada y no tan arriba
+            ImgManagement(
+                null,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
+                    .padding(bottom = 20.dp) // ajusta la distancia con los botones
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Columna de botones
+            Column(
+                modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
-                // boton Iniciar Sesion
+                // Botón Iniciar Sesión
                 Button(
                     onClick = { onNavigationLogin?.invoke() },
                     modifier = Modifier
@@ -60,13 +69,10 @@ fun HomeContent(
                         contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                     )
                 ) {
-                    Text(
-                        text = "Iniciar Sesión / Registrarse",
-                        fontSize = 16.sp
-                    )
+                    Text("Iniciar Sesión / Registrarse", fontSize = 16.sp)
                 }
 
-                // Ver Catálogo
+                // Botón Catálogo
                 Button(
                     onClick = onNavigationCatalogo,
                     modifier = Modifier
@@ -77,13 +83,10 @@ fun HomeContent(
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 ) {
-                    Text(
-                        text = "Ver Catálogo sin Iniciar Sesión",
-                        fontSize = 16.sp
-                    )
+                    Text("Ver Catálogo sin Iniciar Sesión", fontSize = 16.sp)
                 }
 
-                // Acceso de Administrador
+                // Botón Administrador
                 Button(
                     onClick = onNavigationAdmin,
                     modifier = Modifier
@@ -94,15 +97,13 @@ fun HomeContent(
                         contentColor = MaterialTheme.colorScheme.onTertiaryContainer
                     )
                 ) {
-                    Text(
-                        text = "Acceso de Administrador",
-                        fontSize = 16.sp
-                    )
+                    Text("Acceso de Administrador", fontSize = 16.sp)
                 }
             }
         }
     }
 }
+
 
 
 @Composable
