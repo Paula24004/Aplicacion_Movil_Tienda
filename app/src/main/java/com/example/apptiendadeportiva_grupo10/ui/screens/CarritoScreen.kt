@@ -49,7 +49,7 @@ fun CarritoScreen(navController: NavHostController, viewModel: CarritoViewModel)
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "${item.producto.nombre} (x${item.cantidad})",
+                                text = "${item.producto.nombre} (Talla: ${item.talla} ((x${item.cantidad})",
                                 style = MaterialTheme.typography.bodyLarge,
                                 modifier = Modifier.weight(1f)
                             )

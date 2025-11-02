@@ -11,11 +11,11 @@ import kotlinx.coroutines.flow.stateIn
 
 data class ItemCarrito(
     val producto: Producto,
+    val talla: String,
     val cantidad: Int
 )
 
 class CarritoViewModel : ViewModel() {
-
     private val _items = MutableStateFlow<List<ItemCarrito>>(emptyList())
     val items: StateFlow<List<ItemCarrito>> = _items
 
@@ -23,14 +23,14 @@ class CarritoViewModel : ViewModel() {
         .map { lista -> lista.sumOf { it.producto.precio * it.cantidad } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0.0)
 
-    fun agregar(producto: Producto, cantidad: Int = 1) {
+    fun agregar(producto: Producto, talla: String, cantidad: Int = 1) {
         val actual = _items.value.toMutableList()
-        val i = actual.indexOfFirst { it.producto.id == producto.id}
+        val i = actual.indexOfFirst { it.producto.id == producto.id && it.talla == talla }
         if (i >= 0) {
             val previo = actual[i]
             actual[i] = previo.copy(cantidad = (previo.cantidad + cantidad).coerceAtLeast(1))
         } else {
-            actual.add(ItemCarrito(producto, cantidad))
+            actual.add(ItemCarrito(producto,talla, cantidad))
         }
         _items.value = actual
     }

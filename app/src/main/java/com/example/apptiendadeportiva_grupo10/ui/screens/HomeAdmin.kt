@@ -122,7 +122,8 @@ fun HomeAdmin(
                                     nombre = nuevoNombre,
                                     descripcion = nuevaDescripcion, // Usando el nuevo estado
                                     precio = nuevoPrecioText.toInt(),
-                                    imagen = nuevaImagen          // Usando el nuevo estado
+                                    imagen = nuevaImagen,
+                                    stockPorTalla = emptyMap() // Usando el nuevo estado
                                     // Asegúrate de que los nombres de los parámetros (descripcion, imagen) coincidan con tu clase Producto
                                 )
                                 viewModel.agregarProducto(nuevoProducto)
