@@ -29,6 +29,10 @@ fun RegistroAdmin(
     // Mensaje desde el ViewModel (admin)
     val mensajeAdmin by viewModel.mensajeadmin
 
+    var rutError by remember { mutableStateOf<String?>(null) }
+    val rutLimpio = rutAdmin.replace("[^0-9]".toRegex(), "")
+    val isRutValid = rutValido(rutAdmin)
+
     Scaffold(
         topBar = { TopAppBar(title = { Text("Registro Administrador") }) }
     ) { padding ->
@@ -78,10 +82,23 @@ fun RegistroAdmin(
                 // Usuario rutAdmin
                 OutlinedTextField(
                     value = rutAdmin,
-                    onValueChange = { rutAdmin = it },
-                    label = { Text("Rut administrador") },
+                    onValueChange = { newValue ->
+                        rutAdmin = newValue
+                        if (newValue.isNotBlank() && !rutValido(newValue)) {
+                            rutError = "Rut inválido (ingrese rut sin digito verificador"
+                        } else {
+                            rutError = null
+                        }
+                    },
+                    label = { Text("Rut") },
                     modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
+                    isError = rutError != null,
+                    supportingText = {
+                        if (rutError != null) {
+                            Text(text = rutError!!, color = MaterialTheme.colorScheme.error)
+                        }
+
+                    }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -132,4 +149,15 @@ fun RegistroAdmin(
             }
         }
     }
+}
+
+fun rutAdminValido(rut: String): Boolean{
+    val rutLimpio = rut.replace("[^0-9Kk]".toRegex(), "")
+    val rutCuerpo = if (rutLimpio.length > 1 ) {
+        rutLimpio.substring(0, rutLimpio.length - 1)
+    } else {
+        return false
+    }
+
+    return rutCuerpo.matches("[0-9]+".toRegex()) && rutLimpio.length in 7..8
 }

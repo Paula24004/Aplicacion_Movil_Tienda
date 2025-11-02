@@ -29,6 +29,12 @@ fun RegisterScreen(
     var password by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     val registerMessage by viewModel.mensaje
+    var rutError by remember { mutableStateOf<String?>(null) }
+    val rutLimpio = rut.replace("[^0-9]".toRegex(), "")
+    val isRutValid = rutValido(rut)
+
+
+
 
 
     Scaffold(
@@ -78,9 +84,23 @@ fun RegisterScreen(
                 // Campo de rut
                 OutlinedTextField(
                     value = rut,
-                    onValueChange = { rut = it },
+                    onValueChange = { newValue ->
+                        rut = newValue
+                        if (newValue.isNotBlank() && !rutValido(newValue)) {
+                            rutError = "Rut inválido (ingrese rut sin digito verificador"
+                        } else {
+                            rutError = null
+                        }
+                    },
                     label = { Text("Rut") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = rutError != null,
+                    supportingText = {
+                        if (rutError != null) {
+                            Text(text = rutError!!, color = MaterialTheme.colorScheme.error)
+                        }
+
+                    }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -97,7 +117,7 @@ fun RegisterScreen(
                 // Botón de Registrar
                 Button(
                     onClick = {
-                        viewModel.registrar(0,username,rut = null,password, email)
+                        viewModel.registrar(0,username,rut = rut,password, email)
                         if (viewModel.mensaje.value=="Registro exitoso"){
                             onNavigateToLogin()
                         }
@@ -123,5 +143,16 @@ fun RegisterScreen(
             }
         }
     }
+}
+
+fun rutValido(rut: String): Boolean{
+    val rutLimpio = rut.replace("[^0-9Kk]".toRegex(), "")
+    val rutCuerpo = if (rutLimpio.length > 1 ) {
+        rutLimpio.substring(0, rutLimpio.length - 1)
+    } else {
+        return false
+    }
+
+    return rutCuerpo.matches("[0-9]+".toRegex()) && rutLimpio.length in 7..8
 }
 
