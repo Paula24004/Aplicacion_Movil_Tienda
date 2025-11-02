@@ -1,7 +1,7 @@
 package com.example.apptiendadeportiva_grupo10.viewmodel
 
-import android.content.Context
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.apptiendadeportiva_grupo10.model.Producto
 import com.example.apptiendadeportiva_grupo10.repository.ProductoRepository
@@ -9,42 +9,58 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class CatalogoViewModel(
-    private val repo: ProductoRepository = ProductoRepository()
-) : ViewModel() {
+class CatalogoViewModel(app: Application) : AndroidViewModel(app) {
+
+    private val repo = ProductoRepository()
 
     private val _productos = MutableStateFlow<List<Producto>>(emptyList())
     val productos: StateFlow<List<Producto>> = _productos
 
-    private val _loading = MutableStateFlow(false)
-    val loading: StateFlow<Boolean> = _loading
-
-    fun cargarProductos(context: Context) {
-        viewModelScope.launch {
-            _loading.value = true
-            val list = repo.obtenerProductosDesdeAssets(context)
-            _productos.value = list
-            _loading.value = false
-        }
+    init {
+        cargar()
     }
 
-    fun buscarProductoPorId(id: Int): Producto? {
-        return _productos.value.find { it.id == id }
+    fun cargar() = viewModelScope.launch {
+        val lista = repo.obtenerProductosDesdeAssets(getApplication())
+        _productos.value = lista
     }
-    fun reducirStock(productoId: Int, talla: String, cantidad: Int = 1): Boolean {
-        // Usamos una copia de la lista para modificarla
-        val listaActualizada = _productos.value.toMutableList()
-        val index = listaActualizada.indexOfFirst { it.id == productoId }
-        if (index == -1) return false
-        val productoOriginal = listaActualizada[index]
-        val stockActual = productoOriginal.stockPorTalla[talla] ?: 0
-        if (stockActual < cantidad) return false
-        val nuevoStockMap = productoOriginal.stockPorTalla.toMutableMap()
-        val nuevoStock = stockActual - cantidad
-        nuevoStockMap[talla] = nuevoStock
-        val productoActualizado = productoOriginal.copy(stockPorTalla = nuevoStockMap)
-        listaActualizada[index] = productoActualizado
-        _productos.value = listaActualizada
+
+    fun buscarProductoPorId(id: Int): Producto? =
+        _productos.value.firstOrNull { it.id == id }
+
+    fun reducirStock(idProducto: Int, talla: String, unidades: Int): Boolean {
+        val lista = _productos.value
+        val idx = lista.indexOfFirst { it.id == idProducto }
+        if (idx == -1) return false
+
+        val p = lista[idx]
+        val tallaKey = talla.trim().uppercase()
+        val actual = p.stockPorTalla[tallaKey] ?: 0
+        if (actual < unidades) return false
+
+        val nuevoStock = p.stockPorTalla.toMutableMap()
+        nuevoStock[tallaKey] = actual - unidades
+
+        val actualizado = p.copy(stockPorTalla = nuevoStock)
+        val nuevaLista = lista.toMutableList().apply { this[idx] = actualizado }
+        _productos.value = nuevaLista
         return true
+    }
+
+    fun devolverStock(idProducto: Int, talla: String, unidades: Int) {
+        val lista = _productos.value
+        val idx = lista.indexOfFirst { it.id == idProducto }
+        if (idx == -1) return
+
+        val p = lista[idx]
+        val tallaKey = talla.trim().uppercase()
+        val actual = p.stockPorTalla[tallaKey] ?: 0
+
+        val nuevoStock = p.stockPorTalla.toMutableMap()
+        nuevoStock[tallaKey] = (actual + unidades).coerceAtLeast(0)
+
+        val actualizado = p.copy(stockPorTalla = nuevoStock)
+        val nuevaLista = lista.toMutableList().apply { this[idx] = actualizado }
+        _productos.value = nuevaLista
     }
 }

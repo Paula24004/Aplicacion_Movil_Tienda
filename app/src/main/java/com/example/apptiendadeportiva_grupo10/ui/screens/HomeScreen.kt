@@ -20,7 +20,6 @@ import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
 import com.example.apptiendadeportiva_grupo10.R
 import com.example.apptiendadeportiva_grupo10.components.ImgManagement
 
-// Pantalla principal visible
 @Composable
 fun HomeContent(
     onNavigationLogin: (() -> Unit)? = null,
@@ -103,8 +102,6 @@ fun HomeContent(
         }
     }
 }
-
-
 
 @Composable
 fun HomeScreen(

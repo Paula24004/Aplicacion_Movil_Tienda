@@ -1,47 +1,53 @@
 package com.example.apptiendadeportiva_grupo10.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-
 import com.example.apptiendadeportiva_grupo10.ui.screens.LoginScreen
 import com.example.apptiendadeportiva_grupo10.ui.screens.RegisterScreen
 import com.example.apptiendadeportiva_grupo10.ui.screens.CatalogoScreen
 import com.example.apptiendadeportiva_grupo10.ui.screens.CarritoScreen
 import com.example.apptiendadeportiva_grupo10.ui.screens.DetalleProductoScreen
 import com.example.apptiendadeportiva_grupo10.ui.screens.HomeScreen
-
 import com.example.apptiendadeportiva_grupo10.ui.screens.LoginAdmin
 import com.example.apptiendadeportiva_grupo10.ui.screens.RegistroAdmin
 import com.example.apptiendadeportiva_grupo10.ui.screens.HomeAdmin
-
 import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
 import com.example.apptiendadeportiva_grupo10.viewmodel.CatalogoViewModel
 import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
 
 @Composable
-fun AppNavigation(
-    authViewModel: AuthViewModel,
-    carritoViewModel: CarritoViewModel
-) {
+fun RootScreen() {
     val navController = rememberNavController()
+
+    val authViewModel: AuthViewModel = viewModel()
     val catalogoViewModel: CatalogoViewModel = viewModel()
+    val carritoViewModel: CarritoViewModel = viewModel()
+
+    val productos by catalogoViewModel.productos.collectAsState()
+
+    LaunchedEffect(productos) {
+        if (productos.isNotEmpty()) {
+            // Solo si usas el CarritoViewModel con inventario (initStock)
+            carritoViewModel.initStock(productos)
+        }
+    }
 
     NavHost(
         navController = navController,
-        //Inicio
         startDestination = "home"
     ) {
-
         composable("home") {
             HomeScreen(
                 navController = navController,
                 viewModel = authViewModel,
-
                 onNavigateToLogin = { navController.navigate("iniciar_sesion") },
                 onNavigateToAdmin = { navController.navigate("admin_iniciar") },
                 onNavigateToCatalogo = { navController.navigate("catalogo") }
@@ -56,9 +62,7 @@ fun AppNavigation(
                         popUpTo("home") { inclusive = true }
                     }
                 },
-                onNavigateToRegister = {
-                    navController.navigate("registrarse")
-                }
+                onNavigateToRegister = { navController.navigate("registrarse") }
             )
         }
 
@@ -109,12 +113,10 @@ fun AppNavigation(
                 viewModel = authViewModel,
                 onLoginSuccess = {
                     navController.navigate("admin_panel") {
-                        popUpTo("home") { inclusive = true } // popUpTo "home" si quieres resetear la pila
+                        popUpTo("home") { inclusive = true }
                     }
                 },
-                onNavigateToRegister = {
-                    navController.navigate("admin_registrar")
-                }
+                onNavigateToRegister = { navController.navigate("admin_registrar") }
             )
         }
 
@@ -138,8 +140,7 @@ fun AppNavigation(
             HomeAdmin(
                 viewModel = authViewModel,
                 onLogout = {
-                    // Usando la función corregida de logout
-                    authViewModel.loginAdmin()
+                    // Ajusta esto a tu lógica real de logout
                     navController.navigate("admin_iniciar") {
                         popUpTo("admin_panel") { inclusive = true }
                     }

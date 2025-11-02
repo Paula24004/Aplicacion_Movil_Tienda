@@ -24,11 +24,11 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetalleProductoScreen(productoId: Int,
-                          catalogoViewModel: CatalogoViewModel,
-                          carritoViewModel: CarritoViewModel = viewModel()
+fun DetalleProductoScreen(
+    productoId: Int,
+    catalogoViewModel: CatalogoViewModel,
+    carritoViewModel: CarritoViewModel = viewModel()
 ) {
-    val producto: Producto? = remember(productoId) { catalogoViewModel.buscarProductoPorId(productoId) }
     val formato = remember { NumberFormat.getCurrencyInstance(Locale("es", "CL")) }
     var tallaSeleccionada by remember { mutableStateOf<String?>(null) }
     var mensajeStock by remember { mutableStateOf<String?>(null) }
@@ -36,58 +36,75 @@ fun DetalleProductoScreen(productoId: Int,
     Scaffold(topBar = {
         TopAppBar(title = { Text("Detalle del Producto") })
     }) { padding ->
-        producto?.let { p ->
-            val tallasDisponibles = p.stockPorTalla.keys.toList().sorted()
-            val stockActual = tallaSeleccionada?.let { p.stockPorTalla[it] } ?: 0
+
+        val p: Producto? = catalogoViewModel.buscarProductoPorId(productoId)
+
+        p?.let { prod ->
+            val tallasDisponibles = prod.stockPorTalla.keys.toList().sorted()
+            val stockActual = tallaSeleccionada?.let { prod.stockPorTalla[it.uppercase()] } ?: 0
             val hayStock = stockActual > 0
 
-            Column(modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.Start
             ) {
-                val painter = rememberAsyncImagePainter(p.imagen)
-                Image(painter = painter, contentDescription = p.nombre, modifier = Modifier
-                    .fillMaxWidth()
-                    .height(350.dp),
+                val painter = rememberAsyncImagePainter(prod.imagen)
+                Image(
+                    painter = painter,
+                    contentDescription = prod.nombre,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(350.dp),
                     contentScale = ContentScale.Crop
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(Modifier.height(16.dp))
 
-                // Nombre y Precio
-                Text(text = p.nombre, style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                Text(text = formato.format(p.precio), style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary)
+                Text(
+                    text = prod.nombre,
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = formato.format(prod.precio),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
                 Divider(modifier = Modifier.padding(vertical = 8.dp))
-                Text(text = p.descripcion ?: "Sin descripción disponible.", style = MaterialTheme.typography.bodyLarge)
-                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = prod.descripcion ?: "Sin descripción disponible.",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Spacer(Modifier.height(16.dp))
 
-                // Selección de talla
-                Text("Selecciona la Talla:", style = MaterialTheme.typography.titleMedium)
-                Spacer(modifier = Modifier.height(8.dp))
+                Text("Selecciona la talla", style = MaterialTheme.typography.titleMedium)
+                Spacer(Modifier.height(8.dp))
 
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(tallasDisponibles) { talla ->
-                        val stockParaTalla = p.stockPorTalla[talla] ?: 0
-                        val isSelected = talla == tallaSeleccionada
+                        val key = talla.uppercase()
+                        val stockParaTalla = prod.stockPorTalla[key] ?: 0
+                        val isSelected = key == tallaSeleccionada?.uppercase()
                         val isEnabled = stockParaTalla > 0
                         val borderColor = when {
                             !isEnabled -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
                             isSelected -> MaterialTheme.colorScheme.primary
                             else -> Color.Gray
                         }
-
-                        val containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
-                        val labelColor = if (isEnabled) MaterialTheme.colorScheme.onSurface else Color.Gray
+                        val containerColor =
+                            if (isSelected) MaterialTheme.colorScheme.primaryContainer
+                            else MaterialTheme.colorScheme.surface
+                        val labelColor =
+                            if (isEnabled) MaterialTheme.colorScheme.onSurface else Color.Gray
 
                         AssistChip(
                             onClick = {
                                 if (isEnabled) {
-                                    tallaSeleccionada = talla
+                                    tallaSeleccionada = key
                                     mensajeStock = null
                                 }
                             },
@@ -98,32 +115,24 @@ fun DetalleProductoScreen(productoId: Int,
                                 )
                             },
                             enabled = isEnabled,
-                            border = BorderStroke(
-                                width = 2.dp,
-                                color = borderColor
-                            ),
-                            colors = ChipColors(
+                            border = BorderStroke(2.dp, borderColor),
+                            colors = AssistChipDefaults.assistChipColors(
                                 containerColor = containerColor,
                                 labelColor = labelColor,
-                                leadingIconContentColor = Color.Unspecified, // No estamos usando iconos, pero se requiere
-                                trailingIconContentColor = Color.Unspecified, // No estamos usando iconos
                                 disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                                disabledLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                                disabledLeadingIconContentColor = Color.Unspecified,
-                                disabledTrailingIconContentColor = Color.Unspecified
+                                disabledLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                             )
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(Modifier.height(16.dp))
 
-                // Stock y Mensaje
                 Text(
                     text = if (tallaSeleccionada != null) {
-                        "Stock disponible para talla ${tallaSeleccionada}: ${stockActual} unidades"
+                        "Stock disponible para talla ${tallaSeleccionada}: $stockActual unidades"
                     } else {
-                        "Por favor, selecciona una talla."
+                        "Selecciona una talla."
                     },
                     color = when {
                         tallaSeleccionada == null -> MaterialTheme.colorScheme.onSurface
@@ -134,27 +143,28 @@ fun DetalleProductoScreen(productoId: Int,
                 )
 
                 if (mensajeStock != null) {
-                    Text(mensajeStock!!, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 4.dp))
+                    Text(
+                        mensajeStock!!,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
                 }
 
-                Spacer(modifier = Modifier.weight(1f))
+                Spacer(Modifier.weight(1f))
 
-                // agregar al carrito
                 Button(
                     onClick = {
                         if (tallaSeleccionada == null) {
-                            mensajeStock = "⚠️ Debes seleccionar una talla."
+                            mensajeStock = "Debes seleccionar una talla."
                         } else if (!hayStock) {
-                            mensajeStock = "❌ Stock agotado para la talla seleccionada."
+                            mensajeStock = "Stock agotado para la talla seleccionada."
                         } else {
-                            val reduccionExitosa = catalogoViewModel.reducirStock(p.id, tallaSeleccionada!!, 1)
-
-                            if (reduccionExitosa) {
-                                carritoViewModel.agregar(p, tallaSeleccionada!!)
-
-                                mensajeStock = "✅ Agregado al carrito: Talla ${tallaSeleccionada}"
+                            val ok = catalogoViewModel.reducirStock(prod.id, tallaSeleccionada!!, 1)
+                            if (ok) {
+                                carritoViewModel.agregar(prod, tallaSeleccionada!!)
+                                mensajeStock = "Agregado al carrito. Talla ${tallaSeleccionada}"
                             } else {
-                                mensajeStock = "Error al agregar el producto."
+                                mensajeStock = "No se pudo agregar el producto."
                             }
                         }
                     },
@@ -166,12 +176,13 @@ fun DetalleProductoScreen(productoId: Int,
                         containerColor = MaterialTheme.colorScheme.primary
                     )
                 ) {
-                    Text("🛒 Agregar al carrito", fontSize = 18.sp)
+                    Text("Agregar al carrito", fontSize = 18.sp)
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+
+                Spacer(Modifier.height(8.dp))
             }
         } ?: Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Error: Producto no encontrado")
+            Text("Producto no encontrado")
         }
     }
 }

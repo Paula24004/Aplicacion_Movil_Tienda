@@ -1,15 +1,22 @@
 package com.example.apptiendadeportiva_grupo10.ui.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.apptiendadeportiva_grupo10.R
 import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
 
@@ -26,7 +33,20 @@ fun LoginAdmin(
     val loginMessageAdmin by viewModel.mensajeadmin
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Iniciar Sesión como Administrador") }) }
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        "Iniciar Sesión como Administrador",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            )
+        }
     ) { innerPadding ->
         Box(
             modifier = Modifier
@@ -40,63 +60,122 @@ fun LoginAdmin(
                 contentScale = ContentScale.Crop
             )
 
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.4f))
+            )
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(32.dp),
+                    .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text("Panel Administrador", style = MaterialTheme.typography.headlineMedium)
-                Spacer(modifier = Modifier.height(32.dp))
+                Text(
+                    "Panel Administrador",
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(Modifier.height(24.dp))
 
                 OutlinedTextField(
                     value = usernameAdmin,
                     onValueChange = { usernameAdmin = it },
                     label = { Text("Usuario Administrador") },
+                    textStyle = TextStyle(color = Color.White, fontWeight = FontWeight.Bold),
+                    colors = adminFieldColors(),
                     modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+
+                Spacer(Modifier.height(12.dp))
 
                 OutlinedTextField(
                     value = passwordAdmin,
                     onValueChange = { passwordAdmin = it },
                     label = { Text("Contraseña") },
                     visualTransformation = PasswordVisualTransformation(),
+                    textStyle = TextStyle(color = Color.White, fontWeight = FontWeight.Bold),
+                    colors = adminFieldColors(),
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(Modifier.height(24.dp))
 
                 Button(
                     onClick = {
-                        val loginExitoso = viewModel.loginAdmin(usernameAdmin, passwordAdmin)
-                        if (loginExitoso) {
-                            onLoginSuccess()
-                        }
+                        val ok = viewModel.loginAdmin(usernameAdmin, passwordAdmin)
+                        if (ok) onLoginSuccess()
                     },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = usernameAdmin.isNotBlank() && passwordAdmin.isNotBlank()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    enabled = usernameAdmin.isNotBlank() && passwordAdmin.isNotBlank(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = Color.White
+                    )
                 ) {
-                    Text("Ingresar")
+                    Text("Ingresar", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(Modifier.height(12.dp))
+
                 TextButton(onClick = onNavigateToRegister) {
-                    Text("Registrarse como Administrador")
+                    Text("Registrarse como Administrador", color = Color.White, fontWeight = FontWeight.Bold)
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
                 if (loginMessageAdmin.isNotBlank()) {
+                    Spacer(Modifier.height(8.dp))
                     Text(
                         text = loginMessageAdmin,
                         color = if (loginMessageAdmin.contains("exitos", ignoreCase = true))
                             MaterialTheme.colorScheme.primary
                         else
-                            MaterialTheme.colorScheme.error
+                            Color.White
                     )
                 }
             }
         }
     }
 }
+
+@Composable
+private fun adminFieldColors() = OutlinedTextFieldDefaults.colors(
+    focusedTextColor = Color.White,
+    unfocusedTextColor = Color.White,
+    disabledTextColor = Color.White.copy(alpha = 0.5f),
+    errorTextColor = Color.White,
+
+    focusedContainerColor = Color.Transparent,
+    unfocusedContainerColor = Color.Transparent,
+    disabledContainerColor = Color.Transparent,
+    errorContainerColor = Color.Transparent,
+
+    cursorColor = Color.White,
+    errorCursorColor = Color.White,
+    selectionColors = TextSelectionColors(
+        handleColor = Color.White,
+        backgroundColor = Color.White.copy(alpha = 0.3f)
+    ),
+
+    focusedBorderColor = Color.White,
+    unfocusedBorderColor = Color.White.copy(alpha = 0.4f),
+    disabledBorderColor = Color.White.copy(alpha = 0.2f),
+    errorBorderColor = Color.Red,
+
+    focusedLabelColor = Color.White,
+    unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
+    disabledLabelColor = Color.White.copy(alpha = 0.5f),
+    errorLabelColor = Color.Red,
+
+    focusedPlaceholderColor = Color.White.copy(alpha = 0.6f),
+    unfocusedPlaceholderColor = Color.White.copy(alpha = 0.6f),
+    disabledPlaceholderColor = Color.White.copy(alpha = 0.4f),
+    errorPlaceholderColor = Color.White.copy(alpha = 0.6f)
+)

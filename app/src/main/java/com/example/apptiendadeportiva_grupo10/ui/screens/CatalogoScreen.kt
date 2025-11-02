@@ -2,152 +2,112 @@ package com.example.apptiendadeportiva_grupo10.ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
 import com.example.apptiendadeportiva_grupo10.model.Producto
 import com.example.apptiendadeportiva_grupo10.viewmodel.CatalogoViewModel
 import java.text.NumberFormat
 import java.util.Locale
 
-
 @OptIn(ExperimentalMaterial3Api::class)
-
-
-
 @Composable
-fun CatalogoScreen(navController: NavController, viewModel: CatalogoViewModel) {
-    val context = LocalContext.current
-    val productos by viewModel.productos.collectAsState(initial = emptyList())
-    val loading by viewModel.loading.collectAsState(initial = false)
+fun CatalogoScreen(
+    navController: NavController,
+    viewModel: CatalogoViewModel
+) {
+    val productos by viewModel.productos.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.cargarProductos(context)
+        if (productos.isEmpty()) viewModel.cargar()
     }
 
-    Scaffold(topBar = {
-        TopAppBar(
-            title = { Text("Catálogo de Productos") },
-            //boton añadir carrito
-            actions = {
-                IconButton(onClick = { navController.navigate("carrito") }) {
-                    Icon(
-                        imageVector = Icons.Default.ShoppingCart,
-                        contentDescription = "Ir al Carrito de Compras"
-                    )
-                }
+    Scaffold(
+        topBar = { TopAppBar(title = { Text("Catálogo") }) }
+    ) { padding ->
+        if (productos.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
-        )
-    }) { padding ->
-        Box(modifier = Modifier.padding(padding)) {
-            if (loading) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-                return@Box
-            }
-
-            if (productos.isEmpty()) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("No se encontraron productos.", style = MaterialTheme.typography.titleMedium)
-                }
-                return@Box
-            }
-
-            LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(items = productos, key = { it.id }) { producto ->
-                    ProductoCard(producto = producto, onClick = {
-                        // Navegación al detalle
-                        navController.navigate("detalle/${producto.id}")
-                    })
+        } else {
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(180.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentPadding = PaddingValues(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(productos) { p ->
+                    ProductoCard(p) {
+                        navController.navigate("detalle/${p.id}")
+                    }
                 }
             }
         }
     }
 }
+
 @Composable
-fun ProductoCard(producto: Producto, onClick: () -> Unit) {
-    val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale("es", "CL")) }
-    val formattedPrice = currencyFormat.format(producto.precio)
-
-    Card(modifier = Modifier
-        .fillMaxWidth()
-        .clickable { onClick() }
-        .padding(4.dp),
-        shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+private fun ProductoCard(
+    producto: Producto,
+    onClick: () -> Unit
+) {
+    val formato = remember { NumberFormat.getCurrencyInstance(Locale("es", "CL")) }
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 260.dp)
+            .clickable { onClick() }
     ) {
-        Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-
-
-            val imageRequest = ImageRequest.Builder(LocalContext.current)
-                .data(producto.imagen)
-                .placeholder(android.R.drawable.ic_menu_gallery)
-                .error(android.R.drawable.ic_delete)
-                .build()
-
-            val painter = rememberAsyncImagePainter(imageRequest)
-
+        Column(Modifier.fillMaxSize()) {
+            val painter = rememberAsyncImagePainter(producto.imagen)
             Image(
                 painter = painter,
                 contentDescription = producto.nombre,
                 modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(4.dp)),
+                    .fillMaxWidth()
+                    .height(140.dp),
                 contentScale = ContentScale.Crop
             )
+            Spacer(Modifier.height(8.dp))
+            Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+                Text(
+                    text = producto.nombre,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2
+                )
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = formato.format(producto.precio),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(Modifier.height(8.dp))
 
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(Modifier.weight(1f)) {
-                Text(text = producto.nombre, style = MaterialTheme.typography.titleMedium)
-
-                Text(text = formattedPrice, style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.primary))
-
-                producto.descripcion?.let {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = it, style = MaterialTheme.typography.bodySmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                }
+                val totalDisponible = producto.stockPorTalla.values.sum()
+                Text(
+                    text = "Unidades disponibles: $totalDisponible",
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
         }
     }
