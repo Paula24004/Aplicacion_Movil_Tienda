@@ -15,7 +15,7 @@ object FakeDatabase {
     }
 
     // --- ADMIN ---
-    fun registrarAdmin(usernameAdmin: String, passwordAdmin: String, emailAdmin: String): Boolean {
+    fun registrarAdmin(usernameAdmin: String, rutAdmin: String,passwordAdmin: String, emailAdmin: String): Boolean {
         // Validaciones básicas
         if (usernameAdmin.isBlank() || passwordAdmin.isBlank() || emailAdmin.isBlank()) {
             return false
@@ -33,6 +33,7 @@ object FakeDatabase {
         val admin = Usuario(
             id = nuevoId,
             nombre = null,
+            rut = rutAdmin,
             password = passwordAdmin,
             email = emailAdmin,
             esAdmin = true,

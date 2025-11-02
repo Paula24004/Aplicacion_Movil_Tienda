@@ -21,6 +21,7 @@ fun LoginScreen(
     viewModel: AuthViewModel
 ) {
     var username by remember { mutableStateOf("") }
+    var rut by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
 

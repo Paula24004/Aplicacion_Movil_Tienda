@@ -22,6 +22,7 @@ fun RegistroAdmin(
 ) {
     // Estados locales (admin)
     var usernameAdmin by remember { mutableStateOf("") }
+    var rutAdmin by remember { mutableStateOf("") }
     var passwordAdmin by remember { mutableStateOf("") }
     var emailAdmin by remember { mutableStateOf("") }
 
@@ -74,6 +75,16 @@ fun RegistroAdmin(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // Usuario rutAdmin
+                OutlinedTextField(
+                    value = rutAdmin,
+                    onValueChange = { rutAdmin = it },
+                    label = { Text("Rut administrador") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
                 // Contraseña
                 OutlinedTextField(
                     value = passwordAdmin,
@@ -88,7 +99,7 @@ fun RegistroAdmin(
                 // registrar admin en el authviewmodel
                 Button(
                     onClick = {
-                        viewModel.registrarAdmin(usernameAdmin, passwordAdmin, emailAdmin)
+                        viewModel.registrarAdmin(usernameAdmin, rutAdmin = "", passwordAdmin, emailAdmin)
                         if (viewModel.mensajeadmin.value == "Registro exitoso") {
                             onRegisterSuccess()
                         }

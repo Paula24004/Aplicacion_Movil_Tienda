@@ -25,6 +25,7 @@ fun RegisterScreen(
     onNavigateToLogin: () -> Unit
 ) {
     var username by remember { mutableStateOf("") }
+    var rut by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     val registerMessage by viewModel.mensaje
@@ -74,6 +75,15 @@ fun RegisterScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // Campo de rut
+                OutlinedTextField(
+                    value = rut,
+                    onValueChange = { rut = it },
+                    label = { Text("Rut") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
                 // Campo de Contraseña
                 OutlinedTextField(
                     value = password,
@@ -87,7 +97,7 @@ fun RegisterScreen(
                 // Botón de Registrar
                 Button(
                     onClick = {
-                        viewModel.registrar(0,username,password, email)
+                        viewModel.registrar(0,username,rut = null,password, email)
                         if (viewModel.mensaje.value=="Registro exitoso"){
                             onNavigateToLogin()
                         }

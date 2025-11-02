@@ -18,8 +18,8 @@ class AuthViewModel : ViewModel() {
     val mensajeadmin = mutableStateOf("")
 
     // usuario
-    fun registrar(id: Int, nombre: String?, password: String?, email: String?) {
-        val nuevo = Usuario(id, nombre, password, email)
+    fun registrar(id: Int, nombre: String?,rut: String?, password: String?, email: String?) {
+        val nuevo = Usuario(id, nombre, rut , password, email)
         if (FakeDatabase.registrar(nuevo)) {
             mensaje.value = "Registro exitoso"
         } else {
@@ -79,8 +79,8 @@ class AuthViewModel : ViewModel() {
     }
 
     // Admin registro
-    fun registrarAdmin(usernameAdmin: String, passwordAdmin: String, emailAdmin: String): Boolean {
-        if (FakeDatabase.registrarAdmin(usernameAdmin, passwordAdmin, emailAdmin)) {
+    fun registrarAdmin(usernameAdmin: String, rutAdmin: String, passwordAdmin: String, emailAdmin: String): Boolean {
+        if (FakeDatabase.registrarAdmin(usernameAdmin,rutAdmin, passwordAdmin, emailAdmin)) {
             mensajeadmin.value = "Registro exitoso"
             return true
         }
