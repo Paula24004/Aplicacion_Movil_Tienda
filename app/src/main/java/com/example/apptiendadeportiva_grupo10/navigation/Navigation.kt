@@ -25,25 +25,36 @@ import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
 
 @Composable
 fun RootScreen() {
+
+    // Controlador de navegación
     val navController = rememberNavController()
 
+    // ViewModels compartidos
     val authViewModel: AuthViewModel = viewModel()
     val catalogoViewModel: CatalogoViewModel = viewModel()
     val carritoViewModel: CarritoViewModel = viewModel()
 
+    // Productos cargados
     val productos by catalogoViewModel.productos.collectAsState()
 
-    LaunchedEffect(productos) {
+ 
+
+
+// Solo inicializa cuando hay productos por primera vez.
+// Gracias al guard interno, no se “repite” ni borra nada luego.
+    LaunchedEffect(productos.isNotEmpty()) {
         if (productos.isNotEmpty()) {
-            // Solo si usas el CarritoViewModel con inventario (initStock)
             carritoViewModel.initStock(productos)
         }
     }
 
+    // Navegación principal
     NavHost(
         navController = navController,
         startDestination = "home"
     ) {
+
+        // --- Pantalla principal ---
         composable("home") {
             HomeScreen(
                 navController = navController,
@@ -54,6 +65,7 @@ fun RootScreen() {
             )
         }
 
+        // --- Login de usuario ---
         composable("iniciar_sesion") {
             LoginScreen(
                 viewModel = authViewModel,
@@ -66,6 +78,7 @@ fun RootScreen() {
             )
         }
 
+        // --- Registro de usuario ---
         composable("registrarse") {
             RegisterScreen(
                 viewModel = authViewModel,
@@ -82,25 +95,31 @@ fun RootScreen() {
             )
         }
 
+        // --- Catálogo de productos ---
         composable("catalogo") {
             CatalogoScreen(
                 navController = navController,
-                viewModel = catalogoViewModel
+                viewModel = catalogoViewModel,
+                carritoViewModel = carritoViewModel
             )
         }
 
+        // --- Detalle de producto ---
         composable(
             route = "detalle/{idProducto}",
             arguments = listOf(navArgument("idProducto") { type = NavType.IntType })
         ) { entry ->
             val idProducto = entry.arguments?.getInt("idProducto") ?: 0
             DetalleProductoScreen(
+                navController = navController,
                 productoId = idProducto,
                 catalogoViewModel = catalogoViewModel,
                 carritoViewModel = carritoViewModel
             )
+
         }
 
+        // --- Carrito de compras ---
         composable("carrito") {
             CarritoScreen(
                 navController = navController,
@@ -108,6 +127,7 @@ fun RootScreen() {
             )
         }
 
+        // --- Login de administrador ---
         composable("admin_iniciar") {
             LoginAdmin(
                 viewModel = authViewModel,
@@ -120,6 +140,7 @@ fun RootScreen() {
             )
         }
 
+        // --- Registro de administrador ---
         composable("admin_registrar") {
             RegistroAdmin(
                 viewModel = authViewModel,
@@ -136,11 +157,11 @@ fun RootScreen() {
             )
         }
 
+        // --- Panel del administrador ---
         composable("admin_panel") {
             HomeAdmin(
                 viewModel = authViewModel,
                 onLogout = {
-                    // Ajusta esto a tu lógica real de logout
                     navController.navigate("admin_iniciar") {
                         popUpTo("admin_panel") { inclusive = true }
                     }
