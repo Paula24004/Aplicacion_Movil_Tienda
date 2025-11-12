@@ -43,6 +43,14 @@ android {
 }
 
 dependencies {
+    //implementacion de jetcpack compose
+    implementation("androidx.activity:activity-compose:1.9.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4")
+    //implementacion de retrofit y gson converter
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    //implementacion de corrutinas
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.ui:ui:1.9.3")
     implementation("com.google.code.gson:gson:2.10.1")
