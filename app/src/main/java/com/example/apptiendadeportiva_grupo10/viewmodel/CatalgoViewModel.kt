@@ -1,82 +1,45 @@
 package com.example.apptiendadeportiva_grupo10.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import android.content.Context
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.apptiendadeportiva_grupo10.model.Producto
+import com.example.apptiendadeportiva_grupo10.model.ProductoEntity
 import com.example.apptiendadeportiva_grupo10.repository.ProductoRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class CatalogoViewModel(app: Application) : AndroidViewModel(app) {
 
-    private val repo = ProductoRepository()
+class CatalogoViewModel(
+    private val repo: ProductoRepository = ProductoRepository()
+) : ViewModel() {
 
-    private val _productos = MutableStateFlow<List<Producto>>(emptyList())
-    val productos: StateFlow<List<Producto>> = _productos
+    private val _productos = MutableStateFlow<List<ProductoEntity>>(emptyList())
+    val productos: StateFlow<List<ProductoEntity>> = _productos
 
-    init {
-        cargar()
-    }
+    private val _loading = MutableStateFlow(false)
+    val loading: StateFlow<Boolean> = _loading
 
-    fun cargar() = viewModelScope.launch {
-        val listaRaw = repo.obtenerProductosDesdeAssets(getApplication())
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
 
-
-        val lista = listaRaw.map { p ->
-            val stockNormalizado = p.stockPorTalla
-                .mapKeys { (k, _) -> k.trim().uppercase() }
-            p.copy(stockPorTalla = stockNormalizado)
+    fun cargarProductos(context: Context) {
+        viewModelScope.launch {
+            _loading.value = true
+            _error.value = null
+            try {
+                val list = repo.getProductos(context)
+                _productos.value = list
+            } catch (e: Exception) {
+                _error.value = e.message ?: "Error desconocido"
+            } finally {
+                _loading.value = false
+            }
         }
-
-        _productos.value = lista
     }
 
-
-    fun buscarProductoPorId(id: Int): Producto? =
-        _productos.value.firstOrNull { it.id == id }
-
-    private fun encontrarClaveTalla(p: Producto, talla: String): String? {
-        val target = talla.trim()
-        return p.stockPorTalla.keys.firstOrNull { it.equals(target, ignoreCase = true) }
+    suspend fun buscarPorId(context: Context, id: Int): ProductoEntity? {
+        return repo.getProductoPorId(context, id)
     }
-
-
-    fun reducirStock(idProducto: Int, talla: String, unidades: Int): Boolean {
-        val lista = _productos.value
-        val idx = lista.indexOfFirst { it.id == idProducto }
-        if (idx == -1) return false
-
-        val p = lista[idx]
-        val claveReal = encontrarClaveTalla(p, talla) ?: return false
-
-        val actual = p.stockPorTalla[claveReal] ?: 0
-        if (actual < unidades) return false
-
-        val nuevoStock = p.stockPorTalla.toMutableMap()
-        nuevoStock[claveReal] = actual - unidades
-
-        val actualizado = p.copy(stockPorTalla = nuevoStock)
-        _productos.value = lista.toMutableList().apply { this[idx] = actualizado }
-        return true
-    }
-
-    fun devolverStock(idProducto: Int, talla: String, unidades: Int) {
-        val lista = _productos.value
-        val idx = lista.indexOfFirst { it.id == idProducto }
-        if (idx == -1) return
-
-        val p = lista[idx]
-        val claveReal = encontrarClaveTalla(p, talla) ?: return
-
-        val actual = p.stockPorTalla[claveReal] ?: 0
-        val nuevoStock = p.stockPorTalla.toMutableMap()
-        nuevoStock[claveReal] = (actual + unidades).coerceAtLeast(0)
-
-        val actualizado = p.copy(stockPorTalla = nuevoStock)
-        _productos.value = lista.toMutableList().apply { this[idx] = actualizado }
-    }
-
 }
 
