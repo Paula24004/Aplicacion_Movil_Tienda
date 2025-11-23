@@ -22,6 +22,7 @@ import com.example.apptiendadeportiva_grupo10.components.ImgManagement
 
 @Composable
 fun HomeContent(
+    navController: NavController? = null,  // Agrega navController como parámetro opcional
     onNavigationLogin: (() -> Unit)? = null,
     onNavigationAdmin: () -> Unit,
     onNavigationCatalogo: () -> Unit
@@ -70,9 +71,19 @@ fun HomeContent(
                 ) {
                     Text("Iniciar Sesión / Registrarse", fontSize = 16.sp)
                 }
-                //boton API externa
-                Button(onClick = { navController.navigate("frases") }) {
-                    Text("Frase del día")
+
+                // Botón Frase del día (ahora usa navController si está disponible)
+                Button(
+                    onClick = { navController?.navigate("frases") },  // Usa navController opcionalmente
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                ) {
+                    Text("Frase del día", fontSize = 16.sp)
                 }
 
                 // Botón Catálogo
@@ -115,8 +126,9 @@ fun HomeScreen(
     onNavigateToAdmin: () -> Unit,
     onNavigateToCatalogo: () -> Unit
 ) {
-    // La función HomeScreen simplemente mapea los lambdas de navegación a HomeContent
+    // Pasa navController a HomeContent
     HomeContent(
+        navController = navController,  // Agrega esto
         onNavigationLogin = onNavigateToLogin,
         onNavigationAdmin = onNavigateToAdmin,
         onNavigationCatalogo = onNavigateToCatalogo

@@ -1,6 +1,5 @@
 package com.example.apptiendadeportiva_grupo10.ui.screens
 
-import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,10 +16,15 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.apptiendadeportiva_grupo10.viewmodel.CatalogoViewModel
 import androidx.compose.runtime.collectAsState
+import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CatalogoScreen(navController: NavController, viewModel: CatalogoViewModel) {
+fun CatalogoScreen(
+    navController: NavController,
+    viewModel: CatalogoViewModel,
+    carritoViewModel: CarritoViewModel
+) {
 
     val context = LocalContext.current
 

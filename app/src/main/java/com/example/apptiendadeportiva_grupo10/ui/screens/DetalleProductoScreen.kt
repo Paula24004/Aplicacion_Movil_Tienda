@@ -9,12 +9,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
+import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
 import com.example.apptiendadeportiva_grupo10.viewmodel.CatalogoViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetalleProductoScreen(productoId: Int, viewModel: CatalogoViewModel) {
+fun DetalleProductoScreen(
+    productoId: Int,
+    viewModel: CatalogoViewModel,
+    carritoViewModel: CarritoViewModel,
+    navController: NavHostController
+) {
     val contexto = LocalContext.current
 
     var producto by remember { mutableStateOf<com.example.apptiendadeportiva_grupo10.model.ProductoEntity?>(null) }

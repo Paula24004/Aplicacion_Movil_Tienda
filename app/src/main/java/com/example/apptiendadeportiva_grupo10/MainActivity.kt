@@ -11,21 +11,31 @@ import androidx.navigation.compose.rememberNavController
 import com.example.apptiendadeportiva_grupo10.ui.screens.CatalogoScreen
 import com.example.apptiendadeportiva_grupo10.ui.screens.DetalleProductoScreen
 import com.example.apptiendadeportiva_grupo10.viewmodel.CatalogoViewModel
-
+import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             val navController = rememberNavController()
-            val viewModel = remember { CatalogoViewModel() } // para un curso está bien
+            val viewModel = remember { CatalogoViewModel() }
+            val carritoViewModel = remember { CarritoViewModel() }
             Surface {
                 NavHost(navController = navController, startDestination = "catalogo") {
                     composable("catalogo") {
-                        CatalogoScreen(navController = navController, viewModel = viewModel)
+                        CatalogoScreen(
+                            navController = navController,
+                            viewModel = viewModel,
+                            carritoViewModel = carritoViewModel
+                        )
                     }
                     composable("detalle/{productoId}") { back ->
                         val id = back.arguments?.getString("productoId")?.toIntOrNull() ?: -1
-                        DetalleProductoScreen(productoId = id, viewModel = viewModel)
+                        DetalleProductoScreen(
+                            navController = navController,  // Agrega esto
+                            productoId = id,
+                            viewModel = viewModel,
+                            carritoViewModel = carritoViewModel
+                        )
                     }
                 }
             }

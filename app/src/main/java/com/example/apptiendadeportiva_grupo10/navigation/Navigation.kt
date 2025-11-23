@@ -24,7 +24,7 @@ import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
 import com.example.apptiendadeportiva_grupo10.viewmodel.CatalogoViewModel
 import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
 import com.example.apptiendadeportiva_grupo10.viewmodel.QuoteViewModel
-import com.example.apptiendadeportiva_grupo10.model.toProducto // <-- Importación necesaria del mapper
+import com.example.apptiendadeportiva_grupo10.model.toProducto
 
 @Composable
 fun RootScreen() {
@@ -118,9 +118,10 @@ fun RootScreen() {
             val idProducto = entry.arguments?.getInt("idProducto") ?: 0
             DetalleProductoScreen(
                 navController = navController,
-                productoId = idProducto,
-                catalogoViewModel = catalogoViewModel,
-                carritoViewModel = carritoViewModel
+                viewModel = catalogoViewModel,
+                carritoViewModel = carritoViewModel,
+                productoId = idProducto
+
             )
 
         }

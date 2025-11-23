@@ -16,3 +16,15 @@ object RetrofitClient {
     }
 }
 
+// Nuevo cliente para frases
+object QuoteRetrofitClient {
+    private const val BASE_URL = "https://api.quotable.io/"  // Confirma la URL de la API
+    val api: QuoteApi by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(QuoteApi::class.java)
+    }
+}
+
