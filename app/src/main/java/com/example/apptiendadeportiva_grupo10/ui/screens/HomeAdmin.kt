@@ -78,7 +78,7 @@ fun HomeAdmin(
                     )
                     Spacer(Modifier.height(8.dp))
 
-                    // Descripción del Producto (✅ NUEVO CAMPO)
+                    // Descripción del Producto
                     OutlinedTextField(
                         value = nuevaDescripcion,
                         onValueChange = { nuevaDescripcion = it },
@@ -87,18 +87,18 @@ fun HomeAdmin(
                     )
                     Spacer(Modifier.height(8.dp))
 
-                    // Precio
+                    // Precio (FIX: Solo permite dígitos para Int)
                     OutlinedTextField(
                         value = nuevoPrecioText,
-                        onValueChange = { nuevoPrecioText = it.filter { it.isDigit() || it == '.' } },
-                        label = { Text("Precio") },
+                        onValueChange = { nuevoPrecioText = it.filter { it.isDigit() } }, // <--- CAMBIO AQUÍ: Solo permite dígitos
+                        label = { Text("Precio (número entero)") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                     )
                     Spacer(Modifier.height(8.dp))
 
-                    // URL/Ruta de Imagen (✅ NUEVO CAMPO)
+                    // URL/Ruta de Imagen
                     OutlinedTextField(
                         value = nuevaImagen,
                         onValueChange = { nuevaImagen = it },
@@ -110,21 +110,19 @@ fun HomeAdmin(
 
                     Button(
                         onClick = {
-                            val precio = nuevoPrecioText.toFloatOrNull()
+                            val precioInt = nuevoPrecioText.toIntOrNull() // <--- CAMBIO AQUÍ: Conversión segura a Int
                             // Lógica de validación
-                            if (camposCompletos && precio != null && precio > 0) {
+                            if (camposCompletos && precioInt != null && precioInt > 0) {
 
                                 val nuevoId = (productosList.maxOfOrNull { it.id } ?: 0) + 1
 
-                                // ✅ USO DE VARIABLES CORREGIDO
                                 val nuevoProducto = Producto(
                                     id = nuevoId,
                                     nombre = nuevoNombre,
-                                    descripcion = nuevaDescripcion, // Usando el nuevo estado
-                                    precio = nuevoPrecioText.toInt(),
+                                    descripcion = nuevaDescripcion,
+                                    precio = precioInt, // Usando el Int seguro
                                     imagen = nuevaImagen,
-                                    stockPorTalla = emptyMap() // Usando el nuevo estado
-                                    // Asegúrate de que los nombres de los parámetros (descripcion, imagen) coincidan con tu clase Producto
+                                    stockPorTalla = emptyMap()
                                 )
                                 viewModel.agregarProducto(nuevoProducto)
                                 // Limpiar campos después de agregar
@@ -186,8 +184,9 @@ fun ProductoAdminItem(producto: Producto, onDelete: () -> Unit) {
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.bodyLarge
                 )
+                // FIX: Muestra el precio como entero, sin formato decimal forzado.
                 Text(
-                    text = "ID: ${producto.id} | Precio: $${String.format("%.2f", producto.precio.toFloat())}",
+                    text = "ID: ${producto.id} | Precio: $${producto.precio}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.secondary
                 )

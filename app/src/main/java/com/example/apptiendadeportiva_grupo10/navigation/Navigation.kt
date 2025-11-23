@@ -15,6 +15,7 @@ import com.example.apptiendadeportiva_grupo10.ui.screens.RegisterScreen
 import com.example.apptiendadeportiva_grupo10.ui.screens.CatalogoScreen
 import com.example.apptiendadeportiva_grupo10.ui.screens.CarritoScreen
 import com.example.apptiendadeportiva_grupo10.ui.screens.DetalleProductoScreen
+import com.example.apptiendadeportiva_grupo10.ui.screens.FraseScreen
 import com.example.apptiendadeportiva_grupo10.ui.screens.HomeScreen
 import com.example.apptiendadeportiva_grupo10.ui.screens.LoginAdmin
 import com.example.apptiendadeportiva_grupo10.ui.screens.RegistroAdmin
@@ -22,6 +23,8 @@ import com.example.apptiendadeportiva_grupo10.ui.screens.HomeAdmin
 import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
 import com.example.apptiendadeportiva_grupo10.viewmodel.CatalogoViewModel
 import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
+import com.example.apptiendadeportiva_grupo10.viewmodel.QuoteViewModel
+import com.example.apptiendadeportiva_grupo10.model.toProducto // <-- Importación necesaria del mapper
 
 @Composable
 fun RootScreen() {
@@ -36,17 +39,18 @@ fun RootScreen() {
     val catalogoViewModel: CatalogoViewModel = viewModel()
     val carritoViewModel: CarritoViewModel = viewModel()
 
-    // Productos cargados
+    // Productos cargados (AÚN SON ProductoEntity)
     val productos by catalogoViewModel.productos.collectAsState()
 
- 
+
 
 
 // Solo inicializa cuando hay productos por primera vez.
 // Gracias al guard interno, no se “repite” ni borra nada luego.
     LaunchedEffect(productos.isNotEmpty()) {
         if (productos.isNotEmpty()) {
-            carritoViewModel.initStock(productos)
+            // FIX: Aplicamos .map { it.toProducto() } para convertir de List<ProductoEntity> a List<Producto>
+            carritoViewModel.initStock(productos.map { it.toProducto() })
         }
     }
 
@@ -166,7 +170,7 @@ fun RootScreen() {
 
         // --- Panel del administrador ---
         composable("admin_panel") {
-            HomeAdmin(
+            HomeAdmin( // Aquí se asegura que solo se pasen los parámetros requeridos
                 viewModel = authViewModel,
                 onLogout = {
                     navController.navigate("admin_iniciar") {
