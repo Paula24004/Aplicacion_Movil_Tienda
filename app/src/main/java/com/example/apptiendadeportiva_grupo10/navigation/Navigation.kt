@@ -25,6 +25,8 @@ import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
 
 @Composable
 fun RootScreen() {
+    val quoteViewModel: QuoteViewModel = viewModel()
+
 
     // Controlador de navegación
     val navController = rememberNavController()
@@ -156,6 +158,11 @@ fun RootScreen() {
                 }
             )
         }
+
+        composable("frases") {
+            FraseScreen(viewModel = quoteViewModel)
+        }
+
 
         // --- Panel del administrador ---
         composable("admin_panel") {

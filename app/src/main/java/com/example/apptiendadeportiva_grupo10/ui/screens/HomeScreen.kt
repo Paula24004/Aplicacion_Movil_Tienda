@@ -70,6 +70,10 @@ fun HomeContent(
                 ) {
                     Text("Iniciar Sesión / Registrarse", fontSize = 16.sp)
                 }
+                //boton API externa
+                Button(onClick = { navController.navigate("frases") }) {
+                    Text("Frase del día")
+                }
 
                 // Botón Catálogo
                 Button(

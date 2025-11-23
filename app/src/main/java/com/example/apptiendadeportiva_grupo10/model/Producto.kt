@@ -8,3 +8,5 @@ data class Producto (
     val imagen: String?,
     val stockPorTalla: Map<String, Int>
 )
+
+
