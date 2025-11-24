@@ -12,5 +12,6 @@ data class ProductoDto(
     val precio: Double?,
     @SerializedName("imageUrl")
     val imagenUrl: String?,
-    val stockPorTalla: Map<String, Int>?
+    @SerializedName("stock")
+    val stock:Int?
 )

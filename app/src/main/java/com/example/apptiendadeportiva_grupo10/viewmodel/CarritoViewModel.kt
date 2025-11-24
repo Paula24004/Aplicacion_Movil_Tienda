@@ -31,7 +31,7 @@ class CarritoViewModel : ViewModel() {
     /** ¡Importante!: no borra el carrito y solo corre una vez */
     fun initStock(productos: List<Producto>) {
         if (inicializado || productos.isEmpty()) return
-        _stockInicial.value = productos.associate { (it.id to it.stockPorTalla) as Pair<Int, Map<String, Int>> }
+        _stockInicial.value = productos.associate { (it.id to it.stock) as Pair<Int, Map<String, Int>> }
         inicializado = true
     }
 

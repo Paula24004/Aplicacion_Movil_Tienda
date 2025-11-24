@@ -134,7 +134,7 @@ fun HomeAdmin(
                                     // CORRECCIÓN CLAVE: Pasamos el Double validado
                                     precio = precioDouble,
                                     imagenUrl = nuevaImagen,
-                                    stockPorTalla = emptyMap()
+                                    stock= 10
                                 )
                                 viewModel.agregarProducto(nuevoProducto)
 

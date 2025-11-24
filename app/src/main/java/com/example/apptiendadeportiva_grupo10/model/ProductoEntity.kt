@@ -10,5 +10,5 @@ data class ProductoEntity(
     val descripcion: String?,
     val precio: Double?,
     val imagenUrl: String?,
-    val stockPorTalla: Map<String, Int>?
+    val stock:Int?
 )

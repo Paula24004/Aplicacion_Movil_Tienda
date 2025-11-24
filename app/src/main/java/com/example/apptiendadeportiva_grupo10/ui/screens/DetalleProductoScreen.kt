@@ -13,6 +13,8 @@ import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
 import com.example.apptiendadeportiva_grupo10.viewmodel.CatalogoViewModel
+import com.example.apptiendadeportiva_grupo10.model.ProductoEntity // Importar ProductoEntity para seguridad
+import com.example.apptiendadeportiva_grupo10.model.toDomain
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,9 +26,10 @@ fun DetalleProductoScreen(
 ) {
     val contexto = LocalContext.current
 
-    var producto by remember { mutableStateOf<com.example.apptiendadeportiva_grupo10.model.ProductoEntity?>(null) }
+    var producto by remember { mutableStateOf<ProductoEntity?>(null) } // Usamos ProductoEntity directamente
 
     LaunchedEffect(productoId) {
+        // Aseguramos que solo buscamos si el productoId es válido, aunque Compose ya lo garantiza
         producto = viewModel.buscarPorId(contexto, productoId)
     }
 
@@ -40,14 +43,31 @@ fun DetalleProductoScreen(
                     contentScale = ContentScale.Crop
                 )
                 Text(p.nombre ?: "Nombre desconocido", style = MaterialTheme.typography.titleLarge)
-                Text("Precio: $${String.format("%,d", p.precio).replace(',', '.')}", style = MaterialTheme.typography.titleMedium)
+
+                // CORRECCIÓN CRÍTICA: Usamos "%,.0f" (flotante sin decimales) en lugar de "%,d" (entero)
+                val precioFormateado = String.format("%,.0f", p.precio ?: 0.0).replace(',', '.')
+                Text(
+                    "Precio: $$precioFormateado",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
                 Text(p.descripcion ?: "", style = MaterialTheme.typography.bodyMedium)
-                Button(onClick = { /* Ustedes ya hicieron un carrito, tengo Fe */ }, modifier = Modifier.fillMaxWidth()) {
+
+                // Botón de ejemplo para agregar al carrito (debes conectar la lógica de CarritoViewModel aquí)
+                Button(
+                    onClick = {
+                        // Ejemplo: buscar el producto en formato de dominio para agregarlo.
+                        val productoDomain = p.toDomain()
+                        carritoViewModel.agregar(productoDomain, "M", 1) // Asume talla "M" por defecto
+                        navController.navigate("carrito")
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text("Agregar al carrito")
                 }
             }
-        } ?: Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Producto no encontrado")
+        } ?: Box(Modifier.fillMaxSize().padding(padd), contentAlignment = Alignment.Center) {
+            Text("Cargando o Producto no encontrado")
         }
     }
 }
