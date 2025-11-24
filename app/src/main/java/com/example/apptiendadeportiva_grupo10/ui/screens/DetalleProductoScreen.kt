@@ -34,12 +34,12 @@ fun DetalleProductoScreen(
         producto?.let { p ->
             Column(Modifier.padding(padd).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Image(
-                    painter = rememberAsyncImagePainter(p.imagen),
+                    painter = rememberAsyncImagePainter(p.imagenUrl),
                     contentDescription = p.nombre,
                     modifier = Modifier.fillMaxWidth().height(220.dp),
                     contentScale = ContentScale.Crop
                 )
-                Text(p.nombre, style = MaterialTheme.typography.titleLarge)
+                Text(p.nombre ?: "Nombre desconocido", style = MaterialTheme.typography.titleLarge)
                 Text("Precio: $${String.format("%,d", p.precio).replace(',', '.')}", style = MaterialTheme.typography.titleMedium)
                 Text(p.descripcion ?: "", style = MaterialTheme.typography.bodyMedium)
                 Button(onClick = { /* Ustedes ya hicieron un carrito, tengo Fe */ }, modifier = Modifier.fillMaxWidth()) {

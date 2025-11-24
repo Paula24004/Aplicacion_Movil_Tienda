@@ -1,21 +1,23 @@
-package com.example.apptiendadeportiva_grupo10.model 
+package com.example.apptiendadeportiva_grupo10.model
 
 data class Producto (
     val id: Int,
     val nombre: String,
     val descripcion: String?,
-    val precio: Int,
-    val imagen: String?,
-    val stockPorTalla: Map<String, Int>
-)
+    val precio: Double,
+    val imagenUrl: String?,
 
-fun ProductoEntity.toProducto(): Producto {
+    val stockPorTalla: Map<String, Int>?
+)
+fun ProductoEntity.toDomain(): Producto {
+    val defaultPrice = 0.0
+
     return Producto(
         id = this.id,
-        nombre = this.nombre,
-        descripcion = this.descripcion,
-        precio = this.precio,
-        imagen = this.imagen,
+        nombre = this.nombre ?: "Nombre Desconocido",
+        descripcion = this.descripcion ?: "Sin descripción",
+        precio = this.precio ?: defaultPrice,
+        imagenUrl = this.imagenUrl,
         stockPorTalla = this.stockPorTalla
     )
 }
