@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,6 +19,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.apptiendadeportiva_grupo10.viewmodel.CatalogoViewModel
 import androidx.compose.runtime.collectAsState
 import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
+import com.example.apptiendadeportiva_grupo10.model.ProductoEntity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,18 +32,31 @@ fun CatalogoScreen(
     val context = LocalContext.current
 
     val productos by viewModel.productos.collectAsState()
-    val loading by viewModel.loading.collectAsState()
-    val error by viewModel.error.collectAsState()
+
+    // CORRECCIÓN CLAVE: Usamos 'loading' en lugar de 'isLoading'
+    // Y se corrige el problema de inferencia agregando 'initial' para un StateFlow.
+    val loading: Boolean by viewModel.loading.collectAsState(initial = false)
+    val error: String? by viewModel.error.collectAsState(initial = null)
+
 
     LaunchedEffect(Unit) {
+        // Asumiendo que cargarProductos necesita el contexto
         viewModel.cargarProductos(context)
     }
 
     Scaffold(
         topBar = {
-
             TopAppBar(
-                title = { Text("Catálogo") }
+                title = { Text("Catálogo") },
+                actions = {
+                    // Acción de navegación al carrito
+                    IconButton(onClick = { navController.navigate("carrito") }) {
+                        Icon(
+                            imageVector = Icons.Filled.ShoppingCart,
+                            contentDescription = "Carrito de Compras"
+                        )
+                    }
+                }
             )
         }
     ) { padding ->
@@ -50,6 +66,7 @@ fun CatalogoScreen(
                 .fillMaxSize()
         ) {
             when {
+                // Se accede a la variable 'loading' directamente
                 loading -> Box(
                     Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -57,6 +74,7 @@ fun CatalogoScreen(
                     CircularProgressIndicator()
                 }
 
+                // Se accede a la variable 'error' directamente
                 error != null -> Box(
                     Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -81,7 +99,7 @@ fun CatalogoScreen(
 
 @Composable
 fun ProductoCard(
-    producto: com.example.apptiendadeportiva_grupo10.model.ProductoEntity,
+    producto: ProductoEntity,
     onClick: () -> Unit
 ) {
     Card(
@@ -106,10 +124,15 @@ fun ProductoCard(
             Spacer(Modifier.width(12.dp))
 
             Column(Modifier.weight(1f)) {
-                Text(producto.nombre ?: "Nombre desconocido", style = MaterialTheme.typography.titleMedium)
+                // CORRECCIÓN: Usar el operador Elvis (?:) para manejar el valor nulo de nombre.
+                Text(
+                    producto.nombre ?: "Nombre Desconocido",
+                    style = MaterialTheme.typography.titleMedium
+                )
 
                 Text(
-                    "Precio: $${String.format("%,d", producto.precio).replace(',', '.')}",
+                    // Asumiendo que producto.precio es Double?
+                    "Precio: $${String.format("%,.2f", producto.precio ?: 0.0).replace(',', '.')}",
                     style = MaterialTheme.typography.bodyMedium
                 )
 
@@ -120,4 +143,3 @@ fun ProductoCard(
         }
     }
 }
-
