@@ -5,7 +5,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.apptiendadeportiva_grupo10.viewmodel.QuoteViewModel
 
 @Composable
@@ -13,17 +15,19 @@ fun FraseScreen(viewModel: QuoteViewModel) {
 
     val frase by viewModel.quote.collectAsState()
 
-    LaunchedEffect(true) {
-        viewModel.loadQuote()
-    }
-
     Column(
-        modifier = Modifier.fillMaxSize().padding(20.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(20.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        Text(text = frase, style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = frase,
+            fontSize = 20.sp,
+            textAlign = TextAlign.Center
+        )
 
         Spacer(modifier = Modifier.height(30.dp))
 
