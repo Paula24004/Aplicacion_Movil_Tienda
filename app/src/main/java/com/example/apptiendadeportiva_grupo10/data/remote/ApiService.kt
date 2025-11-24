@@ -4,6 +4,6 @@ import com.example.apptiendadeportiva_grupo10.model.ProductoDto
 import retrofit2.http.GET
 
 interface ApiService {
-    @GET("products")
+    @GET("api/products")
     suspend fun getProducts(): List<ProductoDto>
 }

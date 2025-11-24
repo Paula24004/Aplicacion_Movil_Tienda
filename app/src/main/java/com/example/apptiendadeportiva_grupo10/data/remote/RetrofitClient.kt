@@ -1,10 +1,20 @@
 package com.example.apptiendadeportiva_grupo10.data.remote
 
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-    private const val BASE_URL = "https://fakestoreapi.com/" // Recuerda revisar bien la ruta, algunas APIs utilizan una ruta especifica
+    private const val BASE_URL = "http://44.221.81.240:8080/" // Recuerda revisar bien la ruta, algunas APIs utilizan una ruta especifica}
+
+    private val client = OkHttpClient.Builder()
+        .addInterceptor(
+            HttpLoggingInterceptor().apply {
+                level = HttpLoggingInterceptor.Level.BODY // Esto imprime la request y el response body
+            }
+        )
+        .build()
 
     val apiService: ApiService by lazy {
         Retrofit.Builder()

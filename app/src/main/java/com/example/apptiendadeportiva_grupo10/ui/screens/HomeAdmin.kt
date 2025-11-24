@@ -14,7 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
-import com.example.apptiendadeportiva_grupo10.model.Producto // Asegúrate de que esta importación sea correcta
+import com.example.apptiendadeportiva_grupo10.model.Producto
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -22,20 +22,27 @@ fun HomeAdmin(
     viewModel: AuthViewModel,
     onLogout: () -> Unit
 ) {
-    // 1. Estados locales para el formulario de nuevo producto (CORREGIDO Y AMPLIADO)
+    // 1. Estados locales para el formulario de nuevo producto
     var nuevoNombre by remember { mutableStateOf("") }
+    // Dejar como texto para manejar mejor la entrada
     var nuevoPrecioText by remember { mutableStateOf("") }
-    var nuevaDescripcion by remember { mutableStateOf("") } // ✅ NUEVO ESTADO
-    var nuevaImagen by remember { mutableStateOf("") }      // ✅ NUEVO ESTADO
+    var nuevaDescripcion by remember { mutableStateOf("") }
+    var nuevaImagen by remember { mutableStateOf("") }
 
     // Accede a la lista reactiva de productos directamente desde el ViewModel
     val productosList = viewModel.listaProductos
 
-    // Validar si todos los campos requeridos (asumiendo nombre, precio, descripción, imagen) están llenos
+    // Convertir el texto a Double para la validación
+    val precioDouble = nuevoPrecioText.toDoubleOrNull()
+
+    // Validar si todos los campos requeridos están llenos y el precio es un Double válido y positivo
     val camposCompletos = nuevoNombre.isNotBlank() &&
             nuevoPrecioText.isNotBlank() &&
             nuevaDescripcion.isNotBlank() &&
-            nuevaImagen.isNotBlank()
+            nuevaImagen.isNotBlank() &&
+            precioDouble != null &&
+            precioDouble >= 0.0
+
 
     Scaffold(
         topBar = {
@@ -87,14 +94,18 @@ fun HomeAdmin(
                     )
                     Spacer(Modifier.height(8.dp))
 
-                    // Precio (FIX: Solo permite dígitos para Int)
+                    // Precio (FIX: Acepta decimales y convierte a Double)
                     OutlinedTextField(
                         value = nuevoPrecioText,
-                        onValueChange = { nuevoPrecioText = it.filter { it.isDigit() } }, // <--- CAMBIO AQUÍ: Solo permite dígitos
-                        label = { Text("Precio (número entero)") },
+                        // Permite dígitos y un punto decimal
+                        onValueChange = {
+                            nuevoPrecioText = it.filter { char -> char.isDigit() || char == '.' }
+                        },
+                        label = { Text("Precio (número decimal)") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                        // Cambiado a Decimal para permitir el punto
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                     )
                     Spacer(Modifier.height(8.dp))
 
@@ -110,21 +121,23 @@ fun HomeAdmin(
 
                     Button(
                         onClick = {
-                            val precioInt = nuevoPrecioText.toIntOrNull() // <--- CAMBIO AQUÍ: Conversión segura a Int
-                            // Lógica de validación
-                            if (camposCompletos && precioInt != null && precioInt > 0) {
+                            // Se utiliza el Double ya validado
+                            if (camposCompletos && precioDouble != null) {
 
+                                // Generación de ID
                                 val nuevoId = (productosList.maxOfOrNull { it.id } ?: 0) + 1
 
                                 val nuevoProducto = Producto(
                                     id = nuevoId,
                                     nombre = nuevoNombre,
                                     descripcion = nuevaDescripcion,
-                                    precio = precioInt, // Usando el Int seguro
-                                    imagen = nuevaImagen,
+                                    // CORRECCIÓN CLAVE: Pasamos el Double validado
+                                    precio = precioDouble,
+                                    imagenUrl = nuevaImagen,
                                     stockPorTalla = emptyMap()
                                 )
                                 viewModel.agregarProducto(nuevoProducto)
+
                                 // Limpiar campos después de agregar
                                 nuevoNombre = ""
                                 nuevoPrecioText = ""
@@ -133,7 +146,7 @@ fun HomeAdmin(
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = camposCompletos // Usando la validación completa
+                        enabled = camposCompletos
                     ) {
                         Text("Guardar Producto")
                     }
@@ -179,14 +192,18 @@ fun ProductoAdminItem(producto: Producto, onDelete: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(modifier = Modifier.weight(1f)) {
+                // El campo 'nombre' en Producto es no nulo (String), pero si se mapea de ProductoEntity
+                // (que sí es nullable), podría ser nulo si el mapeo no es perfecto.
+                // Usar el operador Elvis como precaución para el UI.
                 Text(
                     text = producto.nombre ?: "Producto Desconocido",
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.bodyLarge
                 )
-                // FIX: Muestra el precio como entero, sin formato decimal forzado.
+
+                // Muestra el precio formateado con dos decimales, ya que ahora es Double.
                 Text(
-                    text = "ID: ${producto.id} | Precio: $${producto.precio}",
+                    text = "ID: ${producto.id} | Precio: $${String.format("%,.2f", producto.precio)}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.secondary
                 )

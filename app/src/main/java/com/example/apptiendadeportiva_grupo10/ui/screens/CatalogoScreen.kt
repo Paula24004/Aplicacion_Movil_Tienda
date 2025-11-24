@@ -94,7 +94,7 @@ fun ProductoCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
 
-            val painter = rememberAsyncImagePainter(producto.imagen)
+            val painter = rememberAsyncImagePainter(producto.imagenUrl)
 
             Image(
                 painter = painter,
@@ -106,7 +106,7 @@ fun ProductoCard(
             Spacer(Modifier.width(12.dp))
 
             Column(Modifier.weight(1f)) {
-                Text(producto.nombre, style = MaterialTheme.typography.titleMedium)
+                Text(producto.nombre ?: "Nombre desconocido", style = MaterialTheme.typography.titleMedium)
 
                 Text(
                     "Precio: $${String.format("%,d", producto.precio).replace(',', '.')}",

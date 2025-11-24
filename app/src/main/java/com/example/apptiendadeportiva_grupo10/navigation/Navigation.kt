@@ -24,7 +24,7 @@ import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
 import com.example.apptiendadeportiva_grupo10.viewmodel.CatalogoViewModel
 import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
 import com.example.apptiendadeportiva_grupo10.viewmodel.QuoteViewModel
-import com.example.apptiendadeportiva_grupo10.model.toProducto
+import com.example.apptiendadeportiva_grupo10.model.toDomain
 
 @Composable
 fun RootScreen() {
@@ -50,7 +50,7 @@ fun RootScreen() {
     LaunchedEffect(productos.isNotEmpty()) {
         if (productos.isNotEmpty()) {
             // FIX: Aplicamos .map { it.toProducto() } para convertir de List<ProductoEntity> a List<Producto>
-            carritoViewModel.initStock(productos.map { it.toProducto() })
+            carritoViewModel.initStock(productos.map { it.toDomain() })
         }
     }
 
