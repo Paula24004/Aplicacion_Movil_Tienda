@@ -12,6 +12,7 @@ import androidx.navigation.NavController
 import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
 import java.text.NumberFormat
 import java.util.Locale
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,12 +24,18 @@ fun CarritoScreen(
     val total by viewModel.total.collectAsState()
     val formato = remember { NumberFormat.getCurrencyInstance(Locale("es", "CL")) }
 
+    // [NUEVO] Estado y scope para el Snackbar
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Carrito") }
             )
         },
+        // [NUEVO] Añadir el host del Snackbar
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             if (items.isNotEmpty()) {
                 Surface(tonalElevation = 2.dp) {
@@ -40,7 +47,19 @@ fun CarritoScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text("Total: ${formato.format(total)}", style = MaterialTheme.typography.titleMedium)
-                        Button(onClick = { /* TODO: flujo de pago */ }) {
+                        Button(
+                            onClick = {
+                                // [LÓGICA DE PAGO]
+                                viewModel.vaciar() // Vacía el carrito
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "¡Pago realizado con éxito!", // Mensaje de éxito
+                                        actionLabel = "OK",
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+                            }
+                        ) {
                             Text("Pagar")
                         }
                     }
@@ -72,7 +91,8 @@ fun CarritoScreen(
                             Spacer(Modifier.height(4.dp))
                             Text("Talla: ${it.talla}  •  Cantidad: ${it.cantidad}")
                             Spacer(Modifier.height(4.dp))
-                            Text("Subtotal: ${formato.format(it.cantidad * it.producto.precio)}",
+                            // Usar el operador Elvis para manejar el precio nulo de forma segura
+                            Text("Subtotal: ${formato.format(it.cantidad * (it.producto.precio ?: 0.0))}",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.primary
                             )
