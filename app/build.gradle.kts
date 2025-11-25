@@ -48,7 +48,8 @@ android {
 }
 
 dependencies {
-
+    implementation("com.google.accompanist:accompanist-flowlayout:0.34.0")
+    implementation("com.google.code.gson:gson:2.10.1")
     // -------------------------
     // RETROFIT + OKHTTP
     // -------------------------

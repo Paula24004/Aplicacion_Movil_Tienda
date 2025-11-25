@@ -6,8 +6,7 @@ data class Producto (
     val descripcion: String?,
     val precio: Double,
     val imagenUrl: String?,
-
-    val stock: Int?
+    val stockPorTalla: Map<String, Int>?
 )
 fun ProductoEntity.toDomain(): Producto {
     val defaultPrice = 0.0
@@ -18,7 +17,7 @@ fun ProductoEntity.toDomain(): Producto {
         descripcion = this.descripcion ?: "Sin descripción",
         precio = this.precio ?: defaultPrice,
         imagenUrl = this.imagenUrl,
-        stock= this.stock
+        stockPorTalla = this.stockPorTallaJson?.fromJsonToMap()
     )
 }
 

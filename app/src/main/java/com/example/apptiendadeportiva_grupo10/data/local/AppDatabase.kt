@@ -5,12 +5,11 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.example.apptiendadeportiva_grupo10.data.Converters
 import com.example.apptiendadeportiva_grupo10.model.ProductoEntity
+import com.example.apptiendadeportiva_grupo10.model.MapTypeConverter
 
-// FIX: Se incrementa la versión a 2 para resolver el error de "Room cannot verify the data integrity".
-@Database(entities = [ProductoEntity::class], version = 2, exportSchema = false)
-@TypeConverters(Converters::class)
+@Database(entities = [ProductoEntity::class], version = 3, exportSchema = false)
+@TypeConverters(MapTypeConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun productoDao(): ProductoDao
 
@@ -24,8 +23,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "catalogo_db"
                 )
-                    // FIX: Se añade la opción para migración destructiva.
-                    // Esto borrará la base de datos antigua y la recreará con el nuevo esquema si hay un error de integridad.
+
                     .fallbackToDestructiveMigration()
                     .build()
 

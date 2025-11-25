@@ -14,7 +14,7 @@ fun ProductoDto.toEntity(): ProductoEntity {
         precio = this.precio,
         // Usamos imagenUrl, que coincide con el DTO y la Entity
         imagenUrl = this.imagenUrl,
-        stock= this.stock
+        stockPorTalla= this.stockPorTalla
     )
 }
 
@@ -29,6 +29,6 @@ fun ProductoEntity.toDto(): ProductoDto {
         descripcion = this.descripcion,
         precio = this.precio,
         imagenUrl = this.imagenUrl,
-        stock= this.stock
+        stockPorTalla= this.stockPorTalla
     )
 }

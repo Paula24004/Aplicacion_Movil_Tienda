@@ -8,7 +8,8 @@ import com.example.apptiendadeportiva_grupo10.repository.ProductoRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 
 class CatalogoViewModel(
     private val repo: ProductoRepository = ProductoRepository()
@@ -37,9 +38,9 @@ class CatalogoViewModel(
             }
         }
     }
-
-    suspend fun buscarPorId(context: Context, id: Int): ProductoEntity? {
-        return repo.getProductoPorId(context, id)
+    suspend fun getProductoById(context: Context, id: Int): ProductoEntity? {
+        return withContext(Dispatchers.IO) {
+            repo.getProductoPorId(context, id)
+        }
     }
 }
-
