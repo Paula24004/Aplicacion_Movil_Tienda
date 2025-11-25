@@ -127,14 +127,15 @@ fun HomeAdmin(
                                 // Generación de ID
                                 val nuevoId = (productosList.maxOfOrNull { it.id } ?: 0) + 1
 
+                                val stockInicialPorTalla = mapOf("unica" to 10)
+
                                 val nuevoProducto = Producto(
                                     id = nuevoId,
                                     nombre = nuevoNombre,
                                     descripcion = nuevaDescripcion,
-                                    // CORRECCIÓN CLAVE: Pasamos el Double validado
                                     precio = precioDouble,
                                     imagenUrl = nuevaImagen,
-                                    stock= 10
+                                    stockPorTalla = stockInicialPorTalla
                                 )
                                 viewModel.agregarProducto(nuevoProducto)
 

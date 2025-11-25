@@ -17,7 +17,7 @@ fun ProductoEntity.toDomain(): Producto {
         descripcion = this.descripcion ?: "Sin descripción",
         precio = this.precio ?: defaultPrice,
         imagenUrl = this.imagenUrl,
-        stockPorTalla = this.stockPorTallaJson?.fromJsonToMap()
+        stockPorTalla = this.stockPorTalla
     )
 }
 
