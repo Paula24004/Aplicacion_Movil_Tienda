@@ -86,18 +86,11 @@ fun RootScreen() {
 
         // --- Registro de usuario ---
         composable("registrarse") {
+            // NOTA: RegisterScreen ahora maneja la navegación interna (a 'catalogo' y 'login')
+            // ya que usa LaunchedEffect en base al estado del ViewModel.
             RegisterScreen(
-                viewModel = authViewModel,
-                onRegisterSuccess = {
-                    navController.navigate("catalogo") {
-                        popUpTo("home") { inclusive = true }
-                    }
-                },
-                onNavigateToLogin = {
-                    navController.navigate("iniciar_sesion") {
-                        popUpTo("registrarse") { inclusive = true }
-                    }
-                }
+                navController = navController, // Necesita el NavController para la navegación interna
+                authViewModel = authViewModel
             )
         }
 
@@ -137,12 +130,9 @@ fun RootScreen() {
         // --- Login de administrador ---
         composable("admin_iniciar") {
             LoginAdmin(
+                navController = navController, // CORRECCIÓN 1: Se agrega el navController
                 viewModel = authViewModel,
-                onLoginSuccess = {
-                    navController.navigate("admin_panel") {
-                        popUpTo("home") { inclusive = true }
-                    }
-                },
+                // CORRECCIÓN 2: Se elimina onLoginSuccess porque la navegación se gestiona internamente en LoginAdmin.
                 onNavigateToRegister = { navController.navigate("admin_registrar") }
             )
         }

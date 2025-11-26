@@ -17,13 +17,14 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.example.apptiendadeportiva_grupo10.R
 import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginAdmin(
-    onLoginSuccess: () -> Unit,
+    navController: NavHostController,
     onNavigateToRegister: () -> Unit,
     viewModel: AuthViewModel
 ) {
@@ -31,6 +32,23 @@ fun LoginAdmin(
     var passwordAdmin by remember { mutableStateOf("") }
 
     val loginMessageAdmin by viewModel.mensajeadmin
+
+    // CORRECCIÓN: Se consume directamente el StateFlow del ViewModel.
+    // NO se llama a la función loginAdminAuth() aquí.
+    val esAdminLogueadoState = viewModel.esAdminLogueado.collectAsState()
+
+    // --- EFECTO DE NAVEGACIÓN ---
+    // Este efecto se dispara cada vez que esAdminLogueadoState.value cambia.
+    LaunchedEffect(esAdminLogueadoState.value) {
+        // Accedemos al valor con .value
+        if (esAdminLogueadoState.value == true) {
+            navController.navigate("admin_panel") {
+                // Esto limpia la pila de navegación para que el usuario no pueda volver al login con el botón de retroceso.
+                popUpTo("admin_iniciar") { inclusive = true }
+            }
+        }
+    }
+    // ----------------------------
 
     Scaffold(
         topBar = {
@@ -53,6 +71,7 @@ fun LoginAdmin(
                 .padding(innerPadding)
                 .fillMaxSize()
         ) {
+            // Asegúrate de que R.drawable.fondo_login existe
             Image(
                 painter = painterResource(id = R.drawable.fondo_login),
                 contentDescription = "Fondo de login admin",
@@ -108,9 +127,9 @@ fun LoginAdmin(
                 Spacer(Modifier.height(24.dp))
 
                 Button(
+                    // CORRECCIÓN: Llamamos a loginAdminAuth() del ViewModel
                     onClick = {
-                        val ok = viewModel.loginAdmin(usernameAdmin, passwordAdmin)
-                        if (ok) onLoginSuccess()
+                        viewModel.loginAdminAuth(usernameAdmin, passwordAdmin)
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -134,7 +153,7 @@ fun LoginAdmin(
                     Spacer(Modifier.height(8.dp))
                     Text(
                         text = loginMessageAdmin,
-                        color = if (loginMessageAdmin.contains("exitos", ignoreCase = true))
+                        color = if (esAdminLogueadoState.value == true) // Usamos el StateFlow para la lógica de color
                             MaterialTheme.colorScheme.primary
                         else
                             Color.White
