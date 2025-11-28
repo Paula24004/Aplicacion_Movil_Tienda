@@ -22,20 +22,16 @@ fun HomeAdmin(
     viewModel: AuthViewModel,
     onLogout: () -> Unit
 ) {
-    // 1. Estados locales para el formulario de nuevo producto
+    LaunchedEffect(Unit) {
+        viewModel.cargarProductos()
+    }
+
     var nuevoNombre by remember { mutableStateOf("") }
-    // Dejar como texto para manejar mejor la entrada
     var nuevoPrecioText by remember { mutableStateOf("") }
     var nuevaDescripcion by remember { mutableStateOf("") }
     var nuevaImagen by remember { mutableStateOf("") }
-
-    // Accede a la lista reactiva de productos directamente desde el ViewModel
-    val productosList = viewModel.listaProductos
-
-    // Convertir el texto a Double para la validación
+    val productosList by viewModel.listaProductos
     val precioDouble = nuevoPrecioText.toDoubleOrNull()
-
-    // Validar si todos los campos requeridos están llenos y el precio es un Double válido y positivo
     val camposCompletos = nuevoNombre.isNotBlank() &&
             nuevoPrecioText.isNotBlank() &&
             nuevaDescripcion.isNotBlank() &&
@@ -124,7 +120,8 @@ fun HomeAdmin(
                             // Se utiliza el Double ya validado
                             if (camposCompletos && precioDouble != null) {
 
-                                // Generación de ID
+                                // Generación de ID (Simplificado: Usar una ID negativa temporal o un UUID
+                                // si la BD/API genera la ID. Aquí usamos el incremento local por ahora).
                                 val nuevoId = (productosList.maxOfOrNull { it.id } ?: 0) + 1
 
                                 val stockInicialPorTalla = mapOf("unica" to 10)
@@ -137,6 +134,7 @@ fun HomeAdmin(
                                     imagenUrl = nuevaImagen,
                                     stockPorTalla = stockInicialPorTalla
                                 )
+                                // Llama a la función del ViewModel que guarda en Room
                                 viewModel.agregarProducto(nuevoProducto)
 
                                 // Limpiar campos después de agregar
@@ -166,9 +164,11 @@ fun HomeAdmin(
                     contentPadding = PaddingValues(vertical = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
+                    // La lista se observa automáticamente gracias al 'by'
                     items(productosList, key = { it.id }) { producto ->
                         ProductoAdminItem(
                             producto = producto,
+                            // Llama a la función del ViewModel que elimina de Room
                             onDelete = { viewModel.eliminarProducto(producto.id) }
                         )
                     }
@@ -178,7 +178,7 @@ fun HomeAdmin(
     }
 }
 
-// Composable auxiliar para cada elemento de la lista de productos
+// Composable auxiliar para cada elemento de la lista de productos (sin cambios)
 @Composable
 fun ProductoAdminItem(producto: Producto, onDelete: () -> Unit) {
     Card(
@@ -193,16 +193,12 @@ fun ProductoAdminItem(producto: Producto, onDelete: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                // El campo 'nombre' en Producto es no nulo (String), pero si se mapea de ProductoEntity
-                // (que sí es nullable), podría ser nulo si el mapeo no es perfecto.
-                // Usar el operador Elvis como precaución para el UI.
                 Text(
                     text = producto.nombre ?: "Producto Desconocido",
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.bodyLarge
                 )
 
-                // Muestra el precio formateado con dos decimales, ya que ahora es Double.
                 Text(
                     text = "ID: ${producto.id} | Precio: $${String.format("%,.2f", producto.precio)}",
                     style = MaterialTheme.typography.bodySmall,

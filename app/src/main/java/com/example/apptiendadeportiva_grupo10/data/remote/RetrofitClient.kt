@@ -1,12 +1,13 @@
 package com.example.apptiendadeportiva_grupo10.data.remote
 
+import com.example.apptiendadeportiva_grupo10.api.ProductApiService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-    private const val BASE_URL = "http://13.217.131.231:8080/" // Recuerda revisar bien la ruta, algunas APIs utilizan una ruta especifica}
+    private const val BASE_URL = "http://3.236.227.110:8080/" // Recuerda revisar bien la ruta, algunas APIs utilizan una ruta especifica}
 
     private val client = OkHttpClient.Builder()
         .addInterceptor(
@@ -16,11 +17,12 @@ object RetrofitClient {
         )
         .build()
 
-    val apiService: ApiService by lazy {
+    val apiService: ProductApiService by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
+            .client(client) // Usar el cliente OkHttp configurado
             .build()
-            .create(ApiService::class.java)
+            .create(ProductApiService::class.java) // ⬅️ Crear ProductApiService
     }
 }

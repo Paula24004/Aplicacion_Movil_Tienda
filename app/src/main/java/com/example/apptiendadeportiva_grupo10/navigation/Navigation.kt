@@ -1,9 +1,12 @@
 package com.example.apptiendadeportiva_grupo10.navigation
 
+import android.app.Application
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext // ¡Necesario!
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -21,28 +24,40 @@ import com.example.apptiendadeportiva_grupo10.ui.screens.LoginAdmin
 import com.example.apptiendadeportiva_grupo10.ui.screens.RegistroAdmin
 import com.example.apptiendadeportiva_grupo10.ui.screens.HomeAdmin
 import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
+import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModelFactory
 import com.example.apptiendadeportiva_grupo10.viewmodel.CatalogoViewModel
 import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
 import com.example.apptiendadeportiva_grupo10.viewmodel.QuoteViewModel
 import com.example.apptiendadeportiva_grupo10.model.toDomain
+import com.example.apptiendadeportiva_grupo10.repository.ProductoRepository
 
 @Composable
 fun RootScreen() {
+    // Obtener la instancia de Application (Necesaria para AuthViewModel y Room)
+    val application = LocalContext.current.applicationContext as Application
+
+    // 1. Instanciar Repositorios (Se usa remember para mantener la instancia viva)
+    val productoRepository = remember { ProductoRepository() } // Asume constructor vacío
+
+    // 2. Crear las Factories para los ViewModels que tienen dependencias (AuthViewModel)
+    val authViewModelFactory = remember {
+        AuthViewModelFactory(application, productoRepository)
+    }
+
+    // ViewModels compartidos (Instanciación usando Factory)
+    val authViewModel: AuthViewModel = viewModel(factory = authViewModelFactory) // ¡AQUÍ EL CAMBIO!
+
+    // ViewModels sin dependencias pueden usar la función por defecto
     val quoteViewModel: QuoteViewModel = viewModel()
+    val catalogoViewModel: CatalogoViewModel = viewModel()
+    val carritoViewModel: CarritoViewModel = viewModel()
 
 
     // Controlador de navegación
     val navController = rememberNavController()
 
-    // ViewModels compartidos
-    val authViewModel: AuthViewModel = viewModel()
-    val catalogoViewModel: CatalogoViewModel = viewModel()
-    val carritoViewModel: CarritoViewModel = viewModel()
-
     // Productos cargados (AÚN SON ProductoEntity)
     val productos by catalogoViewModel.productos.collectAsState()
-
-
 
 
 // Solo inicializa cuando hay productos por primera vez.
@@ -59,6 +74,7 @@ fun RootScreen() {
         navController = navController,
         startDestination = "home"
     ) {
+        // ... (El resto de composables se mantienen igual, usando el authViewModel instanciado)
 
         // --- Pantalla principal ---
         composable("home") {
@@ -86,10 +102,8 @@ fun RootScreen() {
 
         // --- Registro de usuario ---
         composable("registrarse") {
-            // NOTA: RegisterScreen ahora maneja la navegación interna (a 'catalogo' y 'login')
-            // ya que usa LaunchedEffect en base al estado del ViewModel.
             RegisterScreen(
-                navController = navController, // Necesita el NavController para la navegación interna
+                navController = navController,
                 authViewModel = authViewModel
             )
         }
@@ -114,7 +128,6 @@ fun RootScreen() {
                 viewModel = catalogoViewModel,
                 carritoViewModel = carritoViewModel,
                 productoId = idProducto
-
             )
 
         }
@@ -130,9 +143,8 @@ fun RootScreen() {
         // --- Login de administrador ---
         composable("admin_iniciar") {
             LoginAdmin(
-                navController = navController, // CORRECCIÓN 1: Se agrega el navController
+                navController = navController,
                 viewModel = authViewModel,
-                // CORRECCIÓN 2: Se elimina onLoginSuccess porque la navegación se gestiona internamente en LoginAdmin.
                 onNavigateToRegister = { navController.navigate("admin_registrar") }
             )
         }
@@ -161,7 +173,8 @@ fun RootScreen() {
 
         // --- Panel del administrador ---
         composable("admin_panel") {
-            HomeAdmin( // Aquí se asegura que solo se pasen los parámetros requeridos
+            // ¡IMPORTANTE! También se necesita llamar a cargarProductos aquí (en HomeAdmin.kt)
+            HomeAdmin(
                 viewModel = authViewModel,
                 onLogout = {
                     navController.navigate("admin_iniciar") {

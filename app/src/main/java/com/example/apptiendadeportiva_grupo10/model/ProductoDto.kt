@@ -15,3 +15,6 @@ data class ProductoDto(
     @SerializedName("stockPorTalla")
     val stockPorTalla: Map<String, Int>?
 )
+
+
+

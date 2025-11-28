@@ -14,6 +14,12 @@ interface ProductoDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(productos: List<ProductoEntity>)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(producto: ProductoEntity)
+
     @Query("SELECT * FROM productos WHERE id = :id LIMIT 1")
     suspend fun findById(id: Int): ProductoEntity?
+
+    @Query("DELETE FROM productos WHERE id = :id")
+    suspend fun deleteById(id: Int)
 }

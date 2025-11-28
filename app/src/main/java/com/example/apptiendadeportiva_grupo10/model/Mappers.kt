@@ -1,10 +1,4 @@
 package com.example.apptiendadeportiva_grupo10.model
-
-/**
- * Función de extensión para mapear un ProductoDto (objeto de red) a ProductoEntity (objeto de Room).
- * Se utiliza el operador Elvis (?:) para asignar valores por defecto a campos que podrían ser nulos
- * en el JSON de la API, asegurando la integridad de la base de datos local.
- */
 fun ProductoDto.toEntity(): ProductoEntity {
     return ProductoEntity(
         id = this.id,
@@ -17,11 +11,6 @@ fun ProductoDto.toEntity(): ProductoEntity {
         stockPorTalla= this.stockPorTalla
     )
 }
-
-/**
- * Función de extensión para mapear un ProductoEntity (objeto de Room) a ProductoDto (objeto de red).
- * Útil para la capa de la UI si se necesita un objeto más ligero o si los datos se cargan desde la base de datos.
- */
 fun ProductoEntity.toDto(): ProductoDto {
     return ProductoDto(
         id = this.id,
@@ -32,3 +21,30 @@ fun ProductoEntity.toDto(): ProductoDto {
         stockPorTalla= this.stockPorTalla
     )
 }
+
+fun Producto.toEntity(): ProductoEntity {
+    // Usamos el operador Elvis (?:) ya que el precio en Producto es no nulo (Double),
+    // pero la entidad de Room (ProductoEntity) lo acepta como nullable (Double?)
+    return ProductoEntity(
+        id = this.id,
+        nombre = this.nombre,
+        descripcion = this.descripcion,
+        precio = this.precio,
+        imagenUrl = this.imagenUrl,
+        stockPorTalla = this.stockPorTalla
+    )
+}
+
+fun Producto.toDto(): ProductoDto {
+    return ProductoDto(
+        // Al enviar un nuevo producto, el ID puede ser el que tiene actualmente (aunque el servidor
+        // debe ignorarlo y asignar uno nuevo) o puedes pasarlo como 0/null si el DTO lo permite.
+        id = this.id,
+        // Los campos de dominio (Producto) son en su mayoría no nulos, por lo que se pasan directamente.
+        nombre = this.nombre,
+        descripcion = this.descripcion,
+        precio = this.precio,
+        imagenUrl = this.imagenUrl,
+        stockPorTalla = this.stockPorTalla
+    )
+    }
