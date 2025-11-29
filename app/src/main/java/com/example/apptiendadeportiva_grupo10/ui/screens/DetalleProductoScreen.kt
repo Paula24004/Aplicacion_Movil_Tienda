@@ -20,6 +20,8 @@ import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
 import com.example.apptiendadeportiva_grupo10.viewmodel.CatalogoViewModel
 import com.example.apptiendadeportiva_grupo10.model.ProductoEntity
 import com.example.apptiendadeportiva_grupo10.model.toDomain
+import com.example.apptiendadeportiva_grupo10.data.remote.RetrofitClient
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,13 +33,18 @@ fun DetalleProductoScreen(
 ) {
     val contexto = LocalContext.current
 
-    // ESTADO LOCAL DE LA PANTALLA
     var producto by remember { mutableStateOf<ProductoEntity?>(null) }
-    var quantity by remember { mutableStateOf(1) } // Cantidad deseada
-    var selectedSize by remember { mutableStateOf<String?>(null) } // Talla seleccionada
+    var quantity by remember { mutableStateOf(1) }
+    var selectedSize by remember { mutableStateOf<String?>(null) }
+
+    // ESTADOS PARA CONVERSIÓN
+    var precioUsd by remember { mutableStateOf<Double?>(null) }
+    var precioEur by remember { mutableStateOf<Double?>(null) }
+    var convirtiendo by remember { mutableStateOf(false) }
+
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(productoId) {
-        // La firma del ViewModel requiere el contexto
         producto = viewModel.getProductoById(contexto, productoId)
     }
 
@@ -49,35 +56,33 @@ fun DetalleProductoScreen(
         }
     ) { padd ->
         producto?.let { p ->
-            val productDomain = p.toDomain()
 
-            // ✅ CORRECCIÓN CRÍTICA: Usamos el nuevo campo stockPorTalla (asumiendo Map<String, Int> en ProductoEntity)
+            val productDomain = p.toDomain()
             val stockMap = p.stockPorTalla ?: emptyMap()
             val availableSizes = stockMap.keys.toList().sorted()
 
-            // Calcular stock total y stock para la talla seleccionada
             val totalStock = stockMap.values.sum()
             val stockForSelectedSize = selectedSize?.let { stockMap[it] } ?: 0
 
-            // Inicialización: Establecer la primera talla con stock como seleccionada al cargar.
             LaunchedEffect(availableSizes) {
                 if (availableSizes.isNotEmpty() && selectedSize == null) {
-                    selectedSize = availableSizes.firstOrNull { (stockMap[it] ?: 0) > 0 } ?: availableSizes.first()
+                    selectedSize = availableSizes.firstOrNull { (stockMap[it] ?: 0) > 0 }
+                        ?: availableSizes.first()
                 }
             }
 
-            // Habilitación del botón "Agregar al carrito"
-            val isAddToCartEnabled = selectedSize != null && stockForSelectedSize > 0 && quantity > 0 && quantity <= stockForSelectedSize
+            val isAddToCartEnabled =
+                selectedSize != null && stockForSelectedSize > 0 && quantity <= stockForSelectedSize
 
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padd)
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .fillMaxWidth(),
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 horizontalAlignment = Alignment.Start
             ) {
-                // Imagen
+
+                // IMAGEN
                 Image(
                     painter = rememberAsyncImagePainter(p.imagenUrl),
                     contentDescription = p.nombre,
@@ -88,38 +93,69 @@ fun DetalleProductoScreen(
                     contentScale = ContentScale.Crop
                 )
 
-                // Nombre y Descripción
                 Text(p.nombre ?: "Nombre desconocido", style = MaterialTheme.typography.titleLarge)
                 Text(p.descripcion ?: "", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(bottom = 16.dp))
 
-                // Precio
+                // PRECIO FORMATEADO CLP (SIN DECIMALES)
                 val precioFormateado = String.format("%,.0f", p.precio ?: 0.0).replace(',', '.')
                 Text(
                     "Precio: $$precioFormateado",
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
-
-                // ----------------------------------------------------
-                // 1. INFORMACIÓN DE STOCK TOTAL
-                // ----------------------------------------------------
-
-                Text(
-                    "Stock total disponible: $totalStock unidades",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = when {
-                        totalStock == 0 -> MaterialTheme.colorScheme.error
-                        totalStock < 5 -> MaterialTheme.colorScheme.tertiary
-                        else -> MaterialTheme.colorScheme.onSurface
-                    },
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
-                // ----------------------------------------------------
-                // 2. SELECTOR DE TALLA
-                // ----------------------------------------------------
+                // ⭐ BOTÓN CONVERSOR
+                Button(
+                    onClick = {
+                        convirtiendo = true
+                        val precioClp = (p.precio ?: 0.0).toInt()
+
+                        coroutineScope.launch {
+                            try {
+                                val usd = RetrofitClient.apiService.convertir(precioClp, "USD")
+                                val eur = RetrofitClient.apiService.convertir(precioClp, "EUR")
+
+                                precioUsd = String.format("%.2f", usd).toDouble()
+                                precioEur = String.format("%.2f", eur).toDouble()
+
+                            } catch (e: Exception) {
+                                precioUsd = null
+                                precioEur = null
+                            } finally {
+                                convirtiendo = false
+                            }
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                ) {
+                    Text("Convertir precio a USD y EUR")
+                }
+
+                if (convirtiendo) {
+                    Text("Convirtiendo...", color = Color.Gray)
+                }
+
+                precioUsd?.let {
+                    Text("USD: $${it}", style = MaterialTheme.typography.bodyLarge)
+                }
+
+                precioEur?.let {
+                    Text("EUR: €${it}", style = MaterialTheme.typography.bodyLarge)
+                }
+
+                // STOCK TOTAL
+                Text(
+                    "Stock total disponible: $totalStock unidades",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = 16.dp)
+                )
+
+                // SELECTOR DE TALLA
                 if (availableSizes.isNotEmpty()) {
-                    Text("Seleccionar Talla:", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(top = 8.dp, bottom = 8.dp))
+                    Text("Seleccionar Talla:", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(top = 8.dp))
+
                     Row(
                         modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -130,106 +166,62 @@ fun DetalleProductoScreen(
                             val isEnabled = sizeStock > 0
 
                             OutlinedButton(
-                                onClick = { selectedSize = size; quantity = 1 }, // Reset quantity when size changes
+                                onClick = { selectedSize = size; quantity = 1 },
                                 enabled = isEnabled,
-                                colors = ButtonDefaults.outlinedButtonColors(
-                                    containerColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else Color.Transparent,
-                                    contentColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                                    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else Color.Transparent
                                 ),
-                                border = BorderStroke(
-                                    width = 1.dp,
-                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
-                                ),
-                                shape = RoundedCornerShape(8.dp),
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+                                border = BorderStroke(1.dp, if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline),
+                                shape = RoundedCornerShape(8.dp)
                             ) {
                                 Text(size)
                             }
                         }
                     }
 
-                    // Mostrar stock específico de la talla seleccionada
                     if (selectedSize != null) {
                         Text(
                             "Stock para talla $selectedSize: $stockForSelectedSize unidades",
                             style = MaterialTheme.typography.bodySmall,
-                            color = when {
-                                stockForSelectedSize == 0 -> MaterialTheme.colorScheme.error
-                                stockForSelectedSize < 5 -> MaterialTheme.colorScheme.tertiary
-                                else -> MaterialTheme.colorScheme.onSurface
-                            },
-                            modifier = Modifier.padding(top = 8.dp, bottom = 16.dp)
+                            modifier = Modifier.padding(top = 8.dp)
                         )
-                    } else if (totalStock > 0) {
-                        Text("Selecciona una talla para continuar.", color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(bottom = 16.dp))
                     }
                 }
 
-                // ----------------------------------------------------
-                // 3. SELECTOR DE CANTIDAD
-                // ----------------------------------------------------
+                // SELECTOR DE CANTIDAD
                 if (stockForSelectedSize > 0) {
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                        Modifier.fillMaxWidth().padding(vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text("Cantidad:", style = MaterialTheme.typography.bodyLarge)
                         Spacer(Modifier.width(16.dp))
 
-                        // Botón Decrementar
-                        Button(
-                            onClick = { if (quantity > 1) quantity-- },
-                            enabled = quantity > 1,
-                            shape = RoundedCornerShape(4.dp)
-                        ) { Text("-") }
-
-                        Text(
-                            "$quantity",
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-
-                        // Botón Incrementar
-                        Button(
-                            onClick = { if (quantity < stockForSelectedSize) quantity++ }, // Usar stockForSelectedSize
-                            enabled = quantity < stockForSelectedSize,
-                            shape = RoundedCornerShape(4.dp)
-                        ) { Text("+") }
+                        Button(onClick = { if (quantity > 1) quantity-- }, enabled = quantity > 1) { Text("-") }
+                        Text("$quantity", modifier = Modifier.padding(horizontal = 16.dp), style = MaterialTheme.typography.bodyLarge)
+                        Button(onClick = { if (quantity < stockForSelectedSize) quantity++ }, enabled = quantity < stockForSelectedSize) { Text("+") }
                     }
-                } else if (totalStock > 0 && selectedSize != null) {
-                    Text("No hay stock para la talla seleccionada.", color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(vertical = 8.dp))
                 }
 
-
-                // ----------------------------------------------------
-                // 4. BOTÓN AGREGAR AL CARRITO
-                // ----------------------------------------------------
-                Spacer(Modifier.height(24.dp))
-
+                // BOTÓN AGREGAR AL CARRITO
                 Button(
                     onClick = {
-                        // Pasar la talla seleccionada al CarritoViewModel
-                        val size = selectedSize ?: "Desconocida"
-                        carritoViewModel.agregar(productDomain, size, quantity)
+                        carritoViewModel.agregar(productDomain, selectedSize ?: "Desconocida", quantity)
                         navController.navigate("carrito")
                     },
                     enabled = isAddToCartEnabled,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(
-                        when {
-                            totalStock == 0 -> "Agotado (Sin Stock)"
-                            selectedSize == null -> "Seleccionar Talla"
-                            stockForSelectedSize == 0 -> "Agotado (Talla $selectedSize)"
-                            else -> "Agregar $quantity unid. (Talla $selectedSize) a Carrito"
-                        }
-                    )
+                    Text("Agregar $quantity unid. (Talla $selectedSize) a Carrito")
                 }
             }
-        } ?: Box(Modifier.fillMaxSize().padding(padd), contentAlignment = Alignment.Center) {
+
+        } ?: Box(
+            Modifier.fillMaxSize().padding(padd),
+            contentAlignment = Alignment.Center
+        ) {
             CircularProgressIndicator()
-            Text("Cargando Producto o ID no válido", modifier = Modifier.padding(top = 50.dp))
+            Text("Cargando producto…", modifier = Modifier.padding(top = 50.dp))
         }
     }
 }

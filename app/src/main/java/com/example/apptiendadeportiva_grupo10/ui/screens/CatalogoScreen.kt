@@ -30,17 +30,11 @@ fun CatalogoScreen(
 ) {
 
     val context = LocalContext.current
-
     val productos by viewModel.productos.collectAsState()
-
-    // CORRECCIÓN CLAVE: Usamos 'loading' en lugar de 'isLoading'
-    // Y se corrige el problema de inferencia agregando 'initial' para un StateFlow.
     val loading: Boolean by viewModel.loading.collectAsState(initial = false)
     val error: String? by viewModel.error.collectAsState(initial = null)
 
-
     LaunchedEffect(Unit) {
-        // Asumiendo que cargarProductos necesita el contexto
         viewModel.cargarProductos(context)
     }
 
@@ -49,7 +43,6 @@ fun CatalogoScreen(
             TopAppBar(
                 title = { Text("Catálogo") },
                 actions = {
-                    // Acción de navegación al carrito
                     IconButton(onClick = { navController.navigate("carrito") }) {
                         Icon(
                             imageVector = Icons.Filled.ShoppingCart,
@@ -66,21 +59,15 @@ fun CatalogoScreen(
                 .fillMaxSize()
         ) {
             when {
-                // Se accede a la variable 'loading' directamente
                 loading -> Box(
                     Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+                ) { CircularProgressIndicator() }
 
-                // Se accede a la variable 'error' directamente
                 error != null -> Box(
                     Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
-                ) {
-                    Text("Error: $error")
-                }
+                ) { Text("Error: $error") }
 
                 else -> LazyColumn(
                     contentPadding = PaddingValues(8.dp),
@@ -124,15 +111,17 @@ fun ProductoCard(
             Spacer(Modifier.width(12.dp))
 
             Column(Modifier.weight(1f)) {
-                // CORRECCIÓN: Usar el operador Elvis (?:) para manejar el valor nulo de nombre.
+
                 Text(
                     producto.nombre ?: "Nombre Desconocido",
                     style = MaterialTheme.typography.titleMedium
                 )
 
+                // ✔ FORMATO CORREGIDO: $5.990 (sin decimales)
+                val precioFormateado = String.format("%,.0f", producto.precio ?: 0.0).replace(',', '.')
+
                 Text(
-                    // Asumiendo que producto.precio es Double?
-                    "Precio: $${String.format("%,.2f", producto.precio ?: 0.0).replace(',', '.')}",
+                    "Precio: $$precioFormateado",
                     style = MaterialTheme.typography.bodyMedium
                 )
 
