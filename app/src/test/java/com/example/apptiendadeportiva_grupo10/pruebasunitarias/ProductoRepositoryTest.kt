@@ -1,9 +1,8 @@
 package com.example.apptiendadeportiva_grupo10.pruebasunitarias
 
-import android.content.Context
-import com.example.apptiendadeportiva_grupo10.data.remote.ApiService
 import com.example.apptiendadeportiva_grupo10.model.ProductoDto
 import com.example.apptiendadeportiva_grupo10.repository.ProductoRepository
+import com.example.apptiendadeportiva_grupo10.api.ProductApiService
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -12,22 +11,28 @@ import org.mockito.Mockito.mock
 
 class ProductoRepositoryTest {
 
-    private val context = mock(Context::class.java)
-    private val api = mock(ApiService::class.java)
+    private val api = mock(ProductApiService::class.java)
     private val repository = ProductoRepository(api)
 
     @Test
-    fun `getProductos devuelve lista desde API cuando es exitoso`() = runBlocking {
+    fun `getProductosSoloAPI devuelve lista desde la API`() = runBlocking {
 
         val dtoList = listOf(
-            ProductoDto(1, "Prod", "desc", 1000.0, "img", 10)
+            ProductoDto(
+                id = 1,
+                nombre = "Prod Test",
+                descripcion = "Desc",
+                precio = 1000.0,
+                imagenUrl = "img",
+                stockPorTalla = mapOf("M" to 5) // ← CORRECTO
+            )
         )
 
         `when`(api.getProducts()).thenReturn(dtoList)
 
-        val result = repository.getProductos(context)
+        val result = repository.getProductosSoloAPI()
 
         assertEquals(1, result.size)
-        assertEquals("Prod", result[0].nombre)
+        assertEquals("Prod Test", result[0].nombre)
     }
 }

@@ -17,7 +17,7 @@ class ProductoMapperTest {
             descripcion = "Descripción Test",
             precio = 9990.0,
             imagenUrl = "https://ejemplo.com/img.png",
-            stock = 10
+            stockPorTalla = mapOf("M" to 10)
         )
 
         val entity = dto.toEntity()
@@ -25,9 +25,9 @@ class ProductoMapperTest {
         assertEquals(1, entity.id)
         assertEquals("Zapatilla Test", entity.nombre)
         assertEquals("Descripción Test", entity.descripcion)
-        assertEquals(9990.0, entity.precio ?: 0.0, 0.01)   // ← CORREGIDO
+        assertEquals(9990.0, entity.precio ?: 0.0, 0.01)
         assertEquals("https://ejemplo.com/img.png", entity.imagenUrl)
-        assertEquals(10, entity.stock)
+        assertEquals(10, entity.stockPorTalla?.get("M"))
     }
 
     @Test
@@ -38,7 +38,7 @@ class ProductoMapperTest {
             descripcion = "Desc Test",
             precio = 5000.0,
             imagenUrl = "url.png",
-            stock = 5
+            stockPorTalla = mapOf("M" to 5)
         )
 
         val domain = entity.toDomain()
@@ -46,8 +46,8 @@ class ProductoMapperTest {
         assertEquals(1, domain.id)
         assertEquals("Zapatilla Test", domain.nombre)
         assertEquals("Desc Test", domain.descripcion)
-        assertEquals(5000.0, domain.precio, 0.01)   // ← CORRECTO AQUÍ
+        assertEquals(5000.0, domain.precio, 0.01)
         assertEquals("url.png", domain.imagenUrl)
-        assertEquals(5, domain.stock)
+        assertEquals(5, domain.stockPorTalla?.get("M"))
     }
 }

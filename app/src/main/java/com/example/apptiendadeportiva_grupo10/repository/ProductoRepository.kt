@@ -9,6 +9,8 @@ import com.example.apptiendadeportiva_grupo10.model.toEntity
 import com.example.apptiendadeportiva_grupo10.model.toDto
 import com.example.apptiendadeportiva_grupo10.api.ProductApiService
 
+
+
 class ProductoRepository(
     private val api: ProductApiService = RetrofitClient.apiService
 ) {
@@ -65,11 +67,15 @@ class ProductoRepository(
                 dao.insert(productoEntity)
 
             } else {
-                // 🚨 PUNTO CLAVE: Esto imprimirá el error 400/500 si ocurre.
-                println("Error al crear producto en el API: ${response.code()}. Respuesta: ${response.errorBody()?.string()}")
+
+                println(
+                    "Error al crear producto en el API: ${response.code()}. Respuesta: ${
+                        response.errorBody()?.string()
+                    }"
+                )
             }
         } catch (e: Exception) {
-            // 🚨 PUNTO CLAVE: Esto imprimirá si falla la conexión de red.
+
             println("Error de red al crear producto: ${e.message}")
             e.printStackTrace()
         }
@@ -80,4 +86,11 @@ class ProductoRepository(
         val dao = db.productoDao()
         dao.deleteById(id)
     }
+
+
+    suspend fun getProductosSoloAPI(): List<ProductoEntity> {
+        val dtoList = api.getProducts()
+        return dtoList.map { it.toEntity() }
+    }
+
 }
