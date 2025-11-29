@@ -168,14 +168,20 @@ fun DetalleProductoScreen(
                             OutlinedButton(
                                 onClick = { selectedSize = size; quantity = 1 },
                                 enabled = isEnabled,
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else Color.Transparent
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    containerColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else Color.Transparent,
+                                    contentColor = Color.Black,   // 👈 Texto negro SIEMPRE
+                                    disabledContentColor = Color.Gray
                                 ),
-                                border = BorderStroke(1.dp, if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline),
+                                border = BorderStroke(
+                                    1.dp,
+                                    if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                                ),
                                 shape = RoundedCornerShape(8.dp)
                             ) {
-                                Text(size)
+                                Text(size, color = Color.Black)  // 👈 También aquí por seguridad
                             }
+
                         }
                     }
 
