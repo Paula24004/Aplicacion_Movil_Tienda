@@ -43,4 +43,9 @@ class CatalogoViewModel(
             repo.getProductoPorId(context, id)
         }
     }
+    // --- SOLO PARA TESTS ---
+    fun setProductosForTest(lista: List<ProductoEntity>) {
+        _productos.value = lista
+    }
+
 }
