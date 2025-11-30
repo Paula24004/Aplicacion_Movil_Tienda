@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit // 💡 Importación para el botón de modificar
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,6 +27,7 @@ fun HomeAdmin(
         viewModel.cargarProductos()
     }
 
+    // --- Variables de Estado para Agregar Producto ---
     var nuevoNombre by remember { mutableStateOf("") }
     var nuevoPrecioText by remember { mutableStateOf("") }
     var nuevaDescripcion by remember { mutableStateOf("") }
@@ -34,6 +36,9 @@ fun HomeAdmin(
     var nuevaSize by remember { mutableStateOf("") }
     var nuevaColor by remember { mutableStateOf("") }
     var nuevoStockPorTallaText by remember { mutableStateOf("") }
+
+    // --- NUEVO: Estado para Modificar Producto ---
+    var productoAEditar by remember { mutableStateOf<Producto?>(null) }
 
     val productosList by viewModel.listaProductos
     val precioDouble = nuevoPrecioText.toDoubleOrNull()
@@ -81,7 +86,6 @@ fun HomeAdmin(
             )
         }
     ) { padding ->
-        // 🚨 CAMBIO CLAVE: Se reemplaza 'Column' por 'LazyColumn' para habilitar el scroll de toda la pantalla.
         LazyColumn(
             modifier = Modifier
                 .padding(padding)
@@ -98,7 +102,6 @@ fun HomeAdmin(
             }
 
             // ------------------- AGREGAR PRODUCTO (Formulario) -------------------
-            // Todo el formulario va dentro de un solo 'item'
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -230,20 +233,42 @@ fun HomeAdmin(
                     Text("No hay productos registrados.", color = MaterialTheme.colorScheme.error)
                 }
             } else {
-                // Se utiliza 'items' del LazyColumn principal
                 items(productosList, key = { it.id }) { producto ->
-                    ProductoAdminItem(producto) {
-                        viewModel.eliminarProducto(producto.id)
-                    }
+                    ProductoAdminItem(
+                        producto = producto,
+                        onDelete = { viewModel.eliminarProducto(producto.id) },
+                        onEdit = { productoAEditar = it } // 💡 NUEVA ACCIÓN DE EDICIÓN
+                    )
                 }
             }
         }
     }
+
+    // ------------------- LÓGICA DEL DIÁLOGO DE MODIFICACIÓN -------------------
+    productoAEditar?.let { producto ->
+        EditProductDialog(
+            producto = producto,
+            onDismiss = { productoAEditar = null }, // Cierra el diálogo
+            onSave = { productoModificado ->
+                viewModel.modificarProducto(productoModificado) // Llama a la función del ViewModel
+                productoAEditar = null
+            }
+        )
+    }
 }
 
-// ⚠️ Esta función se mantiene sin cambios
+
+// =================================================================================
+// COMPOSABLES REUTILIZABLES
+// =================================================================================
+
+// 💡 FUNCIÓN MODIFICADA: Ahora recibe el callback onEdit
 @Composable
-fun ProductoAdminItem(producto: Producto, onDelete: () -> Unit) {
+fun ProductoAdminItem(
+    producto: Producto,
+    onDelete: () -> Unit,
+    onEdit: (Producto) -> Unit // NUEVO: Callback para el botón de modificar
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
@@ -260,10 +285,146 @@ fun ProductoAdminItem(producto: Producto, onDelete: () -> Unit) {
                 Text("Stock: ${producto.stockPorTalla?.entries?.joinToString { "${it.key}: ${it.value}" }}")
             }
 
-            IconButton(onClick = onDelete) {
-                Icon(Icons.Filled.Delete, contentDescription = "Eliminar", tint = MaterialTheme.colorScheme.error)
+            // Contenedor para los dos botones
+            Row {
+                // 💡 NUEVO: Botón de Modificación
+                IconButton(onClick = { onEdit(producto) }) {
+                    Icon(
+                        imageVector = Icons.Filled.Edit,
+                        contentDescription = "Modificar",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                // Botón de Eliminación (existente)
+                IconButton(onClick = onDelete) {
+                    Icon(Icons.Filled.Delete, contentDescription = "Eliminar", tint = MaterialTheme.colorScheme.error)
+                }
             }
         }
     }
 }
 
+// 💡 NUEVA FUNCIÓN: Diálogo para la edición de productos
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditProductDialog(
+    producto: Producto,
+    onDismiss: () -> Unit,
+    onSave: (Producto) -> Unit
+) {
+    // Función de ayuda local para parsear el stock (copiada de HomeAdmin para ser autocontenida)
+    fun parseStockPorTalla(text: String): Map<String, Int>? {
+        if (text.isBlank()) return null
+        val map = mutableMapOf<String, Int>()
+        val pairs = text.split(",").map { it.trim() }
+        for (pair in pairs) {
+            val parts = pair.split(":")
+            if (parts.size == 2) {
+                val talla = parts[0].trim()
+                val stock = parts[1].trim().toIntOrNull()
+                if (talla.isNotBlank() && stock != null && stock >= 0) {
+                    map[talla] = stock
+                } else return null
+            } else return null
+        }
+        return map.takeIf { it.isNotEmpty() }
+    }
+
+    // Estados inicializados con los valores del producto
+    var nombre by remember { mutableStateOf(producto.nombre) }
+    var descripcion by remember { mutableStateOf(producto.descripcion ?: "") }
+    var precioText by remember { mutableStateOf(producto.precio.toString()) }
+    var categoria by remember { mutableStateOf(producto.categoria ?: "") }
+    var size by remember { mutableStateOf(producto.size ?: "") }
+    var color by remember { mutableStateOf(producto.color ?: "") }
+    var imagenUrl by remember { mutableStateOf(producto.imagenUrl ?: "") }
+    var stockPorTallaText by remember {
+        // Convierte el Map a string "S:10,M:5" para el TextField
+        mutableStateOf(producto.stockPorTalla?.entries?.joinToString(",") { "${it.key}:${it.value}" } ?: "")
+    }
+
+    val precioDouble = precioText.toDoubleOrNull()
+    val stockPorTallaParsed = parseStockPorTalla(stockPorTallaText)
+
+    val camposCompletos = nombre.isNotBlank() &&
+            precioText.isNotBlank() &&
+            descripcion.isNotBlank() &&
+            imagenUrl.isNotBlank() &&
+            precioDouble != null &&
+            categoria.isNotBlank() &&
+            size.isNotBlank() &&
+            color.isNotBlank() &&
+            stockPorTallaText.isNotBlank() &&
+            stockPorTallaParsed != null &&
+            precioDouble >= 0.0
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Modificar Producto ID: ${producto.id}") },
+        text = {
+            LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                item {
+                    OutlinedTextField(value = nombre, onValueChange = { nombre = it }, label = { Text("Nombre del Producto") }, modifier = Modifier.fillMaxWidth())
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedTextField(value = descripcion, onValueChange = { descripcion = it }, label = { Text("Descripción") }, modifier = Modifier.fillMaxWidth())
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = precioText,
+                        onValueChange = { precioText = it.filter { ch -> ch.isDigit() || ch == '.' } },
+                        label = { Text("Precio (decimal)") },
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedTextField(value = categoria, onValueChange = { categoria = it }, label = { Text("Categoría") }, modifier = Modifier.fillMaxWidth())
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedTextField(value = size, onValueChange = { size = it }, label = { Text("Talla") }, modifier = Modifier.fillMaxWidth())
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedTextField(value = color, onValueChange = { color = it }, label = { Text("Color") }, modifier = Modifier.fillMaxWidth())
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = stockPorTallaText,
+                        onValueChange = { stockPorTallaText = it },
+                        label = { Text("Stock por Talla (ej: S:10,M:5)") },
+                        modifier = Modifier.fillMaxWidth(),
+                        isError = stockPorTallaText.isNotBlank() && stockPorTallaParsed == null
+                    )
+                    if (stockPorTallaText.isNotBlank() && stockPorTallaParsed == null) {
+                        Text("Formato inválido. Usa talla:stock,talla:stock",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    OutlinedTextField(value = imagenUrl, onValueChange = { imagenUrl = it }, label = { Text("URL / Ruta de Imagen") }, modifier = Modifier.fillMaxWidth())
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val productoModificado = producto.copy(
+                        nombre = nombre,
+                        descripcion = descripcion,
+                        precio = precioDouble ?: producto.precio,
+                        categoria = categoria,
+                        size = size,
+                        color = color,
+                        imagenUrl = imagenUrl,
+                        stockPorTalla = stockPorTallaParsed
+                    )
+                    onSave(productoModificado) // Llama al ViewModel
+                },
+                enabled = camposCompletos
+            ) {
+                Text("Guardar Cambios")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        }
+    )
+}

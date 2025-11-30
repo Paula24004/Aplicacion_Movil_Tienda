@@ -15,7 +15,6 @@ class ProductoRepository(
     private val api: ProductApiService = RetrofitClient.apiService
 ) {
 
-    // Cambiado a Flow para compatibilidad con ViewModel (emite lista de ProductoEntity)
     fun getProductos(context: Context): Flow<List<ProductoEntity>> = flow {
         val db = AppDatabase.getInstance(context)
         val dao = db.productoDao()
@@ -24,11 +23,10 @@ class ProductoRepository(
             val dtoList = api.getProducts()
             val entities = dtoList.map { it.toEntity() }
 
-            dao.insertAll(entities)  // Actualiza cache en Room
-            emit(entities)  // Emite desde API
+            dao.insertAll(entities)
+            emit(entities)
         } catch (e: Exception) {
             e.printStackTrace()
-            // Fallback a Room si API falla
             emit(dao.getAll())
         }
     }
@@ -48,10 +46,6 @@ class ProductoRepository(
         }
     }
 
-    /**
-     * Inserta un nuevo producto: 1. API (POST), 2. Room (Local)
-     * Cambiado a Result<Unit> para manejar éxito/error
-     */
     suspend fun insertProducto(context: Context, producto: Producto): Result<Unit> {
         val db = AppDatabase.getInstance(context)
         val dao = db.productoDao()
@@ -75,10 +69,36 @@ class ProductoRepository(
         }
     }
 
-    /**
-     * Elimina un producto: 1. API (DELETE), 2. Room (Local)
-     * Cambiado a Result<Unit> para manejar éxito/error
-     */
+    suspend fun updateProducto(context: Context, producto: Producto): Result<Unit> {
+        val db = AppDatabase.getInstance(context)
+        val dao = db.productoDao()
+
+        // El ID del producto NO debe ser nulo o 0 para actualizar
+        if (producto.id == 0) {
+            return Result.failure(Exception("El ID del producto es inválido (0) para la modificación."))
+        }
+
+        val productoDtoParaEnvio = producto.toDto()
+
+        return try {
+            // 1. Llamada a la API de modificación
+            val response = api.updateProduct(producto.id, productoDtoParaEnvio)
+
+            if (response.isSuccessful && response.body() != null) {
+                // 2. ÉXITO: Guarda la respuesta actualizada en Room.
+                //    ProductoDao.insert con OnConflictStrategy.REPLACE maneja la actualización.
+                val productoDtoActualizado = response.body()!!
+                val productoEntity = productoDtoActualizado.toEntity()
+                dao.insert(productoEntity)
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Error al modificar producto en el API: ${response.code()}. Respuesta: ${response.errorBody()?.string()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(Exception("Error de red al modificar producto: ${e.message}"))
+        }
+    }
+
     suspend fun deleteProducto(context: Context, id: Int): Result<Unit> {
         val db = AppDatabase.getInstance(context)
         val dao = db.productoDao()

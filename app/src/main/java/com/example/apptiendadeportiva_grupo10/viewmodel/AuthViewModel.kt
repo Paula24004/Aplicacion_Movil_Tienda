@@ -157,4 +157,16 @@ class AuthViewModel(
             }
         }
     }
+
+    fun modificarProducto(producto: Producto) {
+        viewModelScope.launch {
+            val result = productoRepository.updateProducto(getApplication(), producto)
+            if (result.isSuccess) {
+                mensajeadmin.value = "Producto modificado correctamente"
+                cargarProductos() // Recarga la lista
+            } else {
+                mensajeadmin.value = result.exceptionOrNull()?.message ?: "Error desconocido al modificar"
+            }
+        }
+    }
 }

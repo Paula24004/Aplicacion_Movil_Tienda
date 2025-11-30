@@ -15,6 +15,9 @@ interface ProductApiService {
     @DELETE("api/products/{id}")
     suspend fun deleteProduct(@Path("id") id: Int): Response<Unit>
 
+    @PUT("api/products/{id}")
+    suspend fun updateProduct(@Path("id") id: Int, @Body producto: ProductoDto): Response<ProductoDto>
+
     @GET("api/currency/convert")
     suspend fun convertir(
         @Query("amount") amount: Int,
