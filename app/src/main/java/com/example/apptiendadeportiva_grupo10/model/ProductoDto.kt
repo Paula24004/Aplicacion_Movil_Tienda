@@ -10,6 +10,12 @@ data class ProductoDto(
     val descripcion: String?,
     @SerializedName("price")
     val precio: Double?,
+    @SerializedName("category")
+    val categoria: String?,
+    @SerializedName("size")
+    val size: String?,
+    @SerializedName("color")
+    val color: String?,
     @SerializedName("imageUrl")
     val imagenUrl: String?,
     @SerializedName("stockPorTalla")

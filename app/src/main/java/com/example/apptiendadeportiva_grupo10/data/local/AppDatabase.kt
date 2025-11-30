@@ -8,7 +8,7 @@ import androidx.room.TypeConverters
 import com.example.apptiendadeportiva_grupo10.model.ProductoEntity
 import com.example.apptiendadeportiva_grupo10.model.MapTypeConverter
 
-@Database(entities = [ProductoEntity::class], version = 3, exportSchema = false)
+@Database(entities = [ProductoEntity::class], version = 4, exportSchema = false)
 @TypeConverters(MapTypeConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun productoDao(): ProductoDao

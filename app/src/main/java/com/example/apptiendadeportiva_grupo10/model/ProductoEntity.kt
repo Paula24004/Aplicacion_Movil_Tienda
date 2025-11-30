@@ -13,6 +13,9 @@ data class ProductoEntity(
     val nombre: String?,
     val descripcion: String?,
     val precio: Double?,
+    val categoria: String?,
+    val size: String?,
+    val color: String?,
     val imagenUrl: String?,
     val stockPorTalla: Map<String, Int>?
 )
