@@ -1,7 +1,7 @@
 package com.example.apptiendadeportiva_grupo10.ui.screens
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyColumn // Importación clave
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -81,151 +81,159 @@ fun HomeAdmin(
             )
         }
     ) { padding ->
-        Column(
+        // 🚨 CAMBIO CLAVE: Se reemplaza 'Column' por 'LazyColumn' para habilitar el scroll de toda la pantalla.
+        LazyColumn(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            contentPadding = PaddingValues(top = 8.dp, bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
-            Text("Gestión de Productos", style = MaterialTheme.typography.headlineMedium)
-            Spacer(modifier = Modifier.height(24.dp))
+            // Título de la sección
+            item {
+                Text("Gestión de Productos", style = MaterialTheme.typography.headlineMedium)
+            }
 
-            // ------------------- AGREGAR PRODUCTO -------------------
-            Card(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Agregar Nuevo Producto", style = MaterialTheme.typography.titleLarge)
-                    Spacer(Modifier.height(8.dp))
+            // ------------------- AGREGAR PRODUCTO (Formulario) -------------------
+            // Todo el formulario va dentro de un solo 'item'
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text("Agregar Nuevo Producto", style = MaterialTheme.typography.titleLarge)
+                        Spacer(Modifier.height(8.dp))
 
-                    OutlinedTextField(
-                        value = nuevoNombre,
-                        onValueChange = { nuevoNombre = it },
-                        label = { Text("Nombre del Producto") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(Modifier.height(8.dp))
-
-                    OutlinedTextField(
-                        value = nuevaDescripcion,
-                        onValueChange = { nuevaDescripcion = it },
-                        label = { Text("Descripción") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(Modifier.height(8.dp))
-
-                    OutlinedTextField(
-                        value = nuevoPrecioText,
-                        onValueChange = { nuevoPrecioText = it.filter { ch -> ch.isDigit() || ch == '.' } },
-                        label = { Text("Precio (decimal)") },
-                        modifier = Modifier.fillMaxWidth(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
-                    )
-                    Spacer(Modifier.height(8.dp))
-
-                    OutlinedTextField(
-                        value = nuevaCategory,
-                        onValueChange = { nuevaCategory = it },
-                        label = { Text("Categoría") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(Modifier.height(8.dp))
-
-                    OutlinedTextField(
-                        value = nuevaSize,
-                        onValueChange = { nuevaSize = it },
-                        label = { Text("Talla") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(Modifier.height(8.dp))
-
-                    OutlinedTextField(
-                        value = nuevaColor,
-                        onValueChange = { nuevaColor = it },
-                        label = { Text("Color") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(Modifier.height(8.dp))
-
-                    OutlinedTextField(
-                        value = nuevoStockPorTallaText,
-                        onValueChange = { nuevoStockPorTallaText = it },
-                        label = { Text("Stock por Talla (ej: S:10,M:5)") },
-                        modifier = Modifier.fillMaxWidth(),
-                        isError = nuevoStockPorTallaText.isNotBlank() && stockPorTallaParsed == null
-                    )
-                    if (nuevoStockPorTallaText.isNotBlank() && stockPorTallaParsed == null) {
-                        Text("Formato inválido. Usa talla:stock,talla:stock",
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall
+                        OutlinedTextField(
+                            value = nuevoNombre,
+                            onValueChange = { nuevoNombre = it },
+                            label = { Text("Nombre del Producto") },
+                            modifier = Modifier.fillMaxWidth()
                         )
-                    }
-                    Spacer(Modifier.height(8.dp))
+                        Spacer(Modifier.height(8.dp))
 
-                    OutlinedTextField(
-                        value = nuevaImagen,
-                        onValueChange = { nuevaImagen = it },
-                        label = { Text("URL / Ruta de Imagen") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(Modifier.height(16.dp))
+                        OutlinedTextField(
+                            value = nuevaDescripcion,
+                            onValueChange = { nuevaDescripcion = it },
+                            label = { Text("Descripción") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(Modifier.height(8.dp))
 
-                    Button(
-                        onClick = {
-                            if (precioDouble != null && stockPorTallaParsed != null) {
-                                val nuevoProducto = Producto(
-                                    id = 0, // ⬅️ IMPORTANTE: El backend genera el ID
-                                    nombre = nuevoNombre,
-                                    descripcion = nuevaDescripcion,
-                                    precio = precioDouble,
-                                    categoria = nuevaCategory,
-                                    size = nuevaSize,
-                                    color = nuevaColor,
-                                    imagenUrl = nuevaImagen,
-                                    stockPorTalla = stockPorTallaParsed
-                                )
+                        OutlinedTextField(
+                            value = nuevoPrecioText,
+                            onValueChange = { nuevoPrecioText = it.filter { ch -> ch.isDigit() || ch == '.' } },
+                            label = { Text("Precio (decimal)") },
+                            modifier = Modifier.fillMaxWidth(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                        )
+                        Spacer(Modifier.height(8.dp))
 
-                                viewModel.agregarProducto(nuevoProducto)
+                        OutlinedTextField(
+                            value = nuevaCategory,
+                            onValueChange = { nuevaCategory = it },
+                            label = { Text("Categoría") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(Modifier.height(8.dp))
 
-                                nuevoNombre = ""
-                                nuevoPrecioText = ""
-                                nuevaDescripcion = ""
-                                nuevaImagen = ""
-                                nuevaCategory = ""
-                                nuevaSize = ""
-                                nuevaColor = ""
-                                nuevoStockPorTallaText = ""
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = camposCompletos
-                    ) {
-                        Text("Guardar Producto")
+                        OutlinedTextField(
+                            value = nuevaSize,
+                            onValueChange = { nuevaSize = it },
+                            label = { Text("Talla") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(Modifier.height(8.dp))
+
+                        OutlinedTextField(
+                            value = nuevaColor,
+                            onValueChange = { nuevaColor = it },
+                            label = { Text("Color") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(Modifier.height(8.dp))
+
+                        OutlinedTextField(
+                            value = nuevoStockPorTallaText,
+                            onValueChange = { nuevoStockPorTallaText = it },
+                            label = { Text("Stock por Talla (ej: S:10,M:5)") },
+                            modifier = Modifier.fillMaxWidth(),
+                            isError = nuevoStockPorTallaText.isNotBlank() && stockPorTallaParsed == null
+                        )
+                        if (nuevoStockPorTallaText.isNotBlank() && stockPorTallaParsed == null) {
+                            Text("Formato inválido. Usa talla:stock,talla:stock",
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                        Spacer(Modifier.height(8.dp))
+
+                        OutlinedTextField(
+                            value = nuevaImagen,
+                            onValueChange = { nuevaImagen = it },
+                            label = { Text("URL / Ruta de Imagen") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(Modifier.height(16.dp))
+
+                        Button(
+                            onClick = {
+                                if (precioDouble != null && stockPorTallaParsed != null) {
+                                    val nuevoProducto = Producto(
+                                        id = 0,
+                                        nombre = nuevoNombre,
+                                        descripcion = nuevaDescripcion,
+                                        precio = precioDouble,
+                                        categoria = nuevaCategory,
+                                        size = nuevaSize,
+                                        color = nuevaColor,
+                                        imagenUrl = nuevaImagen,
+                                        stockPorTalla = stockPorTallaParsed
+                                    )
+
+                                    viewModel.agregarProducto(nuevoProducto)
+
+                                    nuevoNombre = ""
+                                    nuevoPrecioText = ""
+                                    nuevaDescripcion = ""
+                                    nuevaImagen = ""
+                                    nuevaCategory = ""
+                                    nuevaSize = ""
+                                    nuevaColor = ""
+                                    nuevoStockPorTallaText = ""
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = camposCompletos
+                        ) {
+                            Text("Guardar Producto")
+                        }
                     }
                 }
             }
 
-            // ------------------- LISTA DE PRODUCTOS -------------------
-            Text("Productos en el Catálogo (${productosList.size})",
-                style = MaterialTheme.typography.titleLarge
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+            // ------------------- Título del Catálogo -------------------
+            item {
+                Text("Productos en el Catálogo (${productosList.size})",
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
 
+
+            // ------------------- LISTA DE PRODUCTOS -------------------
             if (productosList.isEmpty()) {
-                Text("No hay productos registrados.", color = MaterialTheme.colorScheme.error)
+                item {
+                    Text("No hay productos registrados.", color = MaterialTheme.colorScheme.error)
+                }
             } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth().weight(1f),
-                    contentPadding = PaddingValues(vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    items(productosList, key = { it.id }) { producto ->
-                        ProductoAdminItem(producto) {
-                            viewModel.eliminarProducto(producto.id)
-                        }
+                // Se utiliza 'items' del LazyColumn principal
+                items(productosList, key = { it.id }) { producto ->
+                    ProductoAdminItem(producto) {
+                        viewModel.eliminarProducto(producto.id)
                     }
                 }
             }
@@ -233,6 +241,7 @@ fun HomeAdmin(
     }
 }
 
+// ⚠️ Esta función se mantiene sin cambios
 @Composable
 fun ProductoAdminItem(producto: Producto, onDelete: () -> Unit) {
     Card(
