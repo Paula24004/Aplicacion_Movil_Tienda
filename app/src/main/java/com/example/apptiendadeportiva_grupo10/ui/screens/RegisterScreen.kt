@@ -6,8 +6,7 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -21,126 +20,113 @@ fun RegisterScreen(
     navController: NavHostController,
     authViewModel: AuthViewModel
 ) {
-    // Obtiene el estado actual del ViewModel
     val state = authViewModel.uiState
 
-    // Función de validación del RUT (copiada de su código anterior)
+    // Validación RUT
     fun rutValido(rut: String): Boolean {
-        // Limpia el RUT, permitiendo solo números y K/k
         val limpio = rut.replace("[^0-9Kk]".toRegex(), "")
-        // Cuerpo del RUT (todo menos el último dígito, que es el DV)
         val cuerpo = if (limpio.length > 1) limpio.dropLast(1) else return false
-        // El cuerpo debe ser solo números y la longitud total debe estar entre 7 y 8
         return cuerpo.matches(Regex("[0-9]+")) && limpio.length in 7..8
     }
 
-    // Comprueba la validez del RUT en tiempo real si ya se ha ingresado algo
-    val isRutValid = if (state.rut.isNotBlank()) rutValido(state.rut) else true
+    val rutEsValido = if (state.rut.isNotBlank()) rutValido(state.rut) else true
 
-    // El formulario está listo para enviarse si todos los campos están llenos y el RUT es válido
-    val formIsReady = state.username.isNotBlank() && state.email.isNotBlank() &&
-            state.password.isNotBlank() && isRutValid
+    val formularioListo =
+        state.username.isNotBlank() &&
+                state.email.isNotBlank() &&
+                state.password.isNotBlank() &&
+                rutEsValido
 
-    // Efecto para navegar después de un registro exitoso
+    // navegación al iniciar sesión
     LaunchedEffect(state.registrationSuccess) {
         if (state.registrationSuccess) {
-            // Navega a la pantalla principal/catálogo
-            navController.navigate("catalogo") {
-                // Limpia el back stack para que el usuario no pueda volver a registro
+            navController.navigate("login") {
                 popUpTo("register") { inclusive = true }
             }
         }
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("Registro de Usuario") })
-        }
-    ) { paddingValues ->
+        topBar = { TopAppBar(title = { Text("Registro de Usuario") }) }
+    ) { padding ->
         Column(
             modifier = Modifier
+                .padding(padding)
                 .fillMaxSize()
-                .padding(paddingValues)
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text("Crea tu cuenta", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(bottom = 32.dp))
+            Text("Crea tu cuenta", style = MaterialTheme.typography.headlineMedium)
 
-            // Campo Email
+            Spacer(Modifier.height(24.dp))
+
+            // Email
             OutlinedTextField(
                 value = state.email,
                 onValueChange = authViewModel::updateEmail,
                 label = { Text("Email") },
-                leadingIcon = { Icon(Icons.Filled.Email, contentDescription = "Email") },
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                isError = state.errorMessage != null && state.email.isBlank()
+                leadingIcon = { Icon(Icons.Filled.Email, null) },
+                modifier = Modifier.fillMaxWidth()
             )
 
-            // Campo Nombre de Usuario
+            Spacer(Modifier.height(12.dp))
+
+            // Usuario
             OutlinedTextField(
                 value = state.username,
                 onValueChange = authViewModel::updateUsername,
                 label = { Text("Nombre de Usuario") },
-                leadingIcon = { Icon(Icons.Filled.Person, contentDescription = "Usuario") },
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                isError = state.errorMessage != null && state.username.isBlank()
+                leadingIcon = { Icon(Icons.Filled.Person, null) },
+                modifier = Modifier.fillMaxWidth()
             )
 
-            // Campo RUT
+            Spacer(Modifier.height(12.dp))
+
+            // RUT
             OutlinedTextField(
                 value = state.rut,
                 onValueChange = authViewModel::updateRut,
                 label = { Text("RUT (sin DV)") },
-                leadingIcon = { Icon(Icons.Filled.Person, contentDescription = "RUT") },
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                // Muestra error si el RUT está incorrecto Y no está vacío, o si está vacío y hay un error general
-                isError = !isRutValid && state.rut.isNotBlank() || (state.errorMessage != null && state.rut.isBlank()),
-                supportingText = {
-                    if (!isRutValid && state.rut.isNotBlank()) {
-                        Text("RUT inválido (ingrese sin dígito verificador)", color = MaterialTheme.colorScheme.error)
-                    }
-                }
+                isError = !rutEsValido && state.rut.isNotBlank(),
+                leadingIcon = { Icon(Icons.Filled.Person, null) },
+                modifier = Modifier.fillMaxWidth()
             )
+            if (!rutEsValido && state.rut.isNotBlank()) {
+                Text("RUT inválido", color = MaterialTheme.colorScheme.error)
+            }
 
-            // Campo Contraseña
+            Spacer(Modifier.height(12.dp))
+
+            // Password
             OutlinedTextField(
                 value = state.password,
                 onValueChange = authViewModel::updatePassword,
                 label = { Text("Contraseña") },
-                leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = "Contraseña") },
                 visualTransformation = PasswordVisualTransformation(),
-                modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
-                isError = state.errorMessage != null && state.password.isBlank()
+                leadingIcon = { Icon(Icons.Filled.Lock, null) },
+                modifier = Modifier.fillMaxWidth()
             )
 
-            // Botón de Registro
+            Spacer(Modifier.height(24.dp))
+
+            // Botón registrar
             Button(
-                onClick = authViewModel::registrar, // Llama a la lógica de registro en el ViewModel
-                modifier = Modifier.fillMaxWidth().height(50.dp),
-                enabled = !state.isLoading && formIsReady // Se deshabilita mientras carga o si el formulario no está listo
+                onClick = authViewModel::registrar,
+                enabled = formularioListo,
+                modifier = Modifier.fillMaxWidth().height(48.dp)
             ) {
-                if (state.isLoading) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
-                } else {
-                    Text("Registrarse")
-                }
+                Text("Registrarse")
             }
 
-            // Mostrar mensaje de error del ViewModel
-            state.errorMessage?.let { message ->
-                Text(
-                    text = message,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(top = 16.dp)
-                )
+            // Mensaje error
+            state.errorMessage?.let {
+                Text(it, color = MaterialTheme.colorScheme.error)
             }
 
-            // Link para ir a Login
-            TextButton(
-                onClick = { navController.navigate("login") },
-                modifier = Modifier.padding(top = 8.dp)
-            ) {
+            Spacer(Modifier.height(12.dp))
+
+            TextButton(onClick = { navController.navigate("login") }) {
                 Text("¿Ya tienes cuenta? Inicia sesión")
             }
         }

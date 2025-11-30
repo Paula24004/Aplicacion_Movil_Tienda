@@ -27,10 +27,9 @@ fun LoginScreen(
     onNavigateToRegister: () -> Unit,
     viewModel: AuthViewModel
 ) {
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
 
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     val loginMessage by viewModel.mensaje
 
     Scaffold(
@@ -57,16 +56,16 @@ fun LoginScreen(
             // Imagen de fondo
             Image(
                 painter = painterResource(id = R.drawable.fondo_login),
-                contentDescription = "Fondo de login",
+                contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
 
-            // Capa oscura para mejorar contraste
+            // Sombra oscura encima
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.4f))
+                    .background(Color.Black.copy(alpha = 0.45f))
             )
 
             Column(
@@ -76,6 +75,7 @@ fun LoginScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+
                 Text(
                     "Tienda Deportiva",
                     style = MaterialTheme.typography.headlineMedium.copy(
@@ -85,147 +85,46 @@ fun LoginScreen(
                     textAlign = TextAlign.Center
                 )
 
-                Spacer(Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-                // Usuario
-                OutlinedTextField(
-                    value = username,
-                    onValueChange = { username = it },
-                    label = { Text("Usuario") },
-                    textStyle = TextStyle(color = Color.White, fontWeight = FontWeight.Bold),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        disabledTextColor = Color.White.copy(alpha = 0.5f),
-                        errorTextColor = Color.White,
-
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent,
-                        errorContainerColor = Color.Transparent,
-
-                        cursorColor = Color.White,
-                        errorCursorColor = Color.White,
-                        selectionColors = TextSelectionColors(
-                            handleColor = Color.White,
-                            backgroundColor = Color.White.copy(alpha = 0.3f)
-                        ),
-
-                        focusedBorderColor = Color.White,
-                        unfocusedBorderColor = Color.White.copy(alpha = 0.4f),
-                        disabledBorderColor = Color.White.copy(alpha = 0.2f),
-                        errorBorderColor = Color.Red,
-
-                        focusedLabelColor = Color.White,
-                        unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
-                        disabledLabelColor = Color.White.copy(alpha = 0.5f),
-                        errorLabelColor = Color.Red,
-
-                        focusedPlaceholderColor = Color.White.copy(alpha = 0.6f),
-                        unfocusedPlaceholderColor = Color.White.copy(alpha = 0.6f),
-                        disabledPlaceholderColor = Color.White.copy(alpha = 0.4f),
-                        errorPlaceholderColor = Color.White.copy(alpha = 0.6f)
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(Modifier.height(12.dp))
-
-                // Email
+                //-------------------------------------------------
+                //                CAMPO EMAIL
+                //-------------------------------------------------
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
                     label = { Text("Email") },
                     textStyle = TextStyle(color = Color.White, fontWeight = FontWeight.Bold),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        disabledTextColor = Color.White.copy(alpha = 0.5f),
-                        errorTextColor = Color.White,
-
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent,
-                        errorContainerColor = Color.Transparent,
-
-                        cursorColor = Color.White,
-                        errorCursorColor = Color.White,
-                        selectionColors = TextSelectionColors(
-                            handleColor = Color.White,
-                            backgroundColor = Color.White.copy(alpha = 0.3f)
-                        ),
-
-                        focusedBorderColor = Color.White,
-                        unfocusedBorderColor = Color.White.copy(alpha = 0.4f),
-                        disabledBorderColor = Color.White.copy(alpha = 0.2f),
-                        errorBorderColor = Color.Red,
-
-                        focusedLabelColor = Color.White,
-                        unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
-                        disabledLabelColor = Color.White.copy(alpha = 0.5f),
-                        errorLabelColor = Color.Red,
-
-                        focusedPlaceholderColor = Color.White.copy(alpha = 0.6f),
-                        unfocusedPlaceholderColor = Color.White.copy(alpha = 0.6f),
-                        disabledPlaceholderColor = Color.White.copy(alpha = 0.4f),
-                        errorPlaceholderColor = Color.White.copy(alpha = 0.6f)
-                    ),
+                    singleLine = true,
+                    colors = loginFieldColors(),
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Spacer(Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-                // Contraseña
+                //-------------------------------------------------
+                //               CAMPO PASSWORD
+                //-------------------------------------------------
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
                     label = { Text("Contraseña") },
                     visualTransformation = PasswordVisualTransformation(),
                     textStyle = TextStyle(color = Color.White, fontWeight = FontWeight.Bold),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        disabledTextColor = Color.White.copy(alpha = 0.5f),
-                        errorTextColor = Color.White,
-
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent,
-                        errorContainerColor = Color.Transparent,
-
-                        cursorColor = Color.White,
-                        errorCursorColor = Color.White,
-                        selectionColors = TextSelectionColors(
-                            handleColor = Color.White,
-                            backgroundColor = Color.White.copy(alpha = 0.3f)
-                        ),
-
-                        focusedBorderColor = Color.White,
-                        unfocusedBorderColor = Color.White.copy(alpha = 0.4f),
-                        disabledBorderColor = Color.White.copy(alpha = 0.2f),
-                        errorBorderColor = Color.Red,
-
-                        focusedLabelColor = Color.White,
-                        unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
-                        disabledLabelColor = Color.White.copy(alpha = 0.5f),
-                        errorLabelColor = Color.Red,
-
-                        focusedPlaceholderColor = Color.White.copy(alpha = 0.6f),
-                        unfocusedPlaceholderColor = Color.White.copy(alpha = 0.6f),
-                        disabledPlaceholderColor = Color.White.copy(alpha = 0.4f),
-                        errorPlaceholderColor = Color.White.copy(alpha = 0.6f)
-                    ),
+                    singleLine = true,
+                    colors = loginFieldColors(),
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Spacer(Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
+                //-------------------------------------------------
+                //               BOTÓN LOGIN
+                //-------------------------------------------------
                 Button(
                     onClick = {
-                        val loginExitoso = viewModel.login(email, password)
-                        if (loginExitoso) {
-                            onLoginSuccess()
-                        }
+                        val ok = viewModel.login(email, password)
+                        if (ok) onLoginSuccess()
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -243,8 +142,11 @@ fun LoginScreen(
                     )
                 }
 
-                Spacer(Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
+                //-------------------------------------------------
+                //         BOTÓN DE NAVEGACIÓN A REGISTRO
+                //-------------------------------------------------
                 TextButton(onClick = onNavigateToRegister) {
                     Text(
                         "Registrarse",
@@ -253,14 +155,35 @@ fun LoginScreen(
                     )
                 }
 
+                //-------------------------------------------------
+                //          MENSAJE DE LOGIN
+                //-------------------------------------------------
                 if (loginMessage.isNotBlank()) {
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         loginMessage,
-                        color = Color.White
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Center
                     )
                 }
             }
         }
     }
 }
+
+// PERSONALIZACIÓN DE ESTILOS DE CAMPOS
+@Composable
+private fun loginFieldColors() = OutlinedTextFieldDefaults.colors(
+    focusedTextColor = Color.White,
+    unfocusedTextColor = Color.White,
+    focusedBorderColor = Color.White,
+    unfocusedBorderColor = Color.White.copy(alpha = 0.5f),
+    focusedLabelColor = Color.White,
+    unfocusedLabelColor = Color.White.copy(alpha = 0.6f),
+    cursorColor = Color.White,
+    selectionColors = TextSelectionColors(
+        handleColor = Color.White,
+        backgroundColor = Color.White.copy(alpha = 0.3f)
+    )
+)

@@ -1,7 +1,8 @@
 package com.example.apptiendadeportiva_grupo10.model
+
 fun ProductoDto.toEntity(): ProductoEntity {
     return ProductoEntity(
-        id = this.id,
+        id = this.id ?: 0,
         nombre = this.nombre ?: "Nombre Desconocido",
         descripcion = this.descripcion ?: "Sin descripción",
         precio = this.precio,
@@ -9,28 +10,13 @@ fun ProductoDto.toEntity(): ProductoEntity {
         size = this.size ?: "Sin talla",
         color = this.color ?: "Sin color",
         imagenUrl = this.imagenUrl,
-        stockPorTalla= this.stockPorTalla
-    )
-}
-fun ProductoEntity.toDto(): ProductoDto {
-    return ProductoDto(
-        id = this.id,
-        nombre = this.nombre,
-        descripcion = this.descripcion,
-        precio = this.precio,
-        categoria = this.categoria,
-        size = this.size,
-        color = this.color,
-        imagenUrl = this.imagenUrl,
-        stockPorTalla= this.stockPorTalla
+        stockPorTalla = this.stockPorTalla
     )
 }
 
-fun Producto.toEntity(): ProductoEntity {
-    // Usamos el operador Elvis (?:) ya que el precio en Producto es no nulo (Double),
-    // pero la entidad de Room (ProductoEntity) lo acepta como nullable (Double?)
-    return ProductoEntity(
-        id = this.id,
+fun ProductoEntity.toDto(): ProductoDto {
+    return ProductoDto(
+        id = if (this.id == 0) null else this.id, // API genera ID
         nombre = this.nombre,
         descripcion = this.descripcion,
         precio = this.precio,
@@ -44,10 +30,7 @@ fun Producto.toEntity(): ProductoEntity {
 
 fun Producto.toDto(): ProductoDto {
     return ProductoDto(
-        // Al enviar un nuevo producto, el ID puede ser el que tiene actualmente (aunque el servidor
-        // debe ignorarlo y asignar uno nuevo) o puedes pasarlo como 0/null si el DTO lo permite.
-        id = this.id,
-        // Los campos de dominio (Producto) son en su mayoría no nulos, por lo que se pasan directamente.
+        id = if (this.id == 0) null else this.id,
         nombre = this.nombre,
         descripcion = this.descripcion,
         precio = this.precio,
@@ -57,4 +40,4 @@ fun Producto.toDto(): ProductoDto {
         imagenUrl = this.imagenUrl,
         stockPorTalla = this.stockPorTalla
     )
-    }
+}

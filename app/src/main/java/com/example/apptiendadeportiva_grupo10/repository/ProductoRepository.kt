@@ -8,28 +8,28 @@ import com.example.apptiendadeportiva_grupo10.model.ProductoEntity
 import com.example.apptiendadeportiva_grupo10.model.toEntity
 import com.example.apptiendadeportiva_grupo10.model.toDto
 import com.example.apptiendadeportiva_grupo10.api.ProductApiService
-
-
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 class ProductoRepository(
     private val api: ProductApiService = RetrofitClient.apiService
 ) {
 
-    suspend fun getProductos(context: Context): List<ProductoEntity> {
-
+    // Cambiado a Flow para compatibilidad con ViewModel (emite lista de ProductoEntity)
+    fun getProductos(context: Context): Flow<List<ProductoEntity>> = flow {
         val db = AppDatabase.getInstance(context)
         val dao = db.productoDao()
 
-        return try {
+        try {
             val dtoList = api.getProducts()
             val entities = dtoList.map { it.toEntity() }
 
-            dao.insertAll(entities)
-            entities
-
+            dao.insertAll(entities)  // Actualiza cache en Room
+            emit(entities)  // Emite desde API
         } catch (e: Exception) {
             e.printStackTrace()
-            dao.getAll()
+            // Fallback a Room si API falla
+            emit(dao.getAll())
         }
     }
 
@@ -50,14 +50,15 @@ class ProductoRepository(
 
     /**
      * Inserta un nuevo producto: 1. API (POST), 2. Room (Local)
+     * Cambiado a Result<Unit> para manejar éxito/error
      */
-    suspend fun insertProducto(context: Context, producto: Producto) {
+    suspend fun insertProducto(context: Context, producto: Producto): Result<Unit> {
         val db = AppDatabase.getInstance(context)
         val dao = db.productoDao()
 
         val productoDtoParaEnvio = producto.toDto()
 
-        try {
+        return try {
             val response = api.createProduct(productoDtoParaEnvio)
 
             if (response.isSuccessful && response.body() != null) {
@@ -65,32 +66,41 @@ class ProductoRepository(
                 val productoDtoCreado = response.body()!!
                 val productoEntity = productoDtoCreado.toEntity()
                 dao.insert(productoEntity)
-
+                Result.success(Unit)
             } else {
-
-                println(
-                    "Error al crear producto en el API: ${response.code()}. Respuesta: ${
-                        response.errorBody()?.string()
-                    }"
-                )
+                Result.failure(Exception("Error al crear producto en el API: ${response.code()}. Respuesta: ${response.errorBody()?.string()}"))
             }
         } catch (e: Exception) {
-
-            println("Error de red al crear producto: ${e.message}")
-            e.printStackTrace()
+            Result.failure(Exception("Error de red al crear producto: ${e.message}"))
         }
     }
 
-    suspend fun deleteProducto(context: Context, id: Int) {
+    /**
+     * Elimina un producto: 1. API (DELETE), 2. Room (Local)
+     * Cambiado a Result<Unit> para manejar éxito/error
+     */
+    suspend fun deleteProducto(context: Context, id: Int): Result<Unit> {
         val db = AppDatabase.getInstance(context)
         val dao = db.productoDao()
-        dao.deleteById(id)
-    }
 
+        return try {
+            val response = api.deleteProduct(id)  // ¡AGREGADO! Llama a DELETE en API
+
+            if (response.isSuccessful) {
+                // ÉXITO: Elimina de Room
+                dao.deleteById(id)
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Error al eliminar producto en el API: ${response.code()}. Respuesta: ${response.errorBody()?.string()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(Exception("Error de red al eliminar producto: ${e.message}"))
+        }
+    }
 
     suspend fun getProductosSoloAPI(): List<ProductoEntity> {
         val dtoList = api.getProducts()
         return dtoList.map { it.toEntity() }
     }
-
 }
+

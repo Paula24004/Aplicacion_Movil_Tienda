@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 
 class CatalogoViewModel(
     private val repo: ProductoRepository = ProductoRepository()
@@ -29,8 +30,9 @@ class CatalogoViewModel(
             _loading.value = true
             _error.value = null
             try {
-                val list = repo.getProductos(context)
-                _productos.value = list
+                repo.getProductos(context).collect { lista ->
+                    _productos.value = lista
+                }
             } catch (e: Exception) {
                 _error.value = e.message ?: "Error desconocido"
             } finally {
@@ -38,6 +40,7 @@ class CatalogoViewModel(
             }
         }
     }
+
     suspend fun getProductoById(context: Context, id: Int): ProductoEntity? {
         return withContext(Dispatchers.IO) {
             repo.getProductoPorId(context, id)

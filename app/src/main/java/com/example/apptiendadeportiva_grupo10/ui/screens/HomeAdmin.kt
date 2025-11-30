@@ -33,12 +33,12 @@ fun HomeAdmin(
     var nuevaCategory by remember { mutableStateOf("") }
     var nuevaSize by remember { mutableStateOf("") }
     var nuevaColor by remember { mutableStateOf("") }
-    var nuevoStockPorTallaText by remember { mutableStateOf("") }  // Para stock por talla (e.g., "S:10,M:5")
+    var nuevoStockPorTallaText by remember { mutableStateOf("") }
 
     val productosList by viewModel.listaProductos
     val precioDouble = nuevoPrecioText.toDoubleOrNull()
 
-    // Función para parsear el stock por talla (e.g., "S:10,M:5" -> mapOf("S" to 10, "M" to 5))
+    // Convierte "S:10,M:5" en un Map<String, Int>
     fun parseStockPorTalla(text: String): Map<String, Int>? {
         if (text.isBlank()) return null
         val map = mutableMapOf<String, Int>()
@@ -50,19 +50,15 @@ fun HomeAdmin(
                 val stock = parts[1].trim().toIntOrNull()
                 if (talla.isNotBlank() && stock != null && stock >= 0) {
                     map[talla] = stock
-                } else {
-                    return null  // Invalid format
-                }
-            } else {
-                return null  // Invalid format
-            }
+                } else return null
+            } else return null
         }
-        return if (map.isNotEmpty()) map else null
+        return map.takeIf { it.isNotEmpty() }
     }
 
     val stockPorTallaParsed = parseStockPorTalla(nuevoStockPorTallaText)
 
-    // Validación completa: incluye todos los campos y stock por talla válido
+    // Validación completa
     val camposCompletos = nuevoNombre.isNotBlank() &&
             nuevoPrecioText.isNotBlank() &&
             nuevaDescripcion.isNotBlank() &&
@@ -80,9 +76,7 @@ fun HomeAdmin(
             TopAppBar(
                 title = { Text("Panel Administrador") },
                 actions = {
-                    Button(onClick = onLogout) {
-                        Text("Cerrar Sesión")
-                    }
+                    Button(onClick = onLogout) { Text("Cerrar Sesión") }
                 }
             )
         }
@@ -94,10 +88,11 @@ fun HomeAdmin(
                 .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
             Text("Gestión de Productos", style = MaterialTheme.typography.headlineMedium)
             Spacer(modifier = Modifier.height(24.dp))
 
-            // --- SECCIÓN PARA AGREGAR PRODUCTO ---
+            // ------------------- AGREGAR PRODUCTO -------------------
             Card(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -106,17 +101,14 @@ fun HomeAdmin(
                     Text("Agregar Nuevo Producto", style = MaterialTheme.typography.titleLarge)
                     Spacer(Modifier.height(8.dp))
 
-                    // Nombre del Producto
                     OutlinedTextField(
                         value = nuevoNombre,
                         onValueChange = { nuevoNombre = it },
                         label = { Text("Nombre del Producto") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(Modifier.height(8.dp))
 
-                    // Descripción del Producto
                     OutlinedTextField(
                         value = nuevaDescripcion,
                         onValueChange = { nuevaDescripcion = it },
@@ -125,29 +117,23 @@ fun HomeAdmin(
                     )
                     Spacer(Modifier.height(8.dp))
 
-                    // Precio
                     OutlinedTextField(
                         value = nuevoPrecioText,
-                        onValueChange = {
-                            nuevoPrecioText = it.filter { char -> char.isDigit() || char == '.' }
-                        },
-                        label = { Text("Precio (número decimal)") },
+                        onValueChange = { nuevoPrecioText = it.filter { ch -> ch.isDigit() || ch == '.' } },
+                        label = { Text("Precio (decimal)") },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                     )
                     Spacer(Modifier.height(8.dp))
 
-                    // Categoria
                     OutlinedTextField(
                         value = nuevaCategory,
                         onValueChange = { nuevaCategory = it },
-                        label = { Text("Categoria") },
+                        label = { Text("Categoría") },
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(Modifier.height(8.dp))
 
-                    // Talla
                     OutlinedTextField(
                         value = nuevaSize,
                         onValueChange = { nuevaSize = it },
@@ -156,7 +142,6 @@ fun HomeAdmin(
                     )
                     Spacer(Modifier.height(8.dp))
 
-                    // Color
                     OutlinedTextField(
                         value = nuevaColor,
                         onValueChange = { nuevaColor = it },
@@ -165,37 +150,34 @@ fun HomeAdmin(
                     )
                     Spacer(Modifier.height(8.dp))
 
-                    // Stock por Talla (formato: "S:10,M:5,L:8")
                     OutlinedTextField(
                         value = nuevoStockPorTallaText,
                         onValueChange = { nuevoStockPorTallaText = it },
                         label = { Text("Stock por Talla (ej: S:10,M:5)") },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        isError = nuevoStockPorTallaText.isNotBlank() && stockPorTallaParsed == null  // Muestra error si formato inválido
+                        isError = nuevoStockPorTallaText.isNotBlank() && stockPorTallaParsed == null
                     )
                     if (nuevoStockPorTallaText.isNotBlank() && stockPorTallaParsed == null) {
-                        Text("Formato inválido. Usa 'talla:stock,talla:stock'", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                        Text("Formato inválido. Usa talla:stock,talla:stock",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
                     }
                     Spacer(Modifier.height(8.dp))
 
-                    // URL/Ruta de Imagen
                     OutlinedTextField(
                         value = nuevaImagen,
                         onValueChange = { nuevaImagen = it },
-                        label = { Text("Ruta/URL de Imagen") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
+                        label = { Text("URL / Ruta de Imagen") },
+                        modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(Modifier.height(16.dp))
 
                     Button(
                         onClick = {
-                            if (camposCompletos && precioDouble != null && stockPorTallaParsed != null) {
-                                val nuevoId = (productosList.maxOfOrNull { it.id } ?: 0) + 1
-
+                            if (precioDouble != null && stockPorTallaParsed != null) {
                                 val nuevoProducto = Producto(
-                                    id = nuevoId,
+                                    id = 0, // ⬅️ IMPORTANTE: El backend genera el ID
                                     nombre = nuevoNombre,
                                     descripcion = nuevaDescripcion,
                                     precio = precioDouble,
@@ -205,9 +187,9 @@ fun HomeAdmin(
                                     imagenUrl = nuevaImagen,
                                     stockPorTalla = stockPorTallaParsed
                                 )
+
                                 viewModel.agregarProducto(nuevoProducto)
 
-                                // Limpiar todos los campos
                                 nuevoNombre = ""
                                 nuevoPrecioText = ""
                                 nuevaDescripcion = ""
@@ -226,12 +208,14 @@ fun HomeAdmin(
                 }
             }
 
-            // --- SECCIÓN PARA LISTAR Y ELIMINAR ---
-            Text("Productos en el Catálogo (${productosList.size})", style = MaterialTheme.typography.titleLarge)
+            // ------------------- LISTA DE PRODUCTOS -------------------
+            Text("Productos en el Catálogo (${productosList.size})",
+                style = MaterialTheme.typography.titleLarge
+            )
             Spacer(modifier = Modifier.height(8.dp))
 
             if (productosList.isEmpty()) {
-                Text("No hay productos en el catálogo.", color = MaterialTheme.colorScheme.error)
+                Text("No hay productos registrados.", color = MaterialTheme.colorScheme.error)
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth().weight(1f),
@@ -239,10 +223,9 @@ fun HomeAdmin(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     items(productosList, key = { it.id }) { producto ->
-                        ProductoAdminItem(
-                            producto = producto,
-                            onDelete = { viewModel.eliminarProducto(producto.id) }
-                        )
+                        ProductoAdminItem(producto) {
+                            viewModel.eliminarProducto(producto.id)
+                        }
                     }
                 }
             }
@@ -250,7 +233,6 @@ fun HomeAdmin(
     }
 }
 
-// Composable auxiliar para cada elemento de la lista de productos
 @Composable
 fun ProductoAdminItem(producto: Producto, onDelete: () -> Unit) {
     Card(
@@ -258,43 +240,21 @@ fun ProductoAdminItem(producto: Producto, onDelete: () -> Unit) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = producto.nombre ?: "Producto Desconocido",
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Text(
-                    text = "ID: ${producto.id} | Precio: $${String.format("%,.2f", producto.precio)}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.secondary
-                )
-                Text(
-                    text = "Categoría: ${producto.categoria ?: "N/A"} | Talla: ${producto.size ?: "N/A"} | Color: ${producto.color ?: "N/A"}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.secondary
-                )
-                Text(
-                    text = "Stock: ${producto.stockPorTalla?.entries?.joinToString { "${it.key}: ${it.value}" } ?: "N/A"}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.secondary
-                )
+                Text(producto.nombre, fontWeight = FontWeight.Bold)
+                Text("ID: ${producto.id} | Precio: $${String.format("%,.2f", producto.precio)}")
+                Text("Categoría: ${producto.categoria} | Talla: ${producto.size} | Color: ${producto.color}")
+                Text("Stock: ${producto.stockPorTalla?.entries?.joinToString { "${it.key}: ${it.value}" }}")
             }
 
-            // Botón de Eliminación
             IconButton(onClick = onDelete) {
-                Icon(
-                    imageVector = Icons.Filled.Delete,
-                    contentDescription = "Eliminar Producto",
-                    tint = MaterialTheme.colorScheme.error
-                )
+                Icon(Icons.Filled.Delete, contentDescription = "Eliminar", tint = MaterialTheme.colorScheme.error)
             }
         }
     }
 }
+

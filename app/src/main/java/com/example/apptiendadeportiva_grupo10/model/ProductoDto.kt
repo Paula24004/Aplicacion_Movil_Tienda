@@ -3,7 +3,7 @@ package com.example.apptiendadeportiva_grupo10.model
 import com.google.gson.annotations.SerializedName
 
 data class ProductoDto(
-    val id: Int,
+    val id: Int? = null,
     @SerializedName("name")
     val nombre: String?,
     @SerializedName("description")

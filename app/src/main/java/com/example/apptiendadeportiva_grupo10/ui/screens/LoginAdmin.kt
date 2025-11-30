@@ -31,24 +31,20 @@ fun LoginAdmin(
     var usernameAdmin by remember { mutableStateOf("") }
     var passwordAdmin by remember { mutableStateOf("") }
 
-    val loginMessageAdmin by viewModel.mensajeadmin
+    // Mensaje del ViewModel
+    val mensajeAdmin by viewModel.mensajeadmin
 
-    // CORRECCIÓN: Se consume directamente el StateFlow del ViewModel.
-    // NO se llama a la función loginAdminAuth() aquí.
-    val esAdminLogueadoState = viewModel.esAdminLogueado.collectAsState()
+    // Estado booleano del login
+    val esAdminLogueado by viewModel.esAdminLogueado.collectAsState()
 
-    // --- EFECTO DE NAVEGACIÓN ---
-    // Este efecto se dispara cada vez que esAdminLogueadoState.value cambia.
-    LaunchedEffect(esAdminLogueadoState.value) {
-        // Accedemos al valor con .value
-        if (esAdminLogueadoState.value == true) {
+    // EFECTO DE NAVEGACIÓN AL PANEL
+    LaunchedEffect(esAdminLogueado) {
+        if (esAdminLogueado == true) {
             navController.navigate("admin_panel") {
-                // Esto limpia la pila de navegación para que el usuario no pueda volver al login con el botón de retroceso.
                 popUpTo("admin_iniciar") { inclusive = true }
             }
         }
     }
-    // ----------------------------
 
     Scaffold(
         topBar = {
@@ -71,10 +67,9 @@ fun LoginAdmin(
                 .padding(innerPadding)
                 .fillMaxSize()
         ) {
-            // Asegúrate de que R.drawable.fondo_login existe
             Image(
                 painter = painterResource(id = R.drawable.fondo_login),
-                contentDescription = "Fondo de login admin",
+                contentDescription = "Fondo login admin",
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
@@ -82,7 +77,7 @@ fun LoginAdmin(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.4f))
+                    .background(Color.Black.copy(alpha = 0.45f))
             )
 
             Column(
@@ -92,6 +87,7 @@ fun LoginAdmin(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+
                 Text(
                     "Panel Administrador",
                     style = MaterialTheme.typography.headlineMedium.copy(
@@ -105,29 +101,36 @@ fun LoginAdmin(
 
                 OutlinedTextField(
                     value = usernameAdmin,
-                    onValueChange = { usernameAdmin = it },
+                    onValueChange = {
+                        usernameAdmin = it
+                        viewModel.mensajeadmin.value = "" // Limpia mensaje al escribir
+                    },
                     label = { Text("Usuario Administrador") },
+                    singleLine = true,
                     textStyle = TextStyle(color = Color.White, fontWeight = FontWeight.Bold),
-                    colors = adminFieldColors(),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = adminFieldColors()
                 )
 
                 Spacer(Modifier.height(12.dp))
 
                 OutlinedTextField(
                     value = passwordAdmin,
-                    onValueChange = { passwordAdmin = it },
+                    onValueChange = {
+                        passwordAdmin = it
+                        viewModel.mensajeadmin.value = ""
+                    },
                     label = { Text("Contraseña") },
                     visualTransformation = PasswordVisualTransformation(),
+                    singleLine = true,
                     textStyle = TextStyle(color = Color.White, fontWeight = FontWeight.Bold),
-                    colors = adminFieldColors(),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = adminFieldColors()
                 )
 
                 Spacer(Modifier.height(24.dp))
 
                 Button(
-                    // CORRECCIÓN: Llamamos a loginAdminAuth() del ViewModel
                     onClick = {
                         viewModel.loginAdminAuth(usernameAdmin, passwordAdmin)
                     },
@@ -146,17 +149,15 @@ fun LoginAdmin(
                 Spacer(Modifier.height(12.dp))
 
                 TextButton(onClick = onNavigateToRegister) {
-                    Text("Registrarse como Administrador", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text("Registrarse como Administrador", color = Color.White)
                 }
 
-                if (loginMessageAdmin.isNotBlank()) {
+                if (mensajeAdmin.isNotBlank()) {
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        text = loginMessageAdmin,
-                        color = if (esAdminLogueadoState.value == true) // Usamos el StateFlow para la lógica de color
-                            MaterialTheme.colorScheme.primary
-                        else
-                            Color.White
+                        mensajeAdmin,
+                        color = if (esAdminLogueado == true) Color.Green else Color.Red,
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
@@ -168,33 +169,15 @@ fun LoginAdmin(
 private fun adminFieldColors() = OutlinedTextFieldDefaults.colors(
     focusedTextColor = Color.White,
     unfocusedTextColor = Color.White,
-    disabledTextColor = Color.White.copy(alpha = 0.5f),
-    errorTextColor = Color.White,
-
-    focusedContainerColor = Color.Transparent,
-    unfocusedContainerColor = Color.Transparent,
-    disabledContainerColor = Color.Transparent,
-    errorContainerColor = Color.Transparent,
-
     cursorColor = Color.White,
-    errorCursorColor = Color.White,
+    focusedBorderColor = Color.White,
+    unfocusedBorderColor = Color.White.copy(alpha = 0.4f),
+    focusedLabelColor = Color.White,
+    unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
     selectionColors = TextSelectionColors(
         handleColor = Color.White,
         backgroundColor = Color.White.copy(alpha = 0.3f)
     ),
-
-    focusedBorderColor = Color.White,
-    unfocusedBorderColor = Color.White.copy(alpha = 0.4f),
-    disabledBorderColor = Color.White.copy(alpha = 0.2f),
-    errorBorderColor = Color.Red,
-
-    focusedLabelColor = Color.White,
-    unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
-    disabledLabelColor = Color.White.copy(alpha = 0.5f),
-    errorLabelColor = Color.Red,
-
-    focusedPlaceholderColor = Color.White.copy(alpha = 0.6f),
-    unfocusedPlaceholderColor = Color.White.copy(alpha = 0.6f),
-    disabledPlaceholderColor = Color.White.copy(alpha = 0.4f),
-    errorPlaceholderColor = Color.White.copy(alpha = 0.6f)
+    focusedContainerColor = Color.Transparent,
+    unfocusedContainerColor = Color.Transparent
 )
