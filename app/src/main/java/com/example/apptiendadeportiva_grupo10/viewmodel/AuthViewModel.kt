@@ -14,9 +14,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-// ===================================================
+
 // ESTADO PARA USUARIOS NORMALES
-// ===================================================
 data class AuthUiState(
     val username: String = "",
     val email: String = "",
@@ -81,7 +80,6 @@ class AuthViewModel(
 
     // ---------------------------------------------------
     // LOGIN Y REGISTRO ADMINISTRADOR
-    // ---------------------------------------------------
     val mensajeadmin = mutableStateOf("")
     private val _esAdminLogueado = MutableStateFlow(false)
     val esAdminLogueado: StateFlow<Boolean> = _esAdminLogueado

@@ -102,9 +102,7 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                //-------------------------------------------------
                 //               CAMPO PASSWORD
-                //-------------------------------------------------
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
@@ -118,9 +116,7 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                //-------------------------------------------------
-                //               BOTÓN LOGIN
-                //-------------------------------------------------
+                //           BOTÓN LOGIN
                 Button(
                     onClick = {
                         val ok = viewModel.login(email, password)
@@ -144,9 +140,7 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                //-------------------------------------------------
-                //         BOTÓN DE NAVEGACIÓN A REGISTRO
-                //-------------------------------------------------
+                //BOTÓN DE NAVEGACIÓN A REGISTRO
                 TextButton(onClick = onNavigateToRegister) {
                     Text(
                         "Registrarse",

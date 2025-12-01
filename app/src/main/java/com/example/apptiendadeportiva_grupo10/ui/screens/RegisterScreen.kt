@@ -40,7 +40,7 @@ fun RegisterScreen(
     // navegación al iniciar sesión
     LaunchedEffect(state.registrationSuccess) {
         if (state.registrationSuccess) {
-            navController.navigate("login") {
+            navController.navigate("catalogo") {
                 popUpTo("register") { inclusive = true }
             }
         }
