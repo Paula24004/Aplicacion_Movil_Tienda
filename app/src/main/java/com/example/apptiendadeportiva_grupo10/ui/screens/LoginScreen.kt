@@ -27,7 +27,6 @@ fun LoginScreen(
     onNavigateToRegister: () -> Unit,
     viewModel: AuthViewModel
 ) {
-
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val loginMessage by viewModel.mensaje
@@ -35,25 +34,14 @@ fun LoginScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(
-                        "Iniciar Sesión",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
+                title = { Text("Iniciar Sesión", color = Color.White, fontWeight = FontWeight.Bold) },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
             )
         }
     ) { innerPadding ->
         Box(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
+            modifier = Modifier.padding(innerPadding).fillMaxSize()
         ) {
-            // Imagen de fondo
             Image(
                 painter = painterResource(id = R.drawable.fondo_login),
                 contentDescription = null,
@@ -61,21 +49,15 @@ fun LoginScreen(
                 contentScale = ContentScale.Crop
             )
 
-            // Sombra oscura encima
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.45f))
+                modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.45f))
             )
 
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(24.dp),
+                modifier = Modifier.fillMaxSize().padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-
                 Text(
                     "Tienda Deportiva",
                     style = MaterialTheme.typography.headlineMedium.copy(
@@ -87,9 +69,6 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                //-------------------------------------------------
-                //                CAMPO EMAIL
-                //-------------------------------------------------
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
@@ -102,7 +81,6 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                //               CAMPO PASSWORD
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
@@ -116,57 +94,34 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                //           BOTÓN LOGIN
                 Button(
                     onClick = {
-                        val ok = viewModel.login(email, password)
-                        if (ok) onLoginSuccess()
+                        viewModel.login(email, password)
+                        if (viewModel.usuarioActual.value.isNotBlank()) {
+                            onLoginSuccess()
+                        }
                     },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp),
-                    enabled = email.isNotBlank() && password.isNotBlank(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = Color.White
-                    )
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    enabled = email.isNotBlank() && password.isNotBlank()
                 ) {
-                    Text(
-                        "Ingresar",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Text("Ingresar", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                //BOTÓN DE NAVEGACIÓN A REGISTRO
                 TextButton(onClick = onNavigateToRegister) {
-                    Text(
-                        "Registrarse",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Text("Registrarse", color = Color.White, fontWeight = FontWeight.Bold)
                 }
 
-                //-------------------------------------------------
-                //          MENSAJE DE LOGIN
-                //-------------------------------------------------
                 if (loginMessage.isNotBlank()) {
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        loginMessage,
-                        color = Color.White,
-                        fontSize = 14.sp,
-                        textAlign = TextAlign.Center
-                    )
+                    Text(loginMessage, color = Color.White, fontSize = 14.sp)
                 }
             }
         }
     }
 }
 
-// PERSONALIZACIÓN DE ESTILOS DE CAMPOS
 @Composable
 private fun loginFieldColors() = OutlinedTextFieldDefaults.colors(
     focusedTextColor = Color.White,

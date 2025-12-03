@@ -36,7 +36,7 @@ fun RootScreen() {
     // Obtener la instancia de Application (Necesaria para AuthViewModel y Room)
     val application = LocalContext.current.applicationContext as Application
 
-    // 1. Instanciar Repositorios (Se usa remember para mantener la instancia viva)
+    // Instanciar Repositorios (
     val productoRepository = remember { ProductoRepository() } // Asume constructor vacío
 
     // 2. Crear las Factories para los ViewModels que tienen dependencias (AuthViewModel)
@@ -74,8 +74,6 @@ fun RootScreen() {
         navController = navController,
         startDestination = "home"
     ) {
-        // ... (El resto de composables se mantienen igual, usando el authViewModel instanciado)
-
         // --- Pantalla principal ---
         composable("home") {
             HomeScreen(

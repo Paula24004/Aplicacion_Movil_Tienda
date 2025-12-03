@@ -7,13 +7,14 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.apptiendadeportiva_grupo10.model.Producto
+import com.example.apptiendadeportiva_grupo10.model.User
 import com.example.apptiendadeportiva_grupo10.model.toDomain
 import com.example.apptiendadeportiva_grupo10.repository.ProductoRepository
+import com.example.apptiendadeportiva_grupo10.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-
 
 // ESTADO PARA USUARIOS NORMALES
 data class AuthUiState(
@@ -28,12 +29,11 @@ data class AuthUiState(
 
 class AuthViewModel(
     application: Application,
-    private val productoRepository: ProductoRepository
+    private val productoRepository: ProductoRepository,
 ) : AndroidViewModel(application) {
-
-    // ---------------------------------------------------
+    // REPOSITORIO DE USUARIOS (BACKEND)
+    private val userRepository = UserRepository()
     // LOGIN Y REGISTRO DE USUARIOS NORMALES
-    // ---------------------------------------------------
     var uiState by mutableStateOf(AuthUiState())
         private set
 
@@ -45,6 +45,7 @@ class AuthViewModel(
     fun updatePassword(value: String) { uiState = uiState.copy(password = value, errorMessage = null) }
     fun updateRut(value: String) { uiState = uiState.copy(rut = value, errorMessage = null) }
 
+    // REGISTRO REAL VIA API
     fun registrar() {
         if (uiState.username.isBlank() ||
             uiState.email.isBlank() ||
@@ -55,22 +56,43 @@ class AuthViewModel(
             return
         }
 
-        uiState = uiState.copy(
-            registrationSuccess = true,
-            errorMessage = null
-        )
-        mensaje.value = "Registro exitoso"
+        viewModelScope.launch {
+            try {
+                val nuevoUser = User(
+                    username = uiState.username,
+                    email = uiState.email,
+                    password = uiState.password,
+                    esAdmin = false,
+                    active = true
+                )
+
+                val response = userRepository.register(nuevoUser)
+
+                if (response.isSuccessful) {
+                    uiState = uiState.copy(registrationSuccess = true, errorMessage = null)
+                    mensaje.value = "Registro exitoso"
+                } else {
+                    mensaje.value = "El email o username ya existe"
+                }
+
+            } catch (e: Exception) {
+                mensaje.value = "Error al registrar usuario"
+            }
+        }
     }
 
+    //LOGIN REAL VIA API
     fun login(email: String, password: String): Boolean {
-        return if (email == "user@gmail.com" && password == "1234") {
-            usuarioActual.value = email
-            mensaje.value = "Inicio de sesión exitoso"
-            true
-        } else {
-            mensaje.value = "Credenciales inválidas"
-            false
+        viewModelScope.launch {
+            val ok = userRepository.login(email, password)
+            if (ok) {
+                usuarioActual.value = email
+                mensaje.value = "Inicio de sesión exitoso"
+            } else {
+                mensaje.value = "Credenciales inválidas"
+            }
         }
+        return false
     }
 
     fun logout() {
@@ -78,39 +100,31 @@ class AuthViewModel(
         mensaje.value = "Sesión cerrada"
     }
 
-    // ---------------------------------------------------
-    // LOGIN Y REGISTRO ADMINISTRADOR
+    // LOGIN Y REGISTRO ADMINISTRADOR (SE MANTIENE IGUAL)
     val mensajeadmin = mutableStateOf("")
     private val _esAdminLogueado = MutableStateFlow(false)
     val esAdminLogueado: StateFlow<Boolean> = _esAdminLogueado
 
-    /**
-     * REGISTRO DE ADMIN
-     * Ya no loguea automáticamente
-     */
     fun registrarAdmin(username: String, rut: String, password: String, email: String): Boolean {
         if (username.isEmpty() || rut.isEmpty() || password.isEmpty() || email.isEmpty()) {
             mensajeadmin.value = "Todos los campos son obligatorios"
             return false
         }
 
-        // Puedes cambiar esta validación si quieres admin libre
         if (username != "admin" || password != "admin") {
-            mensajeadmin.value = "Solo se permite crear el usuario administrador por defecto"
+            mensajeadmin.value = "Solo se permite crear admin por defecto"
             return false
         }
 
-        // Registro exitoso
         _esAdminLogueado.value = true
         mensajeadmin.value = "Registro exitoso"
         return true
     }
 
-
     fun loginAdminAuth(username: String, password: String): Boolean {
         val ok = username == "admin" && password == "admin"
         _esAdminLogueado.value = ok
-        mensajeadmin.value = if (ok) "Login de administrador exitoso" else "Usuario o contraseña incorrectos"
+        mensajeadmin.value = if (ok) "Login admin exitoso" else "Usuario o contraseña incorrectos"
         return ok
     }
 
@@ -119,9 +133,7 @@ class AuthViewModel(
         mensajeadmin.value = "Sesión de administrador cerrada"
     }
 
-    // ---------------------------------------------------
     // PRODUCTOS
-    // ---------------------------------------------------
     var listaProductos = mutableStateOf<List<Producto>>(emptyList())
 
     fun cargarProductos() {
@@ -161,9 +173,10 @@ class AuthViewModel(
             val result = productoRepository.updateProducto(getApplication(), producto)
             if (result.isSuccess) {
                 mensajeadmin.value = "Producto modificado correctamente"
-                cargarProductos() // Recarga la lista
+                cargarProductos()
             } else {
-                mensajeadmin.value = result.exceptionOrNull()?.message ?: "Error desconocido al modificar"
+                mensajeadmin.value =
+                    result.exceptionOrNull()?.message ?: "Error desconocido al modificar"
             }
         }
     }
