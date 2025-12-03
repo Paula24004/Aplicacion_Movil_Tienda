@@ -23,8 +23,11 @@ class ProductoRepositoryTest {
                 nombre = "Prod Test",
                 descripcion = "Desc",
                 precio = 1000.0,
+                categoria = "Calzado",
+                size = "M",
+                color = "Rojo",
                 imagenUrl = "img",
-                stockPorTalla = mapOf("M" to 5) // ← CORRECTO
+                stockPorTalla = mapOf("M" to 5)
             )
         )
 

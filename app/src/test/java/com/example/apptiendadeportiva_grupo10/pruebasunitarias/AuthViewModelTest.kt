@@ -20,24 +20,24 @@ class AuthViewModelTest {
     }
 
     @Test
-    fun `registro falla por rut invalido`() {
-        vm.updateUsername("User1")
-        vm.updateEmail("user1@test.cl")
+    fun `registro falla cuando hay campos vacios`() {
+        vm.updateUsername("")     // vacío
+        vm.updateEmail("test@test.cl")
         vm.updatePassword("1234")
-        vm.updateRut("123")   // RUT inválido
+        vm.updateRut("11111111K")
 
         vm.registrar()
 
-        assertEquals("El RUT ingresado no es válido (sin DV, 7 a 8 dígitos).", vm.uiState.errorMessage)
+        assertEquals("Todos los campos son obligatorios", vm.uiState.errorMessage)
         assertFalse(vm.uiState.registrationSuccess)
     }
 
     @Test
-    fun `registro exitoso con datos unicos`() {
-        vm.updateUsername("User2")
-        vm.updateEmail("user2@test.cl") // email único
-        vm.updatePassword("abcd")
-        vm.updateRut("1234567K")  // válido
+    fun `registro exitoso cuando todos los campos estan completos`() {
+        vm.updateUsername("User1")
+        vm.updateEmail("user1@test.cl")
+        vm.updatePassword("1234")
+        vm.updateRut("12345678K")
 
         vm.registrar()
 
@@ -46,23 +46,18 @@ class AuthViewModelTest {
     }
 
     @Test
-    fun `registro duplicado usando el mismo email`() {
-        // Primer registro
-        vm.updateUsername("User3")
-        vm.updateEmail("user3@test.cl") // email nuevo
-        vm.updatePassword("1234")
-        vm.updateRut("1234567K")
-        vm.registrar()
+    fun `login falla con credenciales incorrectas`() {
+        val result = vm.login("incorrecto@gmail.com", "wrongpass")
 
-        // Segundo registro con el MISMO email
-        vm.updateUsername("User3")
-        vm.updateEmail("user3@test.cl")
-        vm.updatePassword("1234")
-        vm.updateRut("1234567K")
+        assertFalse(result)
+        assertEquals("Credenciales inválidas", vm.mensaje.value)
+    }
 
-        vm.registrar()
+    @Test
+    fun `login exitoso con credenciales correctas`() {
+        val result = vm.login("user@gmail.com", "1234")
 
-        assertEquals("El usuario/email ya existe en la base de datos.", vm.uiState.errorMessage)
-        assertFalse(vm.uiState.registrationSuccess)
+        assertTrue(result)
+        assertEquals("Inicio de sesión exitoso", vm.mensaje.value)
     }
 }

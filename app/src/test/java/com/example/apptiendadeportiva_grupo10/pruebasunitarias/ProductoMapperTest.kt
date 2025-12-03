@@ -16,7 +16,10 @@ class ProductoMapperTest {
             nombre = "Zapatilla Test",
             descripcion = "Descripción Test",
             precio = 9990.0,
-            imagenUrl = "https://ejemplo.com/img.png",
+            categoria = "Calzado",
+            size = "M",
+            color = "Azul",
+            imagenUrl = "img.png",
             stockPorTalla = mapOf("M" to 10)
         )
 
@@ -26,7 +29,10 @@ class ProductoMapperTest {
         assertEquals("Zapatilla Test", entity.nombre)
         assertEquals("Descripción Test", entity.descripcion)
         assertEquals(9990.0, entity.precio ?: 0.0, 0.01)
-        assertEquals("https://ejemplo.com/img.png", entity.imagenUrl)
+        assertEquals("Calzado", entity.categoria)
+        assertEquals("M", entity.size)
+        assertEquals("Azul", entity.color)
+        assertEquals("img.png", entity.imagenUrl)
         assertEquals(10, entity.stockPorTalla?.get("M"))
     }
 
@@ -37,6 +43,9 @@ class ProductoMapperTest {
             nombre = "Zapatilla Test",
             descripcion = "Desc Test",
             precio = 5000.0,
+            categoria = "Calzado",
+            size = "M",
+            color = "Azul",
             imagenUrl = "url.png",
             stockPorTalla = mapOf("M" to 5)
         )
@@ -47,6 +56,9 @@ class ProductoMapperTest {
         assertEquals("Zapatilla Test", domain.nombre)
         assertEquals("Desc Test", domain.descripcion)
         assertEquals(5000.0, domain.precio, 0.01)
+        assertEquals("Calzado", domain.categoria)
+        assertEquals("M", domain.size)
+        assertEquals("Azul", domain.color)
         assertEquals("url.png", domain.imagenUrl)
         assertEquals(5, domain.stockPorTalla?.get("M"))
     }

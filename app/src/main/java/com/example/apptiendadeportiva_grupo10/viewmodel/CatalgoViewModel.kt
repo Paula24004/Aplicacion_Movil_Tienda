@@ -51,4 +51,6 @@ class CatalogoViewModel(
         _productos.value = lista
     }
 
+
+
 }
