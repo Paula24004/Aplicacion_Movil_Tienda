@@ -34,8 +34,8 @@ class ProductoDaoTest {
     @Test
     fun insertAll_y_getAll_funcionan_correctamente() = runBlocking {
         val productos = listOf(
-            ProductoEntity(1, "A", "desc", 1000.0, "img", 5),
-            ProductoEntity(2, "B", "desc2", 2000.0, "img2", 10)
+            ProductoEntity(1, "A", "desc", 1000.0, "categoria", "M","rojo","img", mapOf("M" to 5)),
+            ProductoEntity(2, "B", "desc2", 2000.0, "categoria2", "M","negro","img2", mapOf("M" to 5))
         )
 
         dao.insertAll(productos)
@@ -47,7 +47,7 @@ class ProductoDaoTest {
 
     @Test
     fun findById_devuelve_producto_correcto() = runBlocking {
-        val producto = ProductoEntity(1, "A", "desc", 1000.0, "img", 5)
+        val producto = ProductoEntity(1, "A", "desc", 1000.0, "categoria", "M","rojo","img", mapOf("M" to 5))
 
         dao.insertAll(listOf(producto))
 
