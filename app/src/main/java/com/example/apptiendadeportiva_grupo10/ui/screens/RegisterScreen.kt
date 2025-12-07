@@ -9,6 +9,9 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -19,7 +22,6 @@ fun RegisterScreen(
     val state = authViewModel.uiState
     val mensaje by authViewModel.mensaje
 
-    // Validación completa del formulario
     val formularioListo =
         state.username.isNotBlank() &&
                 state.email.isNotBlank() &&
@@ -29,7 +31,6 @@ fun RegisterScreen(
                 state.comuna.isNotBlank() &&
                 state.direccion.isNotBlank()
 
-    // Navegar tras registro exitoso
     LaunchedEffect(state.registrationSuccess) {
         if (state.registrationSuccess) {
             navController.navigate("catalogo") {
@@ -45,15 +46,14 @@ fun RegisterScreen(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
-                .padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .padding(horizontal = 24.dp)
+                .verticalScroll(rememberScrollState()),  // ⭐ IMPORTANTE
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
             Text("Crea tu cuenta", style = MaterialTheme.typography.headlineMedium)
             Spacer(Modifier.height(24.dp))
 
-            // EMAIL
             OutlinedTextField(
                 value = state.email,
                 onValueChange = authViewModel::updateEmail,
@@ -62,7 +62,6 @@ fun RegisterScreen(
             )
             Spacer(Modifier.height(12.dp))
 
-            // USERNAME
             OutlinedTextField(
                 value = state.username,
                 onValueChange = authViewModel::updateUsername,
@@ -71,7 +70,6 @@ fun RegisterScreen(
             )
             Spacer(Modifier.height(12.dp))
 
-            // RUT
             OutlinedTextField(
                 value = state.rut,
                 onValueChange = authViewModel::updateRut,
@@ -80,7 +78,6 @@ fun RegisterScreen(
             )
             Spacer(Modifier.height(12.dp))
 
-            // REGIÓN
             OutlinedTextField(
                 value = state.region,
                 onValueChange = authViewModel::updateRegion,
@@ -89,7 +86,6 @@ fun RegisterScreen(
             )
             Spacer(Modifier.height(12.dp))
 
-            // COMUNA
             OutlinedTextField(
                 value = state.comuna,
                 onValueChange = authViewModel::updateComuna,
@@ -98,7 +94,6 @@ fun RegisterScreen(
             )
             Spacer(Modifier.height(12.dp))
 
-            // DIRECCIÓN
             OutlinedTextField(
                 value = state.direccion,
                 onValueChange = authViewModel::updateDireccion,
@@ -107,7 +102,6 @@ fun RegisterScreen(
             )
             Spacer(Modifier.height(12.dp))
 
-            // PASSWORD
             OutlinedTextField(
                 value = state.password,
                 onValueChange = authViewModel::updatePassword,
@@ -117,7 +111,6 @@ fun RegisterScreen(
             )
             Spacer(Modifier.height(24.dp))
 
-            // BOTÓN REGISTRARSE
             Button(
                 onClick = { authViewModel.registrar() },
                 enabled = formularioListo,
@@ -128,7 +121,6 @@ fun RegisterScreen(
                 Text("Registrarse")
             }
 
-            // Mensaje de respuesta
             if (mensaje.isNotBlank()) {
                 Spacer(Modifier.height(12.dp))
                 Text(mensaje, color = MaterialTheme.colorScheme.primary)

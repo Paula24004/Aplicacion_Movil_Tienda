@@ -69,12 +69,10 @@ fun RootScreen() {
         }
     }
 
-    // Navegación principal
     NavHost(
         navController = navController,
         startDestination = "home"
     ) {
-        // --- Pantalla principal ---
         composable("home") {
             HomeScreen(
                 navController = navController,
@@ -85,7 +83,6 @@ fun RootScreen() {
             )
         }
 
-        // --- Login de usuario ---
         composable("iniciar_sesion") {
             LoginScreen(
                 viewModel = authViewModel,
@@ -98,7 +95,6 @@ fun RootScreen() {
             )
         }
 
-        // --- Registro de usuario ---
         composable("registrarse") {
             RegisterScreen(
                 navController = navController,
@@ -106,7 +102,6 @@ fun RootScreen() {
             )
         }
 
-        // --- Catálogo de productos ---
         composable("catalogo") {
             CatalogoScreen(
                 navController = navController,
@@ -115,9 +110,8 @@ fun RootScreen() {
             )
         }
 
-        // --- Detalle de producto ---
         composable(
-            route = "detalle/{idProducto}",
+            "detalle/{idProducto}",
             arguments = listOf(navArgument("idProducto") { type = NavType.IntType })
         ) { entry ->
             val idProducto = entry.arguments?.getInt("idProducto") ?: 0
@@ -127,62 +121,53 @@ fun RootScreen() {
                 carritoViewModel = carritoViewModel,
                 productoId = idProducto
             )
-
         }
 
-        // --- Carrito de compras ---
         composable("carrito") {
             CarritoScreen(
                 navController = navController,
                 viewModel = carritoViewModel,
                 authViewModel = authViewModel
             )
+        }
 
+        composable("admin_iniciar") {
+            LoginAdmin(
+                navController = navController,
+                viewModel = authViewModel,
+                onNavigateToRegister = { navController.navigate("admin_registrar") }
+            )
+        }
 
-            // --- Login de administrador ---
-            composable("admin_iniciar") {
-                LoginAdmin(
-                    navController = navController,
-                    viewModel = authViewModel,
-                    onNavigateToRegister = { navController.navigate("admin_registrar") }
-                )
-            }
-
-            // --- Registro de administrador ---
-            composable("admin_registrar") {
-                RegistroAdmin(
-                    viewModel = authViewModel,
-                    onRegisterSuccess = {
-                        navController.navigate("admin_iniciar") {
-                            popUpTo("admin_registrar") { inclusive = true }
-                        }
-                    },
-                    onNavigateToLogin = {
-                        navController.navigate("admin_iniciar") {
-                            popUpTo("admin_registrar") { inclusive = true }
-                        }
+        composable("admin_registrar") {
+            RegistroAdmin(
+                viewModel = authViewModel,
+                onRegisterSuccess = {
+                    navController.navigate("admin_iniciar") {
+                        popUpTo("admin_registrar") { inclusive = true }
                     }
-                )
-            }
-
-            composable("frases") {
-                FraseScreen(viewModel = quoteViewModel)
-            }
-
-
-            // --- Panel del administrador ---
-            composable("admin_panel") {
-                // ¡IMPORTANTE! También se necesita llamar a cargarProductos aquí (en HomeAdmin.kt)
-                HomeAdmin(
-                    viewModel = authViewModel,
-                    onLogout = {
-                        navController.navigate("admin_iniciar") {
-                            popUpTo("admin_panel") { inclusive = true }
-                        }
+                },
+                onNavigateToLogin = {
+                    navController.navigate("admin_iniciar") {
+                        popUpTo("admin_registrar") { inclusive = true }
                     }
-                )
-            }
+                }
+            )
+        }
+
+        composable("frases") {
+            FraseScreen(viewModel = quoteViewModel)
+        }
+
+        composable("admin_panel") {
+            HomeAdmin(
+                viewModel = authViewModel,
+                onLogout = {
+                    navController.navigate("admin_iniciar") {
+                        popUpTo("admin_panel") { inclusive = true }
+                    }
+                }
+            )
         }
     }
- }
-
+}
