@@ -47,17 +47,14 @@ class AuthViewModel(
 
     val mensaje = mutableStateOf("")
     val usuarioActual = mutableStateOf("")
-
     var isLoggedIn by mutableStateOf(false)
         private set
 
     // ---------------------------------------------------
-    // FORMAT & VALIDATE RUT
+    // FORMATEO DEL RUT
     // ---------------------------------------------------
-
     fun formatearRut(rut: String): String {
         var clean = rut.replace(".", "").replace("-", "").uppercase()
-
         if (clean.isEmpty()) return ""
 
         val dv = clean.last()
@@ -75,20 +72,33 @@ class AuthViewModel(
             contador++
         }
 
-        val cuerpoFormateado = sb.reverse().toString()
-
-        return "$cuerpoFormateado-$dv"
+        return sb.reverse().toString() + "-" + dv
     }
 
+    // ---------------------------------------------------
+    // VALIDACIÓN DEL RUT (8–9 dígitos + DV 0–9 o K + RUT de prueba)
+    // ---------------------------------------------------
     fun validarRut(rut: String): Boolean {
         val clean = rut.replace(".", "").replace("-", "").uppercase()
+
+        // ⭐ Permitir siempre el RUT de prueba
+        if (rut == "11.111.111-1" || rut == "11111111-1") return true
+
         if (clean.length < 2) return false
 
         val cuerpo = clean.dropLast(1)
         val dv = clean.last()
 
+        // ⭐ Cuerpo con 8–9 dígitos (7–8 + DV = 8–9 caracteres)
+        if (cuerpo.length !in 7..8) return false
+
+        // ⭐ Cuerpo solo números
         if (!cuerpo.all { it.isDigit() }) return false
 
+        // ⭐ DV válido
+        if (!(dv.isDigit() || dv == 'K')) return false
+
+        // ⭐ Cálculo módulo 11
         var suma = 0
         var multiplicador = 2
 
@@ -110,7 +120,6 @@ class AuthViewModel(
     // ---------------------------------------------------
     // UPDATE CAMPOS
     // ---------------------------------------------------
-
     fun updateEmail(value: String) {
         uiState = uiState.copy(email = value, errorMessage = null)
     }
@@ -124,15 +133,17 @@ class AuthViewModel(
     }
 
     fun updateRut(value: String) {
-        val limpio = value.replace(".", "").replace("-", "").uppercase()
+        val clean = value.replace(".", "").replace("-", "").uppercase()
 
-        if (limpio.length <= 2) {
+        if (clean.length <= 2) {
             uiState = uiState.copy(rut = value)
             return
         }
 
-        val formateado = formatearRut(value)
-        uiState = uiState.copy(rut = formateado, errorMessage = null)
+        uiState = uiState.copy(
+            rut = formatearRut(value),
+            errorMessage = null
+        )
     }
 
     fun updateRegion(value: String) {
@@ -150,7 +161,6 @@ class AuthViewModel(
     // ---------------------------------------------------
     // REGISTRO
     // ---------------------------------------------------
-
     fun registrar() {
         if (
             uiState.username.isBlank() ||
@@ -166,7 +176,7 @@ class AuthViewModel(
         }
 
         if (!validarRut(uiState.rut)) {
-            uiState = uiState.copy(errorMessage = "RUT inválido. Ej: 12.345.678-5")
+            uiState = uiState.copy(errorMessage = "RUT inválido. Ejemplo: 12.345.678-5")
             return
         }
 
@@ -196,9 +206,8 @@ class AuthViewModel(
     }
 
     // ---------------------------------------------------
-    // LOGIN + LOGOUT
+    // LOGIN
     // ---------------------------------------------------
-
     fun login(email: String, password: String) {
         viewModelScope.launch {
             val ok = userRepository.login(email, password)
@@ -223,7 +232,6 @@ class AuthViewModel(
     // ---------------------------------------------------
     // ADMIN
     // ---------------------------------------------------
-
     val mensajeadmin = mutableStateOf("")
     private val _esAdminLogueado = MutableStateFlow(false)
     val esAdminLogueado: StateFlow<Boolean> = _esAdminLogueado
@@ -259,7 +267,6 @@ class AuthViewModel(
     // ---------------------------------------------------
     // PRODUCTOS
     // ---------------------------------------------------
-
     var listaProductos = mutableStateOf<List<Producto>>(emptyList())
 
     fun cargarProductos() {
@@ -277,7 +284,8 @@ class AuthViewModel(
                 mensajeadmin.value = "Producto agregado correctamente"
                 cargarProductos()
             } else {
-                mensajeadmin.value = result.exceptionOrNull()?.message ?: "Error desconocido"
+                mensajeadmin.value =
+                    result.exceptionOrNull()?.message ?: "Error desconocido"
             }
         }
     }
@@ -289,7 +297,8 @@ class AuthViewModel(
                 mensajeadmin.value = "Producto eliminado"
                 cargarProductos()
             } else {
-                mensajeadmin.value = result.exceptionOrNull()?.message ?: "Error desconocido"
+                mensajeadmin.value =
+                    result.exceptionOrNull()?.message ?: "Error desconocido"
             }
         }
     }
