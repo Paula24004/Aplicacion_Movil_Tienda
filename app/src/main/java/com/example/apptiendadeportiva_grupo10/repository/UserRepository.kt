@@ -10,9 +10,23 @@ class UserRepository {
 
     suspend fun register(user: User) = userApi.register(user)
 
+    // 🔥 LOGIN usando el nuevo modelo User del backend
     suspend fun login(username: String, password: String): Boolean {
-        val user = User(username = username, password = password)
-        val response = userApi.login(user)
+
+        // El backend pide un User COMPLETO (aunque solo use username/password)
+        val loginUser = User(
+            id = null,
+            username = username,
+            password = password,
+            email = "",         // El backend no lo usa para login
+            region = "",
+            comuna = "",
+            direccion = "",
+            esAdmin = false,
+            active = true
+        )
+
+        val response = userApi.login(loginUser)
         return response.isSuccessful
     }
 }

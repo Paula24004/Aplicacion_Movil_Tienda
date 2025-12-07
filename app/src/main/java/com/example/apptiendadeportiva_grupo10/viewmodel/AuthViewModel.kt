@@ -76,12 +76,11 @@ class AuthViewModel(
     }
 
     // ---------------------------------------------------
-    // VALIDACIÓN DEL RUT (8–9 dígitos + DV 0–9 o K + RUT de prueba)
+    // VALIDACIÓN DEL RUT
     // ---------------------------------------------------
     fun validarRut(rut: String): Boolean {
         val clean = rut.replace(".", "").replace("-", "").uppercase()
 
-        // ⭐ Permitir siempre el RUT de prueba
         if (rut == "11.111.111-1" || rut == "11111111-1") return true
 
         if (clean.length < 2) return false
@@ -89,16 +88,10 @@ class AuthViewModel(
         val cuerpo = clean.dropLast(1)
         val dv = clean.last()
 
-        // ⭐ Cuerpo con 8–9 dígitos (7–8 + DV = 8–9 caracteres)
         if (cuerpo.length !in 7..8) return false
-
-        // ⭐ Cuerpo solo números
         if (!cuerpo.all { it.isDigit() }) return false
-
-        // ⭐ DV válido
         if (!(dv.isDigit() || dv == 'K')) return false
 
-        // ⭐ Cálculo módulo 11
         var suma = 0
         var multiplicador = 2
 
@@ -120,17 +113,12 @@ class AuthViewModel(
     // ---------------------------------------------------
     // UPDATE CAMPOS
     // ---------------------------------------------------
-    fun updateEmail(value: String) {
-        uiState = uiState.copy(email = value, errorMessage = null)
-    }
-
-    fun updateUsername(value: String) {
-        uiState = uiState.copy(username = value, errorMessage = null)
-    }
-
-    fun updatePassword(value: String) {
-        uiState = uiState.copy(password = value, errorMessage = null)
-    }
+    fun updateEmail(value: String) { uiState = uiState.copy(email = value, errorMessage = null) }
+    fun updateUsername(value: String) { uiState = uiState.copy(username = value, errorMessage = null) }
+    fun updatePassword(value: String) { uiState = uiState.copy(password = value, errorMessage = null) }
+    fun updateRegion(value: String) { uiState = uiState.copy(region = value, errorMessage = null) }
+    fun updateComuna(value: String) { uiState = uiState.copy(comuna = value, errorMessage = null) }
+    fun updateDireccion(value: String) { uiState = uiState.copy(direccion = value, errorMessage = null) }
 
     fun updateRut(value: String) {
         val clean = value.replace(".", "").replace("-", "").uppercase()
@@ -140,26 +128,11 @@ class AuthViewModel(
             return
         }
 
-        uiState = uiState.copy(
-            rut = formatearRut(value),
-            errorMessage = null
-        )
-    }
-
-    fun updateRegion(value: String) {
-        uiState = uiState.copy(region = value, errorMessage = null)
-    }
-
-    fun updateComuna(value: String) {
-        uiState = uiState.copy(comuna = value, errorMessage = null)
-    }
-
-    fun updateDireccion(value: String) {
-        uiState = uiState.copy(direccion = value, errorMessage = null)
+        uiState = uiState.copy(rut = formatearRut(value), errorMessage = null)
     }
 
     // ---------------------------------------------------
-    // REGISTRO
+    // REGISTRO (CON REGION, COMUNA Y DIRECCIÓN)
     // ---------------------------------------------------
     fun registrar() {
         if (
@@ -184,8 +157,11 @@ class AuthViewModel(
             try {
                 val nuevoUser = User(
                     username = uiState.username,
-                    email = uiState.email,
                     password = uiState.password,
+                    email = uiState.email,
+                    region = uiState.region,
+                    comuna = uiState.comuna,
+                    direccion = uiState.direccion,
                     esAdmin = false,
                     active = true
                 )
@@ -208,12 +184,12 @@ class AuthViewModel(
     // ---------------------------------------------------
     // LOGIN
     // ---------------------------------------------------
-    fun login(email: String, password: String) {
+    fun login(username: String, password: String) {
         viewModelScope.launch {
-            val ok = userRepository.login(email, password)
+            val ok = userRepository.login(username, password)
 
             if (ok) {
-                usuarioActual.value = email
+                usuarioActual.value = username
                 isLoggedIn = true
                 mensaje.value = "Inicio de sesión exitoso"
             } else {
@@ -230,43 +206,12 @@ class AuthViewModel(
     }
 
     // ---------------------------------------------------
-    // ADMIN
+    // PRODUCTOS (SIN CAMBIOS)
     // ---------------------------------------------------
     val mensajeadmin = mutableStateOf("")
     private val _esAdminLogueado = MutableStateFlow(false)
     val esAdminLogueado: StateFlow<Boolean> = _esAdminLogueado
 
-    fun registrarAdmin(username: String, rut: String, password: String, email: String): Boolean {
-        if (username.isEmpty() || rut.isEmpty() || password.isEmpty() || email.isEmpty()) {
-            mensajeadmin.value = "Todos los campos son obligatorios"
-            return false
-        }
-
-        if (username != "admin" || password != "admin") {
-            mensajeadmin.value = "Solo se permite crear admin por defecto"
-            return false
-        }
-
-        _esAdminLogueado.value = true
-        mensajeadmin.value = "Registro exitoso"
-        return true
-    }
-
-    fun loginAdminAuth(username: String, password: String): Boolean {
-        val ok = username == "admin" && password == "admin"
-        _esAdminLogueado.value = ok
-        mensajeadmin.value = if (ok) "Login admin exitoso" else "Usuario o contraseña incorrectos"
-        return ok
-    }
-
-    fun logoutAdmin() {
-        _esAdminLogueado.value = false
-        mensajeadmin.value = "Sesión de administrador cerrada"
-    }
-
-    // ---------------------------------------------------
-    // PRODUCTOS
-    // ---------------------------------------------------
     var listaProductos = mutableStateOf<List<Producto>>(emptyList())
 
     fun cargarProductos() {
@@ -284,8 +229,7 @@ class AuthViewModel(
                 mensajeadmin.value = "Producto agregado correctamente"
                 cargarProductos()
             } else {
-                mensajeadmin.value =
-                    result.exceptionOrNull()?.message ?: "Error desconocido"
+                mensajeadmin.value = result.exceptionOrNull()?.message ?: "Error desconocido"
             }
         }
     }
@@ -297,8 +241,7 @@ class AuthViewModel(
                 mensajeadmin.value = "Producto eliminado"
                 cargarProductos()
             } else {
-                mensajeadmin.value =
-                    result.exceptionOrNull()?.message ?: "Error desconocido"
+                mensajeadmin.value = result.exceptionOrNull()?.message ?: "Error desconocido"
             }
         }
     }
@@ -310,8 +253,7 @@ class AuthViewModel(
                 mensajeadmin.value = "Producto modificado correctamente"
                 cargarProductos()
             } else {
-                mensajeadmin.value =
-                    result.exceptionOrNull()?.message ?: "Error desconocido al modificar"
+                mensajeadmin.value = result.exceptionOrNull()?.message ?: "Error desconocido"
             }
         }
     }
