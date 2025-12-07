@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 // ---------------------------------------------------
-// ESTADO FORM UI
+// ESTADO DEL FORMULARIO
 // ---------------------------------------------------
 data class AuthUiState(
     val username: String = "",
@@ -51,7 +51,7 @@ class AuthViewModel(
         private set
 
     // ---------------------------------------------------
-    // FORMATEO DEL RUT
+    // FORMATEO RUT
     // ---------------------------------------------------
     fun formatearRut(rut: String): String {
         var clean = rut.replace(".", "").replace("-", "").uppercase()
@@ -65,18 +65,16 @@ class AuthViewModel(
 
         for (c in cuerpo.reversed()) {
             if (contador == 3) {
-                sb.append(".")
-                contador = 0
+                sb.append("."); contador = 0
             }
-            sb.append(c)
-            contador++
+            sb.append(c); contador++
         }
 
         return sb.reverse().toString() + "-" + dv
     }
 
     // ---------------------------------------------------
-    // VALIDACIÓN DEL RUT
+    // VALIDACIÓN RUT
     // ---------------------------------------------------
     fun validarRut(rut: String): Boolean {
         val clean = rut.replace(".", "").replace("-", "").uppercase()
@@ -84,7 +82,6 @@ class AuthViewModel(
         if (rut == "11.111.111-1" || rut == "11111111-1") return true
 
         if (clean.length < 2) return false
-
         val cuerpo = clean.dropLast(1)
         val dv = clean.last()
 
@@ -111,7 +108,7 @@ class AuthViewModel(
     }
 
     // ---------------------------------------------------
-    // UPDATE CAMPOS
+    // UPDATE CAMPOS DEL FORMULARIO
     // ---------------------------------------------------
     fun updateEmail(value: String) { uiState = uiState.copy(email = value, errorMessage = null) }
     fun updateUsername(value: String) { uiState = uiState.copy(username = value, errorMessage = null) }
@@ -122,17 +119,15 @@ class AuthViewModel(
 
     fun updateRut(value: String) {
         val clean = value.replace(".", "").replace("-", "").uppercase()
-
-        if (clean.length <= 2) {
-            uiState = uiState.copy(rut = value)
-            return
+        uiState = if (clean.length > 2) {
+            uiState.copy(rut = formatearRut(value))
+        } else {
+            uiState.copy(rut = value)
         }
-
-        uiState = uiState.copy(rut = formatearRut(value), errorMessage = null)
     }
 
     // ---------------------------------------------------
-    // REGISTRO (CON REGION, COMUNA Y DIRECCIÓN)
+    // REGISTRO NORMAL (CON REGION, COMUNA Y DIRECCION)
     // ---------------------------------------------------
     fun registrar() {
         if (
@@ -182,7 +177,7 @@ class AuthViewModel(
     }
 
     // ---------------------------------------------------
-    // LOGIN
+    // LOGIN NORMAL
     // ---------------------------------------------------
     fun login(username: String, password: String) {
         viewModelScope.launch {
@@ -199,19 +194,44 @@ class AuthViewModel(
         }
     }
 
-    fun logout() {
-        usuarioActual.value = ""
-        isLoggedIn = false
-        mensaje.value = "Sesión cerrada"
-    }
-
     // ---------------------------------------------------
-    // PRODUCTOS (SIN CAMBIOS)
+    // ADMIN: REGISTRO + LOGIN + LOGOUT
     // ---------------------------------------------------
     val mensajeadmin = mutableStateOf("")
     private val _esAdminLogueado = MutableStateFlow(false)
     val esAdminLogueado: StateFlow<Boolean> = _esAdminLogueado
 
+    fun registrarAdmin(username: String, rut: String, password: String, email: String): Boolean {
+        if (username.isEmpty() || rut.isEmpty() || password.isEmpty() || email.isEmpty()) {
+            mensajeadmin.value = "Todos los campos son obligatorios"
+            return false
+        }
+
+        if (username != "admin" || password != "admin") {
+            mensajeadmin.value = "Solo se permite crear admin por defecto"
+            return false
+        }
+
+        _esAdminLogueado.value = true
+        mensajeadmin.value = "Registro exitoso"
+        return true
+    }
+
+    fun loginAdminAuth(username: String, password: String): Boolean {
+        val ok = username == "admin" && password == "admin"
+        _esAdminLogueado.value = ok
+        mensajeadmin.value = if (ok) "Login admin exitoso" else "Usuario o contraseña incorrectos"
+        return ok
+    }
+
+    fun logoutAdmin() {
+        _esAdminLogueado.value = false
+        mensajeadmin.value = "Sesión de administrador cerrada"
+    }
+
+    // ---------------------------------------------------
+    // PRODUCTOS
+    // ---------------------------------------------------
     var listaProductos = mutableStateOf<List<Producto>>(emptyList())
 
     fun cargarProductos() {
