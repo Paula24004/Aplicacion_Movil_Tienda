@@ -6,7 +6,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext 
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -134,52 +134,55 @@ fun RootScreen() {
         composable("carrito") {
             CarritoScreen(
                 navController = navController,
-                viewModel = carritoViewModel
+                viewModel = carritoViewModel,
+                authViewModel = authViewModel
             )
-        }
 
-        // --- Login de administrador ---
-        composable("admin_iniciar") {
-            LoginAdmin(
-                navController = navController,
-                viewModel = authViewModel,
-                onNavigateToRegister = { navController.navigate("admin_registrar") }
-            )
-        }
 
-        // --- Registro de administrador ---
-        composable("admin_registrar") {
-            RegistroAdmin(
-                viewModel = authViewModel,
-                onRegisterSuccess = {
-                    navController.navigate("admin_iniciar") {
-                        popUpTo("admin_registrar") { inclusive = true }
+            // --- Login de administrador ---
+            composable("admin_iniciar") {
+                LoginAdmin(
+                    navController = navController,
+                    viewModel = authViewModel,
+                    onNavigateToRegister = { navController.navigate("admin_registrar") }
+                )
+            }
+
+            // --- Registro de administrador ---
+            composable("admin_registrar") {
+                RegistroAdmin(
+                    viewModel = authViewModel,
+                    onRegisterSuccess = {
+                        navController.navigate("admin_iniciar") {
+                            popUpTo("admin_registrar") { inclusive = true }
+                        }
+                    },
+                    onNavigateToLogin = {
+                        navController.navigate("admin_iniciar") {
+                            popUpTo("admin_registrar") { inclusive = true }
+                        }
                     }
-                },
-                onNavigateToLogin = {
-                    navController.navigate("admin_iniciar") {
-                        popUpTo("admin_registrar") { inclusive = true }
+                )
+            }
+
+            composable("frases") {
+                FraseScreen(viewModel = quoteViewModel)
+            }
+
+
+            // --- Panel del administrador ---
+            composable("admin_panel") {
+                // ¡IMPORTANTE! También se necesita llamar a cargarProductos aquí (en HomeAdmin.kt)
+                HomeAdmin(
+                    viewModel = authViewModel,
+                    onLogout = {
+                        navController.navigate("admin_iniciar") {
+                            popUpTo("admin_panel") { inclusive = true }
+                        }
                     }
-                }
-            )
-        }
-
-        composable("frases") {
-            FraseScreen(viewModel = quoteViewModel)
-        }
-
-
-        // --- Panel del administrador ---
-        composable("admin_panel") {
-            // ¡IMPORTANTE! También se necesita llamar a cargarProductos aquí (en HomeAdmin.kt)
-            HomeAdmin(
-                viewModel = authViewModel,
-                onLogout = {
-                    navController.navigate("admin_iniciar") {
-                        popUpTo("admin_panel") { inclusive = true }
-                    }
-                }
-            )
+                )
+            }
         }
     }
-}
+ }
+

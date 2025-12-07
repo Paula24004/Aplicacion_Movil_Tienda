@@ -16,7 +16,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-// ESTADO PARA USUARIOS NORMALES
+// ---------------------------------------------------
+// ESTADO FORM UI
+// ---------------------------------------------------
 data class AuthUiState(
     val username: String = "",
     val email: String = "",
@@ -27,25 +29,115 @@ data class AuthUiState(
     val registrationSuccess: Boolean = false
 )
 
+// ---------------------------------------------------
+// VIEWMODEL
+// ---------------------------------------------------
 class AuthViewModel(
     application: Application,
     private val productoRepository: ProductoRepository,
 ) : AndroidViewModel(application) {
-    // REPOSITORIO DE USUARIOS (BACKEND)
+
     private val userRepository = UserRepository()
-    // LOGIN Y REGISTRO DE USUARIOS NORMALES
+
     var uiState by mutableStateOf(AuthUiState())
         private set
 
     val mensaje = mutableStateOf("")
     val usuarioActual = mutableStateOf("")
 
-    fun updateEmail(value: String) { uiState = uiState.copy(email = value, errorMessage = null) }
-    fun updateUsername(value: String) { uiState = uiState.copy(username = value, errorMessage = null) }
-    fun updatePassword(value: String) { uiState = uiState.copy(password = value, errorMessage = null) }
-    fun updateRut(value: String) { uiState = uiState.copy(rut = value, errorMessage = null) }
+    // NUEVO: estado real de sesión
+    var isLoggedIn by mutableStateOf(false)
+        private set
 
-    // REGISTRO REAL VIA API
+    // ---------------------------------------------------
+    // FORMAT & VALIDATE RUT
+    // ---------------------------------------------------
+
+    // Formateo automático de RUT
+    fun formatearRut(rut: String): String {
+        var clean = rut.replace(".", "").replace("-", "").uppercase()
+
+        if (clean.isEmpty()) return ""
+
+        val dv = clean.last()
+        var cuerpo = clean.dropLast(1)
+
+        // Insertar puntos desde la derecha
+        val sb = StringBuilder()
+        var contador = 0
+        for (c in cuerpo.reversed()) {
+            if (contador == 3) {
+                sb.append(".")
+                contador = 0
+            }
+            sb.append(c)
+            contador++
+        }
+
+        val cuerpoFormateado = sb.reverse().toString()
+
+        return "$cuerpoFormateado-$dv"
+    }
+
+    // Validación real del dígito verificador
+    fun validarRut(rut: String): Boolean {
+        val cleanRut = rut.replace(".", "").replace("-", "").uppercase()
+
+        if (cleanRut.length < 2) return false
+
+        val cuerpo = cleanRut.dropLast(1)
+        val dv = cleanRut.last()
+
+        if (!cuerpo.all { it.isDigit() }) return false
+
+        var suma = 0
+        var multiplicador = 2
+
+        for (char in cuerpo.reversed()) {
+            suma += (char.digitToInt() * multiplicador)
+            multiplicador = if (multiplicador == 7) 2 else multiplicador + 1
+        }
+
+        val resultado = 11 - (suma % 11)
+        val dvEsperado = when (resultado) {
+            11 -> '0'
+            10 -> 'K'
+            else -> resultado.digitToChar()
+        }
+
+        return dv == dvEsperado
+    }
+
+    // ---------------------------------------------------
+    // UPDATE CAMPOS
+    // ---------------------------------------------------
+    fun updateEmail(value: String) {
+        uiState = uiState.copy(email = value, errorMessage = null)
+    }
+
+    fun updateUsername(value: String) {
+        uiState = uiState.copy(username = value, errorMessage = null)
+    }
+
+    fun updatePassword(value: String) {
+        uiState = uiState.copy(password = value, errorMessage = null)
+    }
+
+    fun updateRut(value: String) {
+        val limpio = value.replace(".", "").replace("-", "").uppercase()
+
+        if (limpio.length <= 2) {
+            uiState = uiState.copy(rut = value)
+            return
+        }
+
+        val formateado = formatearRut(value)
+        uiState = uiState.copy(rut = formateado, errorMessage = null)
+    }
+
+    // ---------------------------------------------------
+    // REGISTRO
+    // ---------------------------------------------------
     fun registrar() {
         if (uiState.username.isBlank() ||
             uiState.email.isBlank() ||
@@ -53,6 +145,12 @@ class AuthViewModel(
             uiState.rut.isBlank()
         ) {
             uiState = uiState.copy(errorMessage = "Todos los campos son obligatorios")
+            return
+        }
+
+        // Validación real del RUT
+        if (!validarRut(uiState.rut)) {
+            uiState = uiState.copy(errorMessage = "RUT inválido. Ej: 12.345.678-5")
             return
         }
 
@@ -81,26 +179,33 @@ class AuthViewModel(
         }
     }
 
-    //LOGIN REAL VIA API
-    fun login(email: String, password: String): Boolean {
+    // ---------------------------------------------------
+    // LOGIN + LOGOUT
+    // ---------------------------------------------------
+    fun login(email: String, password: String) {
         viewModelScope.launch {
             val ok = userRepository.login(email, password)
+
             if (ok) {
                 usuarioActual.value = email
+                isLoggedIn = true
                 mensaje.value = "Inicio de sesión exitoso"
             } else {
                 mensaje.value = "Credenciales inválidas"
+                isLoggedIn = false
             }
         }
-        return false
     }
 
     fun logout() {
         usuarioActual.value = ""
+        isLoggedIn = false
         mensaje.value = "Sesión cerrada"
     }
 
-    // LOGIN Y REGISTRO ADMINISTRADOR (SE MANTIENE IGUAL)
+    // ---------------------------------------------------
+    // ADMIN
+    // ---------------------------------------------------
     val mensajeadmin = mutableStateOf("")
     private val _esAdminLogueado = MutableStateFlow(false)
     val esAdminLogueado: StateFlow<Boolean> = _esAdminLogueado
@@ -133,7 +238,9 @@ class AuthViewModel(
         mensajeadmin.value = "Sesión de administrador cerrada"
     }
 
+    // ---------------------------------------------------
     // PRODUCTOS
+    // ---------------------------------------------------
     var listaProductos = mutableStateOf<List<Producto>>(emptyList())
 
     fun cargarProductos() {

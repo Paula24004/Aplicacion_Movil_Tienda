@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
+import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
 import java.text.NumberFormat
 import java.util.Locale
 import kotlinx.coroutines.launch
@@ -18,42 +19,52 @@ import kotlinx.coroutines.launch
 @Composable
 fun CarritoScreen(
     navController: NavController,
-    viewModel: CarritoViewModel   // ← usa el que viene de RootScreen
+    viewModel: CarritoViewModel,
+    authViewModel: AuthViewModel
 ) {
     val items by viewModel.items.collectAsState()
     val total by viewModel.total.collectAsState()
     val formato = remember { NumberFormat.getCurrencyInstance(Locale("es", "CL")) }
 
-    // [NUEVO] Estado y scope para el Snackbar
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Carrito") }
-            )
-        },
-        // [NUEVO] Añadir el host del Snackbar
+        topBar = { TopAppBar(title = { Text("Carrito") }) },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             if (items.isNotEmpty()) {
                 Surface(tonalElevation = 2.dp) {
                     Row(
-                        modifier = Modifier
+                        Modifier
                             .fillMaxWidth()
                             .padding(16.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Total: ${formato.format(total)}", style = MaterialTheme.typography.titleMedium)
+                        Text("Total: ${formato.format(total)}")
+
                         Button(
                             onClick = {
-                                // [LÓGICA DE PAGO]
-                                viewModel.vaciar() // Vacía el carrito
+                                // 1️⃣ VERIFICAR LOGIN
+                                if (!authViewModel.isLoggedIn) {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            message = "Debes iniciar sesión para realizar el pago",
+                                            actionLabel = "OK",
+                                            duration = SnackbarDuration.Short
+                                        )
+                                    }
+                                    navController.navigate("login")
+                                    return@Button
+                                }
+
+                                // 2️⃣ SI ESTÁ LOGUEADO → PAGO EXITOSO
+                                viewModel.vaciar()
+
                                 scope.launch {
                                     snackbarHostState.showSnackbar(
-                                        message = "¡Pago realizado con éxito!", // Mensaje de éxito
+                                        message = "¡Pago realizado con éxito!",
                                         actionLabel = "OK",
                                         duration = SnackbarDuration.Short
                                     )
@@ -67,6 +78,7 @@ fun CarritoScreen(
             }
         }
     ) { padding ->
+
         if (items.isEmpty()) {
             Box(
                 Modifier
@@ -78,7 +90,7 @@ fun CarritoScreen(
             }
         } else {
             LazyColumn(
-                modifier = Modifier
+                Modifier
                     .fillMaxSize()
                     .padding(padding),
                 contentPadding = PaddingValues(16.dp),
@@ -87,30 +99,31 @@ fun CarritoScreen(
                 items(items) { it ->
                     ElevatedCard(Modifier.fillMaxWidth()) {
                         Column(Modifier.padding(12.dp)) {
-                            Text(it.producto.nombre, style = MaterialTheme.typography.titleMedium)
+                            Text(it.producto.nombre)
                             Spacer(Modifier.height(4.dp))
                             Text("Talla: ${it.talla}  •  Cantidad: ${it.cantidad}")
                             Spacer(Modifier.height(4.dp))
-                            // Usar el operador Elvis para manejar el precio nulo de forma segura
-                            Text("Subtotal: ${formato.format(it.cantidad * (it.producto.precio ?: 0.0))}",
-                                style = MaterialTheme.typography.bodyMedium,
+                            Text(
+                                "Subtotal: ${formato.format(it.cantidad * (it.producto.precio ?: 0.0))}",
                                 color = MaterialTheme.colorScheme.primary
                             )
                             Spacer(Modifier.height(8.dp))
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 OutlinedButton(onClick = {
                                     val nueva = (it.cantidad - 1).coerceAtLeast(0)
-                                    if (nueva == 0) {
-                                        viewModel.quitar(it.producto.id)
-                                    } else {
-                                        viewModel.cambiarCantidad(it.producto.id, nueva)
-                                    }
+                                    if (nueva == 0) viewModel.quitar(it.producto.id)
+                                    else viewModel.cambiarCantidad(it.producto.id, nueva)
                                 }) { Text("-") }
+
                                 OutlinedButton(onClick = {
                                     viewModel.cambiarCantidad(it.producto.id, it.cantidad + 1)
                                 }) { Text("+") }
+
                                 Spacer(Modifier.weight(1f))
-                                TextButton(onClick = { viewModel.quitar(it.producto.id) }) { Text("Quitar") }
+
+                                TextButton(onClick = {
+                                    viewModel.quitar(it.producto.id)
+                                }) { Text("Quitar") }
                             }
                         }
                     }
