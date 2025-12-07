@@ -19,12 +19,17 @@ fun RegisterScreen(
     val state = authViewModel.uiState
     val mensaje by authViewModel.mensaje
 
+    // Validación completa del formulario
     val formularioListo =
         state.username.isNotBlank() &&
                 state.email.isNotBlank() &&
                 state.password.isNotBlank() &&
-                state.rut.isNotBlank()
+                state.rut.isNotBlank() &&
+                state.region.isNotBlank() &&
+                state.comuna.isNotBlank() &&
+                state.direccion.isNotBlank()
 
+    // Navegar tras registro exitoso
     LaunchedEffect(state.registrationSuccess) {
         if (state.registrationSuccess) {
             navController.navigate("catalogo") {
@@ -37,41 +42,72 @@ fun RegisterScreen(
         topBar = { TopAppBar(title = { Text("Registro de Usuario") }) }
     ) { padding ->
         Column(
-            modifier = Modifier.padding(padding).fillMaxSize().padding(horizontal = 24.dp),
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+                .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text("Crea tu cuenta", style = MaterialTheme.typography.headlineMedium)
 
+            Text("Crea tu cuenta", style = MaterialTheme.typography.headlineMedium)
             Spacer(Modifier.height(24.dp))
 
+            // EMAIL
             OutlinedTextField(
                 value = state.email,
                 onValueChange = authViewModel::updateEmail,
                 label = { Text("Email") },
                 modifier = Modifier.fillMaxWidth()
             )
-
             Spacer(Modifier.height(12.dp))
 
+            // USERNAME
             OutlinedTextField(
                 value = state.username,
                 onValueChange = authViewModel::updateUsername,
                 label = { Text("Nombre de Usuario") },
                 modifier = Modifier.fillMaxWidth()
             )
-
             Spacer(Modifier.height(12.dp))
 
+            // RUT
             OutlinedTextField(
                 value = state.rut,
                 onValueChange = authViewModel::updateRut,
                 label = { Text("RUT") },
                 modifier = Modifier.fillMaxWidth()
             )
-
             Spacer(Modifier.height(12.dp))
 
+            // REGIÓN
+            OutlinedTextField(
+                value = state.region,
+                onValueChange = authViewModel::updateRegion,
+                label = { Text("Región") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(Modifier.height(12.dp))
+
+            // COMUNA
+            OutlinedTextField(
+                value = state.comuna,
+                onValueChange = authViewModel::updateComuna,
+                label = { Text("Comuna") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(Modifier.height(12.dp))
+
+            // DIRECCIÓN
+            OutlinedTextField(
+                value = state.direccion,
+                onValueChange = authViewModel::updateDireccion,
+                label = { Text("Dirección") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(Modifier.height(12.dp))
+
+            // PASSWORD
             OutlinedTextField(
                 value = state.password,
                 onValueChange = authViewModel::updatePassword,
@@ -79,19 +115,22 @@ fun RegisterScreen(
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth()
             )
-
             Spacer(Modifier.height(24.dp))
 
+            // BOTÓN REGISTRARSE
             Button(
                 onClick = { authViewModel.registrar() },
                 enabled = formularioListo,
-                modifier = Modifier.fillMaxWidth().height(48.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
             ) {
                 Text("Registrarse")
             }
 
+            // Mensaje de respuesta
             if (mensaje.isNotBlank()) {
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(Modifier.height(12.dp))
                 Text(mensaje, color = MaterialTheme.colorScheme.primary)
             }
 
@@ -103,4 +142,3 @@ fun RegisterScreen(
         }
     }
 }
-

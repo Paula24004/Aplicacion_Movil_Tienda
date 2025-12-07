@@ -24,6 +24,9 @@ data class AuthUiState(
     val email: String = "",
     val password: String = "",
     val rut: String = "",
+    val region: String = "",
+    val comuna: String = "",
+    val direccion: String = "",
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val registrationSuccess: Boolean = false
@@ -45,7 +48,6 @@ class AuthViewModel(
     val mensaje = mutableStateOf("")
     val usuarioActual = mutableStateOf("")
 
-    // NUEVO: estado real de sesión
     var isLoggedIn by mutableStateOf(false)
         private set
 
@@ -53,18 +55,17 @@ class AuthViewModel(
     // FORMAT & VALIDATE RUT
     // ---------------------------------------------------
 
-    // Formateo automático de RUT
     fun formatearRut(rut: String): String {
         var clean = rut.replace(".", "").replace("-", "").uppercase()
 
         if (clean.isEmpty()) return ""
 
         val dv = clean.last()
-        var cuerpo = clean.dropLast(1)
+        val cuerpo = clean.dropLast(1)
 
-        // Insertar puntos desde la derecha
         val sb = StringBuilder()
         var contador = 0
+
         for (c in cuerpo.reversed()) {
             if (contador == 3) {
                 sb.append(".")
@@ -79,14 +80,12 @@ class AuthViewModel(
         return "$cuerpoFormateado-$dv"
     }
 
-    // Validación real del dígito verificador
     fun validarRut(rut: String): Boolean {
-        val cleanRut = rut.replace(".", "").replace("-", "").uppercase()
+        val clean = rut.replace(".", "").replace("-", "").uppercase()
+        if (clean.length < 2) return false
 
-        if (cleanRut.length < 2) return false
-
-        val cuerpo = cleanRut.dropLast(1)
-        val dv = cleanRut.last()
+        val cuerpo = clean.dropLast(1)
+        val dv = clean.last()
 
         if (!cuerpo.all { it.isDigit() }) return false
 
@@ -94,7 +93,7 @@ class AuthViewModel(
         var multiplicador = 2
 
         for (char in cuerpo.reversed()) {
-            suma += (char.digitToInt() * multiplicador)
+            suma += char.digitToInt() * multiplicador
             multiplicador = if (multiplicador == 7) 2 else multiplicador + 1
         }
 
@@ -111,6 +110,7 @@ class AuthViewModel(
     // ---------------------------------------------------
     // UPDATE CAMPOS
     // ---------------------------------------------------
+
     fun updateEmail(value: String) {
         uiState = uiState.copy(email = value, errorMessage = null)
     }
@@ -135,20 +135,36 @@ class AuthViewModel(
         uiState = uiState.copy(rut = formateado, errorMessage = null)
     }
 
+    fun updateRegion(value: String) {
+        uiState = uiState.copy(region = value, errorMessage = null)
+    }
+
+    fun updateComuna(value: String) {
+        uiState = uiState.copy(comuna = value, errorMessage = null)
+    }
+
+    fun updateDireccion(value: String) {
+        uiState = uiState.copy(direccion = value, errorMessage = null)
+    }
+
     // ---------------------------------------------------
     // REGISTRO
     // ---------------------------------------------------
+
     fun registrar() {
-        if (uiState.username.isBlank() ||
+        if (
+            uiState.username.isBlank() ||
             uiState.email.isBlank() ||
             uiState.password.isBlank() ||
-            uiState.rut.isBlank()
+            uiState.rut.isBlank() ||
+            uiState.region.isBlank() ||
+            uiState.comuna.isBlank() ||
+            uiState.direccion.isBlank()
         ) {
             uiState = uiState.copy(errorMessage = "Todos los campos son obligatorios")
             return
         }
 
-        // Validación real del RUT
         if (!validarRut(uiState.rut)) {
             uiState = uiState.copy(errorMessage = "RUT inválido. Ej: 12.345.678-5")
             return
@@ -182,6 +198,7 @@ class AuthViewModel(
     // ---------------------------------------------------
     // LOGIN + LOGOUT
     // ---------------------------------------------------
+
     fun login(email: String, password: String) {
         viewModelScope.launch {
             val ok = userRepository.login(email, password)
@@ -206,6 +223,7 @@ class AuthViewModel(
     // ---------------------------------------------------
     // ADMIN
     // ---------------------------------------------------
+
     val mensajeadmin = mutableStateOf("")
     private val _esAdminLogueado = MutableStateFlow(false)
     val esAdminLogueado: StateFlow<Boolean> = _esAdminLogueado
@@ -241,6 +259,7 @@ class AuthViewModel(
     // ---------------------------------------------------
     // PRODUCTOS
     // ---------------------------------------------------
+
     var listaProductos = mutableStateOf<List<Producto>>(emptyList())
 
     fun cargarProductos() {
