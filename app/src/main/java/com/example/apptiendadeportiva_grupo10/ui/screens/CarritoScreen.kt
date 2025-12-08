@@ -78,7 +78,7 @@ fun CarritoScreen(
                                             duration = SnackbarDuration.Short
                                         )
                                     }
-                                    navController.navigate("login")
+                                    navController.navigate("iniciar_sesion")
                                     return@Button
                                 }
 
