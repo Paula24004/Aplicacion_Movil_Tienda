@@ -15,15 +15,18 @@ import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
 import java.text.NumberFormat
 import java.util.Locale
 
-
 @OptIn(ExperimentalMaterial3Api::class)
-
 @Composable
+
 fun CompraExitosaScreen(
     navController: NavController,
     authViewModel: AuthViewModel,
-    carritoViewModel: CarritoViewModel
-) {
+    carritoViewModel: CarritoViewModel,
+
+)
+
+
+ {
     val formato = remember { NumberFormat.getCurrencyInstance(Locale("es", "CL")) }
 
     // Datos finales
@@ -35,6 +38,33 @@ fun CompraExitosaScreen(
     val direccionActual = authViewModel.uiState
 
     Scaffold(
+
+        // ⭐ BOTÓN VOLVER ABAJO
+        bottomBar = {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+
+                Button(
+                    onClick = {
+                        navController.navigate("carrito") {
+                            popUpTo("compra_exitosa") { inclusive = true }
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF8A2BE2), // Morado
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("VOLVER")
+                }
+            }
+        },
+
         topBar = {
             TopAppBar(
                 title = { Text("Compra Exitosa", color = Color.White) },
@@ -93,5 +123,3 @@ fun CompraExitosaScreen(
         }
     }
 }
-
-

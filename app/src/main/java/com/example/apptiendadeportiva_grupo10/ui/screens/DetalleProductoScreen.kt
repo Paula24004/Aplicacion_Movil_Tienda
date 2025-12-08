@@ -49,6 +49,32 @@ fun DetalleProductoScreen(
     }
 
     Scaffold(
+
+        // ⭐ BOTÓN VOLVER ABAJO
+        bottomBar = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Button(
+                    onClick = {
+                        navController.navigate("catalogo") {
+                            popUpTo("detalle/$productoId") { inclusive = true }
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF8A2BE2), // Morado
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("VOLVER")
+                }
+            }
+        },
+
         topBar = {
             TopAppBar(
                 title = { Text(producto?.nombre ?: "Detalle del Producto") }
@@ -94,9 +120,13 @@ fun DetalleProductoScreen(
                 )
 
                 Text(p.nombre ?: "Nombre desconocido", style = MaterialTheme.typography.titleLarge)
-                Text(p.descripcion ?: "", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(bottom = 16.dp))
+                Text(
+                    p.descripcion ?: "",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
 
-                // PRECIO FORMATEADO CLP (SIN DECIMALES)
+                // PRECIO CLP SIN DECIMALES
                 val precioFormateado = String.format("%,.0f", p.precio ?: 0.0).replace(',', '.')
                 Text(
                     "Precio: $$precioFormateado",
@@ -154,10 +184,16 @@ fun DetalleProductoScreen(
 
                 // SELECTOR DE TALLA
                 if (availableSizes.isNotEmpty()) {
-                    Text("Seleccionar Talla:", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(top = 8.dp))
+                    Text(
+                        "Seleccionar Talla:",
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
 
                     Row(
-                        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         availableSizes.forEach { size ->
@@ -169,19 +205,21 @@ fun DetalleProductoScreen(
                                 onClick = { selectedSize = size; quantity = 1 },
                                 enabled = isEnabled,
                                 colors = ButtonDefaults.outlinedButtonColors(
-                                    containerColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else Color.Transparent,
-                                    contentColor = Color.Black,   // 👈 Texto negro SIEMPRE
+                                    containerColor = if (isSelected)
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                                    else Color.Transparent,
+                                    contentColor = Color.Black,
                                     disabledContentColor = Color.Gray
                                 ),
                                 border = BorderStroke(
                                     1.dp,
-                                    if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                                    if (isSelected) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.outline
                                 ),
                                 shape = RoundedCornerShape(8.dp)
                             ) {
-                                Text(size, color = Color.Black)  // 👈 También aquí por seguridad
+                                Text(size, color = Color.Black)
                             }
-
                         }
                     }
 
@@ -197,22 +235,40 @@ fun DetalleProductoScreen(
                 // SELECTOR DE CANTIDAD
                 if (stockForSelectedSize > 0) {
                     Row(
-                        Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text("Cantidad:", style = MaterialTheme.typography.bodyLarge)
                         Spacer(Modifier.width(16.dp))
 
-                        Button(onClick = { if (quantity > 1) quantity-- }, enabled = quantity > 1) { Text("-") }
-                        Text("$quantity", modifier = Modifier.padding(horizontal = 16.dp), style = MaterialTheme.typography.bodyLarge)
-                        Button(onClick = { if (quantity < stockForSelectedSize) quantity++ }, enabled = quantity < stockForSelectedSize) { Text("+") }
+                        Button(
+                            onClick = { if (quantity > 1) quantity-- },
+                            enabled = quantity > 1
+                        ) { Text("-") }
+
+                        Text(
+                            "$quantity",
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+
+                        Button(
+                            onClick = { if (quantity < stockForSelectedSize) quantity++ },
+                            enabled = quantity < stockForSelectedSize
+                        ) { Text("+") }
                     }
                 }
 
                 // BOTÓN AGREGAR AL CARRITO
                 Button(
                     onClick = {
-                        carritoViewModel.agregar(productDomain, selectedSize ?: "Desconocida", quantity)
+                        carritoViewModel.agregar(
+                            productDomain,
+                            selectedSize ?: "Desconocida",
+                            quantity
+                        )
                         navController.navigate("carrito")
                     },
                     enabled = isAddToCartEnabled,
@@ -223,7 +279,9 @@ fun DetalleProductoScreen(
             }
 
         } ?: Box(
-            Modifier.fillMaxSize().padding(padd),
+            Modifier
+                .fillMaxSize()
+                .padding(padd),
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator()

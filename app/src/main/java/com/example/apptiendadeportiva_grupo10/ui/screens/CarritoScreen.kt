@@ -18,7 +18,6 @@ import java.text.NumberFormat
 import java.util.Locale
 import kotlinx.coroutines.launch
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CarritoScreen(
@@ -38,7 +37,7 @@ fun CarritoScreen(
             TopAppBar(
                 title = { Text("Carrito", color = Color.White) },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF8A2BE2) // Morado
+                    containerColor = Color(0xFF8A2BE2)
                 ),
                 navigationIcon = {
                     IconButton(onClick = {
@@ -56,50 +55,77 @@ fun CarritoScreen(
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        bottomBar = {
-            if (items.isNotEmpty()) {
-                Surface(tonalElevation = 2.dp) {
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("Total: ${formato.format(total)}")
 
-                        Button(
-                            onClick = {
-                                if (!authViewModel.isLoggedIn) {
+        bottomBar = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+
+                // 🔵 BOTÓN VOLVER ABAJO
+                Button(
+                    onClick = {
+                        navController.navigate("catalogo") {
+                            popUpTo("carrito") { inclusive = true }
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF8A2BE2),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("VOLVER")
+                }
+
+                // 🔵 BOTÓN PAGAR SOLO SI HAY ITEMS
+                if (items.isNotEmpty()) {
+                    Surface(tonalElevation = 2.dp) {
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("Total: ${formato.format(total)}")
+
+                            Button(
+                                onClick = {
+                                    if (!authViewModel.isLoggedIn) {
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                message = "Debes iniciar sesión para realizar el pago",
+                                                actionLabel = "OK",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                        }
+                                        navController.navigate("iniciar_sesion")
+                                        return@Button
+                                    }
+
+                                    viewModel.vaciar()
+                                    navController.navigate("compra_exitosa")
+
                                     scope.launch {
                                         snackbarHostState.showSnackbar(
-                                            message = "Debes iniciar sesión para realizar el pago",
+                                            message = "¡Pago realizado con éxito!",
                                             actionLabel = "OK",
                                             duration = SnackbarDuration.Short
                                         )
                                     }
-                                    navController.navigate("iniciar_sesion")
-                                    return@Button
-                                }
-
-                                viewModel.vaciar()
-                                navController.navigate("compra_exitosa")
-
-
-                                scope.launch {
-                                    snackbarHostState.showSnackbar(
-                                        message = "¡Pago realizado con éxito!",
-                                        actionLabel = "OK",
-                                        duration = SnackbarDuration.Short
-                                    )
-                                }
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF8A2BE2), // Morado
-                                contentColor = Color.White
-                            )
-                        ) {
-                            Text("Pagar")
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFF8A2BE2),
+                                    contentColor = Color.White
+                                )
+                            ) {
+                                Text("Pagar")
+                            }
                         }
                     }
                 }

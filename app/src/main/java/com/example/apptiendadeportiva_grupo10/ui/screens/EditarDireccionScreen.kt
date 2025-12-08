@@ -28,6 +28,32 @@ fun EditarDireccionScreen(
     var mensaje by remember { mutableStateOf("") }
 
     Scaffold(
+
+        // ⭐ BOTÓN VOLVER ABAJO
+        bottomBar = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Button(
+                    onClick = {
+                        navController.navigate("compra_exitosa") {
+                            popUpTo("editar_direccion") { inclusive = true }
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF8A2BE2), // Morado
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("VOLVER")
+                }
+            }
+        },
+
         topBar = {
             TopAppBar(
                 title = { Text("Nueva Dirección", color = Color.White) },
@@ -106,5 +132,3 @@ fun EditarDireccionScreen(
         }
     }
 }
-
-
