@@ -2,10 +2,14 @@ package com.example.apptiendadeportiva_grupo10.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// Colores principales de tu marca
+val MoradoOscuro = Color(0xFF6A1B9A)
+val MoradoMedio = Color(0xFF8E24AA)
+val MoradoSuave = Color(0xFFE1BEE7)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val TextoClaro = Color(0xFFFFFFFF)
+val TextoOscuro = Color(0xFF1C1C1C)
+
+// Fondos
+val FondoApp = Color(0xFF121212)     // Fondo oscuro elegante
+val FondoCard = Color(0xFF1E1E1E)

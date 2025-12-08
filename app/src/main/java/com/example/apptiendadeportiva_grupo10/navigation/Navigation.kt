@@ -63,13 +63,16 @@ fun RootScreen() {
         // LOGIN
         composable("iniciar_sesion") {
             LoginScreen(
+                navController = navController,
                 viewModel = authViewModel,
                 onLoginSuccess = {
                     navController.navigate("catalogo") {
-                        popUpTo("home") { inclusive = true }
+                        popUpTo("iniciar_sesion") { inclusive = true }
                     }
                 },
-                onNavigateToRegister = { navController.navigate("registrarse") }
+                onNavigateToRegister = {
+                    navController.navigate("registrarse")
+                }
             )
         }
 
