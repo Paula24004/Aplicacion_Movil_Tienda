@@ -30,6 +30,8 @@ data class AuthUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val registrationSuccess: Boolean = false
+
+
 )
 
 // ---------------------------------------------------
@@ -45,10 +47,18 @@ class AuthViewModel(
     var uiState by mutableStateOf(AuthUiState())
         private set
 
+    var nuevaRegion by mutableStateOf("")
+    var nuevaComuna by mutableStateOf("")
+    var nuevaDireccion by mutableStateOf("")
+
     val mensaje = mutableStateOf("")
     val usuarioActual = mutableStateOf("")
     var isLoggedIn by mutableStateOf(false)
         private set
+
+    // Dirección seleccionada para despacho
+    var usarNuevaDireccion by mutableStateOf(false)
+
 
     // ---------------------------------------------------
     // FORMATEO RUT
@@ -184,15 +194,33 @@ class AuthViewModel(
             val ok = userRepository.login(username, password)
 
             if (ok) {
+
+                // 🔥 1. Obtener los datos reales del usuario desde el backend
+                val userData = userRepository.getUserByUsername(username)
+
+                // 🔥 2. Guardar estos datos en uiState
+                if (userData != null) {
+                    uiState = uiState.copy(
+                        username = userData.username,
+                        email = userData.email,
+                        region = userData.region ?: "",
+                        comuna = userData.comuna ?: "",
+                        direccion = userData.direccion ?: ""
+                    )
+                }
+
+                // 🔥 3. Mantener estado de login
                 usuarioActual.value = username
                 isLoggedIn = true
                 mensaje.value = "Inicio de sesión exitoso"
+
             } else {
                 mensaje.value = "Credenciales inválidas"
                 isLoggedIn = false
             }
         }
     }
+
 
     // ---------------------------------------------------
     // ADMIN: REGISTRO + LOGIN + LOGOUT

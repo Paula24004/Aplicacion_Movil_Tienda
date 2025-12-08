@@ -105,9 +105,10 @@ fun EditarDireccionScreen(
 
             Button(
                 onClick = {
-                    authViewModel.updateRegion(region)
-                    authViewModel.updateComuna(comuna)
-                    authViewModel.updateDireccion(direccion)
+                    authViewModel.nuevaRegion = region
+                    authViewModel.nuevaComuna = comuna
+                    authViewModel.nuevaDireccion = direccion
+
 
                     mensaje = "Nueva dirección añadida con éxito"
                 },

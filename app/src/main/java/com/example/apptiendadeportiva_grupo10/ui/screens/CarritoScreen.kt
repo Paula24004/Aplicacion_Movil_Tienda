@@ -10,7 +10,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
 import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
@@ -45,88 +47,57 @@ fun CarritoScreen(
                             popUpTo("carrito") { inclusive = true }
                         }
                     }) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Volver",
-                            tint = Color.White
-                        )
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver", tint = Color.White)
                     }
                 }
             )
         },
+
         snackbarHost = { SnackbarHost(snackbarHostState) },
 
         bottomBar = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-
-                // 🔵 BOTÓN VOLVER ABAJO
-                Button(
-                    onClick = {
-                        navController.navigate("catalogo") {
-                            popUpTo("carrito") { inclusive = true }
-                        }
-                    },
+            if (items.isNotEmpty()) {
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 8.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF8A2BE2),
-                        contentColor = Color.White
-                    )
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text("VOLVER")
-                }
 
-                // 🔵 BOTÓN PAGAR SOLO SI HAY ITEMS
-                if (items.isNotEmpty()) {
-                    Surface(tonalElevation = 2.dp) {
-                        Row(
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text("Total: ${formato.format(total)}")
-
-                            Button(
-                                onClick = {
-                                    if (!authViewModel.isLoggedIn) {
-                                        scope.launch {
-                                            snackbarHostState.showSnackbar(
-                                                message = "Debes iniciar sesión para realizar el pago",
-                                                actionLabel = "OK",
-                                                duration = SnackbarDuration.Short
-                                            )
-                                        }
-                                        navController.navigate("iniciar_sesion")
-                                        return@Button
-                                    }
-
-                                    viewModel.vaciar()
-                                    navController.navigate("compra_exitosa")
-
-                                    scope.launch {
-                                        snackbarHostState.showSnackbar(
-                                            message = "¡Pago realizado con éxito!",
-                                            actionLabel = "OK",
-                                            duration = SnackbarDuration.Short
-                                        )
-                                    }
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFF8A2BE2),
-                                    contentColor = Color.White
-                                )
-                            ) {
-                                Text("Pagar")
+                    Button(
+                        onClick = {
+                            if (!authViewModel.isLoggedIn) {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar("Debes iniciar sesión para pagar")
+                                }
+                                navController.navigate("iniciar_sesion")
+                                return@Button
                             }
-                        }
+
+                            val totalCompra = total
+                            navController.navigate("compra_exitosa/$totalCompra")
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF8A2BE2),
+                            contentColor = Color.White
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Pagar", fontSize = 18.sp)
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            navController.navigate("catalogo") {
+                                popUpTo("carrito") { inclusive = true }
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = Color(0xFF8A2BE2)
+                        )
+                    ) {
+                        Text("Volver", fontSize = 18.sp)
                     }
                 }
             }
@@ -135,7 +106,7 @@ fun CarritoScreen(
 
         if (items.isEmpty()) {
             Box(
-                Modifier
+                modifier = Modifier
                     .fillMaxSize()
                     .padding(padding),
                 contentAlignment = Alignment.Center
@@ -143,41 +114,104 @@ fun CarritoScreen(
                 Text("Tu carrito está vacío")
             }
         } else {
+
             LazyColumn(
-                Modifier
-                    .fillMaxSize()
-                    .padding(padding),
+                modifier = Modifier
+                    .padding(padding)
+                    .fillMaxSize(),
                 contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                items(items) { it ->
-                    ElevatedCard(Modifier.fillMaxWidth()) {
-                        Column(Modifier.padding(12.dp)) {
-                            Text(it.producto.nombre)
-                            Spacer(Modifier.height(4.dp))
-                            Text("Talla: ${it.talla}  •  Cantidad: ${it.cantidad}")
-                            Spacer(Modifier.height(4.dp))
+
+                items(items) { item ->
+
+                    Surface(
+                        shape = MaterialTheme.shapes.medium,
+                        tonalElevation = 2.dp,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(Modifier.padding(20.dp)) {
+
                             Text(
-                                "Subtotal: ${formato.format(it.cantidad * (it.producto.precio ?: 0.0))}",
-                                color = MaterialTheme.colorScheme.primary
+                                item.producto.nombre,
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold
                             )
-                            Spacer(Modifier.height(8.dp))
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                OutlinedButton(onClick = {
-                                    val nueva = (it.cantidad - 1).coerceAtLeast(0)
-                                    if (nueva == 0) viewModel.quitar(it.producto.id)
-                                    else viewModel.cambiarCantidad(it.producto.id, nueva)
-                                }) { Text("-") }
 
-                                OutlinedButton(onClick = {
-                                    viewModel.cambiarCantidad(it.producto.id, it.cantidad + 1)
-                                }) { Text("+") }
+                            Spacer(Modifier.height(10.dp))
 
-                                Spacer(Modifier.weight(1f))
+                            Text(
+                                "Talla: ${item.talla}",
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold
+                            )
 
-                                TextButton(onClick = {
-                                    viewModel.quitar(it.producto.id)
-                                }) { Text("Quitar") }
+                            Spacer(Modifier.height(6.dp))
+
+                            Text(
+                                "Cantidad: ${item.cantidad}",
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            Spacer(Modifier.height(6.dp))
+
+                            Text(
+                                "Subtotal: ${formato.format(item.cantidad * (item.producto.precio ?: 0.0))}",
+                                color = Color(0xFF673AB7),
+                                fontSize = 25.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            Spacer(Modifier.height(20.dp))
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+
+                                Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+
+                                    Button(
+                                        onClick = {
+                                            val nueva = item.cantidad - 1
+                                            if (nueva <= 0) viewModel.quitar(item.producto.id)
+                                            else viewModel.cambiarCantidad(item.producto.id, nueva)
+                                        },
+                                        modifier = Modifier.size(width = 54.dp, height = 45.dp),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = Color(0xFF5E35B1),
+                                            contentColor = Color.White
+                                        )
+                                    ) {
+                                        Text("-", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                                    }
+
+                                    Button(
+                                        onClick = {
+                                            viewModel.cambiarCantidad(item.producto.id, item.cantidad + 1)
+                                        },
+                                        modifier = Modifier.size(width = 54.dp, height = 45.dp),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = Color(0xFF5E35B1),
+                                            contentColor = Color.White
+                                        )
+                                    ) {
+                                        Text("+", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                                    }
+                                }
+
+                                TextButton(
+                                    onClick = { viewModel.quitar(item.producto.id) }
+                                ) {
+                                    Text(
+                                        "Quitar",
+                                        fontSize = 18.sp,
+                                        color = Color(0xFF5E35B1),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
                         }
                     }

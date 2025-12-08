@@ -114,13 +114,18 @@ fun RootScreen() {
         }
 
         // COMPRA EXITOSA (SIN ARGUMENTOS)
-        composable("compra_exitosa") {
+        composable("compra_exitosa/{total}") { backStackEntry ->
+
+            val totalArg = backStackEntry.arguments?.getString("total")?.toDouble() ?: 0.0
+
             CompraExitosaScreen(
                 navController = navController,
                 authViewModel = authViewModel,
-                carritoViewModel = carritoViewModel
+                carritoViewModel = carritoViewModel,
+                totalRecibido = totalArg
             )
         }
+
 
         // EDITAR DIRECCIÓN
         composable("editar_direccion") {

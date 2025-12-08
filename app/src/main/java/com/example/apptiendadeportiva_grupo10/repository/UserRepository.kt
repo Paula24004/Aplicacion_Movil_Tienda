@@ -25,4 +25,13 @@ class UserRepository {
         }
     }
 
+    suspend fun getUserByUsername(username: String): User? {
+        return try {
+            userApi.getUserByUsername(username)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+
 }

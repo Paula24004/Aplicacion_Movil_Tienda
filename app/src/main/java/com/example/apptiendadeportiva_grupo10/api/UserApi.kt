@@ -8,9 +8,16 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
 import com.example.apptiendadeportiva_grupo10.model.User
+import retrofit2.http.GET
+import retrofit2.http.Path
+
 
 
 interface UserApi {
+
+    @GET("users/username/{username}")
+    suspend fun getUserByUsername(@Path("username") username: String): User
+
 
     @POST("users/register")
     suspend fun register(@Body user: User): Response<User>
