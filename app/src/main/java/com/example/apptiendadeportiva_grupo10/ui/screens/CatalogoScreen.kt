@@ -20,6 +20,7 @@ import com.example.apptiendadeportiva_grupo10.viewmodel.CatalogoViewModel
 import androidx.compose.runtime.collectAsState
 import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
 import com.example.apptiendadeportiva_grupo10.model.ProductoEntity
+import androidx.compose.material.icons.filled.ArrowBack
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,6 +43,18 @@ fun CatalogoScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Catálogo") },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        navController.navigate("iniciar_sesion") {
+                            popUpTo("catalogo") { inclusive = true }
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = "Volver"
+                        )
+                    }
+                },
                 actions = {
                     IconButton(onClick = { navController.navigate("carrito") }) {
                         Icon(
@@ -52,6 +65,7 @@ fun CatalogoScreen(
                 }
             )
         }
+
     ) { padding ->
         Box(
             Modifier

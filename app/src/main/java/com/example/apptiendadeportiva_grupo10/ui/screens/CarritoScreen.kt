@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,7 +32,23 @@ fun CarritoScreen(
     val scope = rememberCoroutineScope()
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Carrito") }) },
+        topBar = {
+            TopAppBar(
+                title = { Text("Carrito") },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        navController.navigate("catalogo") {
+                            popUpTo("carrito") { inclusive = true }
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = "Volver"
+                        )
+                    }
+                }
+            )
+        },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             if (items.isNotEmpty()) {
@@ -46,7 +64,6 @@ fun CarritoScreen(
 
                         Button(
                             onClick = {
-                                // 1️⃣ VERIFICAR LOGIN
                                 if (!authViewModel.isLoggedIn) {
                                     scope.launch {
                                         snackbarHostState.showSnackbar(
@@ -59,7 +76,6 @@ fun CarritoScreen(
                                     return@Button
                                 }
 
-                                // 2️⃣ SI ESTÁ LOGUEADO → PAGO EXITOSO
                                 viewModel.vaciar()
 
                                 scope.launch {
