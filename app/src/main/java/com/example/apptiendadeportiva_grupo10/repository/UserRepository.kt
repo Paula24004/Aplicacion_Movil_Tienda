@@ -15,10 +15,14 @@ class UserRepository {
     // 🔹 LOGIN CORRECTO (usando LoginRequest)
     suspend fun login(username: String, password: String): Boolean {
         val request = LoginRequest(username, password)
-
         val response = userApi.login(request)
 
-        // Si el backend responde 200, el login es exitoso.
-        return response.isSuccessful
+        return if (response.isSuccessful) {
+            val body = response.body()?.string() ?: ""
+            body.contains("exitos", ignoreCase = true)
+        } else {
+            false
+        }
     }
+
 }
