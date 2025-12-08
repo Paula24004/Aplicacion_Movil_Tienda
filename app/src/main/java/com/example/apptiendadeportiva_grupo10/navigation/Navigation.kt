@@ -30,7 +30,8 @@ import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
 import com.example.apptiendadeportiva_grupo10.viewmodel.QuoteViewModel
 import com.example.apptiendadeportiva_grupo10.model.toDomain
 import com.example.apptiendadeportiva_grupo10.repository.ProductoRepository
-
+import com.example.apptiendadeportiva_grupo10.ui.screens.CompraExitosaScreen
+import com.example.apptiendadeportiva_grupo10.ui.screens.EditarDireccionScreen
 @Composable
 fun RootScreen() {
     // Obtener la instancia de Application (Necesaria para AuthViewModel y Room)
@@ -58,6 +59,9 @@ fun RootScreen() {
 
     // Productos cargados (AÚN SON ProductoEntity)
     val productos by catalogoViewModel.productos.collectAsState()
+
+
+
 
 
 // Solo inicializa cuando hay productos por primera vez.
@@ -152,6 +156,20 @@ fun RootScreen() {
                         popUpTo("admin_registrar") { inclusive = true }
                     }
                 }
+            )
+        }
+        composable("compra_exitosa") {
+            CompraExitosaScreen(
+                navController = navController,
+                authViewModel = authViewModel,
+                carritoViewModel = carritoViewModel
+            )
+        }
+
+        composable("editar_direccion") {
+            EditarDireccionScreen(
+                navController = navController,
+                authViewModel = authViewModel
             )
         }
 

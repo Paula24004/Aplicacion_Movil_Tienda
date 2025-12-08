@@ -83,6 +83,8 @@ fun CarritoScreen(
                                 }
 
                                 viewModel.vaciar()
+                                navController.navigate("compra_exitosa")
+
 
                                 scope.launch {
                                     snackbarHostState.showSnackbar(
