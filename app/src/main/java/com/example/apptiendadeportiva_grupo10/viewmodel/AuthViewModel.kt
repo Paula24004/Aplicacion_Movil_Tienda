@@ -161,7 +161,7 @@ class AuthViewModel(
                     active = true
                 )
 
-                val response = userRepository.register(nuevoUser)
+                val response = userRepository.registrar(nuevoUser)
 
                 if (response.isSuccessful) {
                     uiState = uiState.copy(registrationSuccess = true, errorMessage = null)

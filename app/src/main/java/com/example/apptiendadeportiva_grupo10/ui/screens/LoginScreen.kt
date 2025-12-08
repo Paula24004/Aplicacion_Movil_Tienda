@@ -27,9 +27,16 @@ fun LoginScreen(
     onNavigateToRegister: () -> Unit,
     viewModel: AuthViewModel
 ) {
-    var email by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val loginMessage by viewModel.mensaje
+
+    // 🔥 Detecta cuando login es exitoso y navega correctamente
+    LaunchedEffect(viewModel.isLoggedIn) {
+        if (viewModel.isLoggedIn) {
+            onLoginSuccess()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -39,9 +46,11 @@ fun LoginScreen(
             )
         }
     ) { innerPadding ->
+
         Box(
             modifier = Modifier.padding(innerPadding).fillMaxSize()
         ) {
+
             Image(
                 painter = painterResource(id = R.drawable.fondo_login),
                 contentDescription = null,
@@ -58,21 +67,22 @@ fun LoginScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+
                 Text(
                     "Tienda Deportiva",
                     style = MaterialTheme.typography.headlineMedium.copy(
                         color = Color.White,
                         fontWeight = FontWeight.Bold
-                    ),
-                    textAlign = TextAlign.Center
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
+                // CAMPO USERNAME
                 OutlinedTextField(
-                    value = email,
-                    onValueChange = { email = it },
-                    label = { Text("Email") },
+                    value = username,
+                    onValueChange = { username = it },
+                    label = { Text("Nombre de usuario") },
                     textStyle = TextStyle(color = Color.White, fontWeight = FontWeight.Bold),
                     singleLine = true,
                     colors = loginFieldColors(),
@@ -81,6 +91,7 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
+                // PASSWORD
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
@@ -95,14 +106,9 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Button(
-                    onClick = {
-                        viewModel.login(email, password)
-                        if (viewModel.usuarioActual.value.isNotBlank()) {
-                            onLoginSuccess()
-                        }
-                    },
+                    onClick = { viewModel.login(username, password) },
                     modifier = Modifier.fillMaxWidth().height(52.dp),
-                    enabled = email.isNotBlank() && password.isNotBlank()
+                    enabled = username.isNotBlank() && password.isNotBlank()
                 ) {
                     Text("Ingresar", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
