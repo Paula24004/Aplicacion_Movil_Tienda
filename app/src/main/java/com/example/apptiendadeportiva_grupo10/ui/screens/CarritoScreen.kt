@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
@@ -16,6 +17,7 @@ import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
 import java.text.NumberFormat
 import java.util.Locale
 import kotlinx.coroutines.launch
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,7 +36,10 @@ fun CarritoScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Carrito") },
+                title = { Text("Carrito", color = Color.White) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFF8A2BE2) // Morado
+                ),
                 navigationIcon = {
                     IconButton(onClick = {
                         navController.navigate("catalogo") {
@@ -43,7 +48,8 @@ fun CarritoScreen(
                     }) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Volver"
+                            contentDescription = "Volver",
+                            tint = Color.White
                         )
                     }
                 }
@@ -85,7 +91,11 @@ fun CarritoScreen(
                                         duration = SnackbarDuration.Short
                                     )
                                 }
-                            }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF8A2BE2), // Morado
+                                contentColor = Color.White
+                            )
                         ) {
                             Text("Pagar")
                         }

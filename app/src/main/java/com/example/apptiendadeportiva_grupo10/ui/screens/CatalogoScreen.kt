@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,7 +21,7 @@ import com.example.apptiendadeportiva_grupo10.viewmodel.CatalogoViewModel
 import androidx.compose.runtime.collectAsState
 import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
 import com.example.apptiendadeportiva_grupo10.model.ProductoEntity
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,16 +43,22 @@ fun CatalogoScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Catálogo") },
+                title = { Text("Catálogo", color = Color.White) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFF8A2BE2) // Morado
+                ),
                 navigationIcon = {
-                    IconButton(onClick = {
-                        navController.navigate("iniciar_sesion") {
-                            popUpTo("catalogo") { inclusive = true }
+                    IconButton(
+                        onClick = {
+                            navController.navigate("iniciar_sesion") {
+                                popUpTo("catalogo") { inclusive = true }
+                            }
                         }
-                    }) {
+                    ) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Volver"
+                            contentDescription = "Volver",
+                            tint = Color.White
                         )
                     }
                 },
@@ -59,7 +66,8 @@ fun CatalogoScreen(
                     IconButton(onClick = { navController.navigate("carrito") }) {
                         Icon(
                             imageVector = Icons.Filled.ShoppingCart,
-                            contentDescription = "Carrito de Compras"
+                            contentDescription = "Carrito de Compras",
+                            tint = Color.White
                         )
                     }
                 }
@@ -131,8 +139,8 @@ fun ProductoCard(
                     style = MaterialTheme.typography.titleMedium
                 )
 
-                // ✔ FORMATO CORREGIDO: $5.990 (sin decimales)
-                val precioFormateado = String.format("%,.0f", producto.precio ?: 0.0).replace(',', '.')
+                val precioFormateado = String.format("%,.0f", producto.precio ?: 0.0)
+                    .replace(',', '.')
 
                 Text(
                     "Precio: $$precioFormateado",
