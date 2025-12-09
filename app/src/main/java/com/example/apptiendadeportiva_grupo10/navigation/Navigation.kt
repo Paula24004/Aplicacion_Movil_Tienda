@@ -89,7 +89,8 @@ fun RootScreen() {
             CatalogoScreen(
                 navController = navController,
                 viewModel = catalogoViewModel,
-                carritoViewModel = carritoViewModel
+                carritoViewModel = carritoViewModel,
+                authViewModel = authViewModel
             )
         }
 

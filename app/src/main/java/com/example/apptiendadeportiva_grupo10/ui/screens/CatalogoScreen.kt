@@ -18,6 +18,7 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.apptiendadeportiva_grupo10.viewmodel.CatalogoViewModel
 import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
+import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
 import com.example.apptiendadeportiva_grupo10.model.ProductoEntity
 import androidx.compose.ui.graphics.Color
 
@@ -26,7 +27,8 @@ import androidx.compose.ui.graphics.Color
 fun CatalogoScreen(
     navController: NavController,
     viewModel: CatalogoViewModel,
-    carritoViewModel: CarritoViewModel
+    carritoViewModel: CarritoViewModel,
+    authViewModel: AuthViewModel   // ⭐ AGREGADO PARA VALIDAR LOGIN
 ) {
 
     val context = LocalContext.current
@@ -40,7 +42,7 @@ fun CatalogoScreen(
 
     Scaffold(
 
-        // 🔥 BOTÓN VOLVER (ABAJO)
+        // ⭐ BOTÓN VOLVER CON LÓGICA DE LOGIN
         bottomBar = {
             Column(
                 modifier = Modifier
@@ -51,13 +53,25 @@ fun CatalogoScreen(
 
                 Button(
                     onClick = {
-                        navController.navigate("home") {
-                            popUpTo("catalogo") { inclusive = true }
+
+                        if (authViewModel.isLoggedIn) {
+                            // Usuarios logeados vuelven al HOME
+                            navController.navigate("home") {
+                                popUpTo("catalogo") { inclusive = true }
+                            }
+
+
+                    } else {
+                            // ⭐ Usuario NO logeado → volver al HomeScreen
+                            navController.navigate("home") {
+                                popUpTo("catalogo") { inclusive = true }
+                            }
                         }
+
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF8A2BE2),  // Morado
+                        containerColor = Color(0xFF8A2BE2),
                         contentColor = Color.White
                     )
                 ) {

@@ -3,11 +3,13 @@ package com.example.apptiendadeportiva_grupo10.ui.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -19,7 +21,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
 import com.example.apptiendadeportiva_grupo10.R
-import androidx.compose.material3.TextFieldDefaults
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,22 +34,26 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     val loginMessage by viewModel.mensaje
 
+    val moradoOscuro = Color(0xFF650099)
+    val fondoElegante = Color(0xFFFCF9EF)
+
     LaunchedEffect(viewModel.isLoggedIn) {
         if (viewModel.isLoggedIn) {
             onLoginSuccess()
         }
     }
 
-    val moradoOscuro =  Color(0xFF650099)
-// Nuevo color más elegante
-
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Iniciar Sesión", color = Color.White, fontWeight = FontWeight.Bold) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = moradoOscuro
-                )
+                title = {
+                    Text(
+                        "Iniciar Sesión",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = moradoOscuro)
             )
         }
     ) { padding ->
@@ -57,23 +62,27 @@ fun LoginScreen(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
-                .background(Color(0xFFFCF9EF))
+                .background(fondoElegante)
         ) {
 
+            // 🔵 LOGO CIRCULAR
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 50.dp),
+                    .padding(top = 40.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.fondo_login),
                     contentDescription = "Logo",
-                    modifier = Modifier.size(180.dp),
-                    contentScale = ContentScale.Fit
+                    modifier = Modifier
+                        .size(160.dp)
+                        .clip(CircleShape),        // ⬅ CÍRCULO PERFECTO
+                    contentScale = ContentScale.Crop
                 )
             }
 
+            // 🔵 CAMPOS Y BOTONES
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -82,23 +91,19 @@ fun LoginScreen(
                 verticalArrangement = Arrangement.Center
             ) {
 
-                Text(
-                    "Bienvenido",
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black,
-                    modifier = Modifier.padding(bottom = 28.dp)
-                )
+                Spacer(modifier = Modifier.height(80.dp))
 
-                // CAMPO USUARIO
+                // ---------------------------
+                // CAMPO: NOMBRE DE USUARIO
+                // ---------------------------
                 OutlinedTextField(
                     value = username,
                     onValueChange = { username = it },
                     label = {
                         Text(
                             "Nombre de usuario",
-                            fontSize = 20.sp,              // MÁS GRANDE
-                            fontWeight = FontWeight.Bold,  // MÁS NEGRITA
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
                             color = Color.Black
                         )
                     },
@@ -109,20 +114,20 @@ fun LoginScreen(
                         fontWeight = FontWeight.Bold
                     ),
                     colors = TextFieldDefaults.colors(
-                        focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.Black,
                         focusedIndicatorColor = moradoOscuro,
-                        unfocusedIndicatorColor = Color.Gray,
+                        unfocusedIndicatorColor = Color.DarkGray,
                         cursorColor = moradoOscuro,
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 16.dp)
+                        .padding(bottom = 20.dp)
                 )
 
-                // CAMPO CONTRASEÑA
+                // ---------------------------
+                // CAMPO: CONTRASEÑA
+                // ---------------------------
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
@@ -142,10 +147,8 @@ fun LoginScreen(
                         fontWeight = FontWeight.Bold
                     ),
                     colors = TextFieldDefaults.colors(
-                        focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.Black,
                         focusedIndicatorColor = moradoOscuro,
-                        unfocusedIndicatorColor = Color.Gray,
+                        unfocusedIndicatorColor = Color.DarkGray,
                         cursorColor = moradoOscuro,
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
@@ -155,7 +158,9 @@ fun LoginScreen(
                         .padding(bottom = 32.dp)
                 )
 
+                // ---------------------------
                 // BOTÓN INGRESAR
+                // ---------------------------
                 Button(
                     onClick = { viewModel.login(username, password) },
                     modifier = Modifier
@@ -167,45 +172,55 @@ fun LoginScreen(
                         contentColor = Color.White
                     )
                 ) {
-                    Text(
-                        "Ingresar",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold // MÁS NEGRITA
-                    )
+                    Text("Ingresar", fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 }
 
+                // ---------------------------
                 // BOTÓN REGISTRARSE
+                // ---------------------------
                 Button(
                     onClick = { onNavigateToRegister() },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 12.dp)
-                        .height(48.dp),
+                        .height(50.dp),
                     shape = RoundedCornerShape(20.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = moradoOscuro,
                         contentColor = Color.White
                     )
                 ) {
-                    Text(
-                        "Registrarse",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Text("Registrarse", fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 }
 
+                // ---------------------------
+                // BOTÓN VOLVER
+                // ---------------------------
+                Button(
+                    onClick = { navController.navigate("home") },
+                    modifier = Modifier
+                        .padding(top = 60.dp)
+                        .height(46.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = moradoOscuro,
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("VOLVER", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                }
+
+                // MENSAJE LOGIN
                 if (loginMessage.isNotBlank()) {
                     Text(
                         loginMessage,
                         color = Color(0xFF0B6623),
-                        textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
                         modifier = Modifier.padding(top = 24.dp)
                     )
                 }
-
-            }
             }
         }
     }
-
+}
