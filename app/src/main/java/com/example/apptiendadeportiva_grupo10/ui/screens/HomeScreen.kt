@@ -19,15 +19,22 @@ import androidx.navigation.NavController
 import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
 import com.example.apptiendadeportiva_grupo10.R
 import com.example.apptiendadeportiva_grupo10.components.ImgManagement
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 
 @Composable
+
 fun HomeContent(
-    navController: NavController? = null,  // Agrega navController como parámetro opcional
+    navController: NavController? = null,
     onNavigationLogin: (() -> Unit)? = null,
     onNavigationAdmin: () -> Unit,
     onNavigationCatalogo: () -> Unit
 ) {
+    val purple = Color(0xFF8A00C2)  // Morado más intenso tipo imagen
+
     Box(modifier = Modifier.fillMaxSize()) {
+
         // Imagen de fondo
         Image(
             painter = painterResource(id = R.drawable.fondo_login),
@@ -43,80 +50,103 @@ fun HomeContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Imagen del logo, centrada y no tan arriba
+
+            // Logo centrado
             ImgManagement(
                 null,
-                modifier = Modifier
-                    .padding(bottom = 20.dp) // ajusta la distancia con los botones
+                modifier = Modifier.padding(bottom = 28.dp)
             )
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Columna de botones
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(20.dp),
+                verticalArrangement = Arrangement.spacedBy(26.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Botón Iniciar Sesión
+
+                // 🔵 Botón Iniciar Sesión
                 Button(
                     onClick = { onNavigationLogin?.invoke() },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp),
+                        .height(65.dp),
+                    shape = MaterialTheme.shapes.large,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        containerColor = purple,
+                        contentColor = Color.White
                     )
                 ) {
-                    Text("Iniciar Sesión / Registrarse", fontSize = 16.sp)
+                    Text(
+                        "Iniciar Sesión / Registrarse",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
 
-                // Botón Frase del día (ahora usa navController si está disponible)
+                // 🔵 Botón Frase del día
                 Button(
-                    onClick = { navController?.navigate("frases") },  // Usa navController opcionalmente
+                    onClick = { navController?.navigate("frases") },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp),
+                        .height(65.dp),
+                    shape = MaterialTheme.shapes.large,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
+                        containerColor = purple,
+                        contentColor = Color.White
                     )
                 ) {
-                    Text("Frase del día", fontSize = 16.sp)
+                    Text(
+                        "Frase del día",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
 
-                // Botón Catálogo
+                // 🔵 Botón Ver Catálogo
                 Button(
                     onClick = onNavigationCatalogo,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp),
+                        .height(65.dp),
+                    shape = MaterialTheme.shapes.large,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
+                        containerColor = purple,
+                        contentColor = Color.White
                     )
                 ) {
-                    Text("Ver Catálogo sin Iniciar Sesión", fontSize = 16.sp)
+                    Text(
+                        "Ver Catálogo sin Iniciar Sesión",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
 
-                // Botón Administrador
+                // 🔵 Botón Administrador
                 Button(
                     onClick = onNavigationAdmin,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp),
+                        .height(65.dp),
+                    shape = MaterialTheme.shapes.large,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                        containerColor = purple,
+                        contentColor = Color.White
                     )
                 ) {
-                    Text("Acceso de Administrador", fontSize = 16.sp)
+                    Text(
+                        "Acceso de Administrador",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }
     }
 }
+
+
+
 
 @Composable
 fun HomeScreen(

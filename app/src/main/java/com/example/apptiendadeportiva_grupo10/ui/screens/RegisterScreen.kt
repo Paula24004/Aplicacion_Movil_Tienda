@@ -1,17 +1,21 @@
 package com.example.apptiendadeportiva_grupo10.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.rememberScrollState
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,97 +44,167 @@ fun RegisterScreen(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Registro de Usuario") }) }
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        "Registro de Usuario",
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFF650099)
+                )
+            )
+        }
     ) { padding ->
+
         Column(
             modifier = Modifier
+                .background(Color(0xFFFCF9EF)) // Fondo blanco hueso
                 .padding(padding)
                 .fillMaxSize()
                 .padding(horizontal = 24.dp)
-                .verticalScroll(rememberScrollState()),  // ⭐ IMPORTANTE
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Text("Crea tu cuenta", style = MaterialTheme.typography.headlineMedium)
+            Spacer(Modifier.height(20.dp))
+
+            Text(
+                "Crea tu cuenta",
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+
             Spacer(Modifier.height(24.dp))
 
-            OutlinedTextField(
-                value = state.email,
-                onValueChange = authViewModel::updateEmail,
-                label = { Text("Email") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(Modifier.height(12.dp))
+            // --------- CAMPOS ------------
 
-            OutlinedTextField(
-                value = state.username,
-                onValueChange = authViewModel::updateUsername,
-                label = { Text("Nombre de Usuario") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(Modifier.height(12.dp))
+            CampoRegistro(state.email, authViewModel::updateEmail, "Email")
+            Spacer(Modifier.height(14.dp))
 
-            OutlinedTextField(
-                value = state.rut,
-                onValueChange = authViewModel::updateRut,
-                label = { Text("RUT") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(Modifier.height(12.dp))
+            CampoRegistro(state.username, authViewModel::updateUsername, "Nombre de Usuario")
+            Spacer(Modifier.height(14.dp))
 
-            OutlinedTextField(
-                value = state.region,
-                onValueChange = authViewModel::updateRegion,
-                label = { Text("Región") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(Modifier.height(12.dp))
+            CampoRegistro(state.rut, authViewModel::updateRut, "RUT")
+            Spacer(Modifier.height(14.dp))
 
-            OutlinedTextField(
-                value = state.comuna,
-                onValueChange = authViewModel::updateComuna,
-                label = { Text("Comuna") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(Modifier.height(12.dp))
+            CampoRegistro(state.region, authViewModel::updateRegion, "Región")
+            Spacer(Modifier.height(14.dp))
 
-            OutlinedTextField(
-                value = state.direccion,
-                onValueChange = authViewModel::updateDireccion,
-                label = { Text("Dirección") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(Modifier.height(12.dp))
+            CampoRegistro(state.comuna, authViewModel::updateComuna, "Comuna")
+            Spacer(Modifier.height(14.dp))
+
+            CampoRegistro(state.direccion, authViewModel::updateDireccion, "Dirección")
+            Spacer(Modifier.height(14.dp))
+
+            // --------- CONTRASEÑA -----------
 
             OutlinedTextField(
                 value = state.password,
                 onValueChange = authViewModel::updatePassword,
-                label = { Text("Contraseña") },
+                label = {
+                    Text(
+                        "Contraseña",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                },
+                textStyle = TextStyle(
+                    color = Color.Black,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Medium
+                ),
                 visualTransformation = PasswordVisualTransformation(),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = Color(0xFF650099),
+                    unfocusedIndicatorColor = Color.Gray,
+                    focusedLabelColor = Color(0xFF650099),
+                    cursorColor = Color(0xFF650099)
+                )
             )
+
             Spacer(Modifier.height(24.dp))
+
+            // --------- BOTÓN REGISTRARSE -----------
 
             Button(
                 onClick = { authViewModel.registrar() },
                 enabled = formularioListo,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp)
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF650099),
+                    contentColor = Color.White
+                )
             ) {
-                Text("Registrarse")
+                Text("Registrarse", fontSize = 18.sp, fontWeight = FontWeight.Bold)
             }
+
+            // --------- MENSAJE --------------
 
             if (mensaje.isNotBlank()) {
                 Spacer(Modifier.height(12.dp))
-                Text(mensaje, color = MaterialTheme.colorScheme.primary)
+                Text(
+                    mensaje,
+                    color = Color(0xFF006400),
+                    fontWeight = FontWeight.Bold
+                )
             }
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(16.dp))
+
+            // --------- VOLVER A LOGIN -----------
 
             TextButton(onClick = { navController.navigate("iniciar_sesion") }) {
-                Text("¿Ya tienes cuenta? Inicia sesión")
+                Text(
+                    "¿Ya tienes cuenta? Inicia sesión",
+                    color = Color(0xFF650099),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 22.sp
+                )
             }
+
+            Spacer(Modifier.height(24.dp))
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CampoRegistro(
+    valor: String,
+    onChange: (String) -> Unit,
+    etiqueta: String
+) {
+    OutlinedTextField(
+        value = valor,
+        onValueChange = onChange,
+        label = {
+            Text(
+                etiqueta,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+        },
+        textStyle = TextStyle(
+            color = Color.Black,
+            fontSize = 17.sp,
+            fontWeight = FontWeight.Medium
+        ),
+        modifier = Modifier.fillMaxWidth(),
+        colors = TextFieldDefaults.colors(
+            focusedIndicatorColor = Color(0xFF650099),
+            unfocusedIndicatorColor = Color.Gray,
+            focusedLabelColor = Color(0xFF650099),
+            cursorColor = Color(0xFF650099)
+        )
+    )
 }
