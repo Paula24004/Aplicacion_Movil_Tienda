@@ -3,15 +3,16 @@ package com.example.apptiendadeportiva_grupo10.ui.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.selection.TextSelectionColors
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -34,6 +35,8 @@ fun RegistroAdmin(
     onRegisterSuccess: () -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
+
+    // Estados
     var usernameAdmin by remember { mutableStateOf("") }
     var rutAdmin by remember { mutableStateOf("") }
     var passwordAdmin by remember { mutableStateOf("") }
@@ -41,6 +44,9 @@ fun RegistroAdmin(
 
     val mensajeAdmin by viewModel.mensajeadmin
     var rutError by remember { mutableStateOf<String?>(null) }
+
+    val morado = Color(0xFF650099)
+    val fondoElegante = Color(0xFFFCF9EF)
 
     val formOk = usernameAdmin.isNotBlank() &&
             passwordAdmin.isNotBlank() &&
@@ -58,45 +64,51 @@ fun RegistroAdmin(
                         fontWeight = FontWeight.Bold
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = morado)
             )
         }
     ) { padding ->
+
         Box(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
+                .background(fondoElegante)
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.fondo_login),
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
 
-            Box(
+            // -------------------------
+            // LOGO CIRCULAR
+            // -------------------------
+            Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.45f))
-            )
+                    .fillMaxWidth()
+                    .padding(top = 40.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.fondo_login),
+                    contentDescription = "Logo",
+                    modifier = Modifier
+                        .size(160.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+            }
 
+            // -------------------------
+            // FORMULARIO
+            // -------------------------
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(24.dp),
+                    .padding(horizontal = 32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(
-                    "Crear Cuenta de Administrador",
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    textAlign = TextAlign.Center
-                )
+
+                Spacer(Modifier.height(80.dp))
+
+
 
                 Spacer(Modifier.height(24.dp))
 
@@ -104,101 +116,127 @@ fun RegistroAdmin(
                 OutlinedTextField(
                     value = emailAdmin,
                     onValueChange = { emailAdmin = it },
-                    label = { Text("Email administrador") },
-                    textStyle = TextStyle(color = Color.White, fontWeight = FontWeight.Bold),
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    colors = adminRegisterFieldColors()
+                    label = {
+                        Text("Email administrador",
+                            fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                    },
+                    textStyle = LocalTextStyle.current.copy(
+                        color = Color.Black, fontSize = 18.sp, fontWeight = FontWeight.Bold
+                    ),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = adminFieldColors(morado),
+                    modifier = Modifier.fillMaxWidth()
                 )
 
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(14.dp))
 
                 // USUARIO
                 OutlinedTextField(
                     value = usernameAdmin,
                     onValueChange = { usernameAdmin = it },
-                    label = { Text("Usuario administrador") },
-                    textStyle = TextStyle(color = Color.White, fontWeight = FontWeight.Bold),
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    colors = adminRegisterFieldColors()
+                    label = {
+                        Text("Usuario administrador",
+                            fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                    },
+                    textStyle = LocalTextStyle.current.copy(
+                        color = Color.Black, fontSize = 18.sp, fontWeight = FontWeight.Bold
+                    ),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = adminFieldColors(morado),
+                    modifier = Modifier.fillMaxWidth()
                 )
 
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(14.dp))
 
-                // RUT ADMIN
+                // RUT
                 OutlinedTextField(
                     value = rutAdmin,
-                    onValueChange = { newValue ->
-                        rutAdmin = newValue
-                        rutError = if (newValue.isNotBlank() && !rutAdminValido(newValue))
-                            "RUT inválido (ingrese sin dígito verificador)"
-                        else null
+                    onValueChange = {
+                        rutAdmin = it
+                        rutError = if (it.isNotBlank() && !rutAdminValido(it))
+                            "RUT inválido (sin dígito verificador)" else null
                     },
-                    label = { Text("RUT (sin DV)") },
+                    label = {
+                        Text("RUT (sin DV)",
+                            fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                    },
                     isError = rutError != null,
                     supportingText = {
-                        rutError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                        rutError?.let { msg -> Text(msg, color = Color.Red) }
                     },
-                    textStyle = TextStyle(color = Color.White, fontWeight = FontWeight.Bold),
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    colors = adminRegisterFieldColors()
+                    textStyle = LocalTextStyle.current.copy(
+                        color = Color.Black, fontSize = 18.sp, fontWeight = FontWeight.Bold
+                    ),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = adminFieldColors(morado),
+                    modifier = Modifier.fillMaxWidth()
                 )
 
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(14.dp))
 
                 // CONTRASEÑA
                 OutlinedTextField(
                     value = passwordAdmin,
                     onValueChange = { passwordAdmin = it },
-                    label = { Text("Contraseña") },
+                    label = {
+                        Text("Contraseña",
+                            fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                    },
                     visualTransformation = PasswordVisualTransformation(),
-                    textStyle = TextStyle(color = Color.White, fontWeight = FontWeight.Bold),
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    colors = adminRegisterFieldColors()
+                    textStyle = LocalTextStyle.current.copy(
+                        color = Color.Black, fontSize = 18.sp, fontWeight = FontWeight.Bold
+                    ),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = adminFieldColors(morado),
+                    modifier = Modifier.fillMaxWidth()
                 )
 
                 Spacer(Modifier.height(24.dp))
 
-                // BOTÓN REGISTRO ADMIN
+                // BOTÓN REGISTRAR
                 Button(
                     onClick = {
                         val ok = viewModel.registrarAdmin(
-                            usernameAdmin,
-                            rutAdmin,
-                            passwordAdmin,
-                            emailAdmin
+                            usernameAdmin, rutAdmin, passwordAdmin, emailAdmin
                         )
                         if (ok) onRegisterSuccess()
                     },
                     enabled = formOk,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(52.dp),
+                        .height(54.dp),
+                    shape = RoundedCornerShape(20.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = Color.White
+                        containerColor = morado, contentColor = Color.White
                     )
                 ) {
-                    Text("Registrar Administrador", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    Text("Registrar Administrador", fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 }
 
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(10.dp))
 
                 if (mensajeAdmin.isNotBlank()) {
                     Text(
                         mensajeAdmin,
-                        fontWeight = FontWeight.Bold,
-                        color = if (mensajeAdmin.contains("exitos")) Color.Green else Color.Red
+                        color = if (mensajeAdmin.contains("exitos")) Color(0xFF0B6623) else Color.Red,
+                        fontWeight = FontWeight.Bold
                     )
                 }
 
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(16.dp))
 
-                TextButton(onClick = onNavigateToLogin) {
-                    Text("¿Ya tienes cuenta? Iniciar sesión", color = Color.White)
+                // BOTÓN VOLVER
+                Button(
+                    onClick = onNavigateToLogin,
+                    modifier = Modifier
+                        .height(46.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = morado,
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("VOLVER", fontSize = 17.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -206,20 +244,10 @@ fun RegistroAdmin(
 }
 
 @Composable
-private fun adminRegisterFieldColors() = OutlinedTextFieldDefaults.colors(
-    focusedTextColor = Color.White,
-    unfocusedTextColor = Color.White,
-    disabledTextColor = Color.White.copy(alpha = 0.5f),
-    focusedBorderColor = Color.White,
-    unfocusedBorderColor = Color.White.copy(alpha = 0.5f),
-    cursorColor = Color.White,
-    errorBorderColor = Color.Red,
-    focusedLabelColor = Color.White,
-    unfocusedLabelColor = Color.White.copy(alpha = 0.7f),
-    selectionColors = TextSelectionColors(
-        handleColor = Color.White,
-        backgroundColor = Color.White.copy(alpha = 0.3f)
-    ),
+private fun adminFieldColors(morado: Color) = TextFieldDefaults.colors(
+    focusedIndicatorColor = morado,
+    unfocusedIndicatorColor = Color.DarkGray,
+    cursorColor = morado,
     focusedContainerColor = Color.Transparent,
     unfocusedContainerColor = Color.Transparent
 )

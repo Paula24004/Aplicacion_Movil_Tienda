@@ -21,6 +21,8 @@ import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
 import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
 import com.example.apptiendadeportiva_grupo10.model.ProductoEntity
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -131,6 +133,7 @@ fun CatalogoScreen(
 }
 
 @Composable
+
 fun ProductoCard(
     producto: ProductoEntity,
     onClick: () -> Unit
@@ -138,10 +141,15 @@ fun ProductoCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
+            .clickable { onClick() },
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFF3F1F5) // Fondo suave elegante
+        ),
+        elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Row(
-            Modifier.padding(12.dp),
+            Modifier
+                .padding(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
 
@@ -150,31 +158,46 @@ fun ProductoCard(
             Image(
                 painter = painter,
                 contentDescription = producto.nombre,
-                modifier = Modifier.size(80.dp),
+                modifier = Modifier
+                    .size(85.dp),
                 contentScale = ContentScale.Crop
             )
 
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(14.dp))
 
             Column(Modifier.weight(1f)) {
 
+                // ⭐ NOMBRE MÁS GRANDE Y NEGRITA
                 Text(
-                    producto.nombre ?: "Nombre Desconocido",
-                    style = MaterialTheme.typography.titleMedium
+                    text = producto.nombre ?: "Producto",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
                 )
 
                 val precioFormateado = String.format("%,.0f", producto.precio ?: 0.0)
                     .replace(',', '.')
 
+                // ⭐ PRECIO MÁS GRANDE Y NEGRITA
                 Text(
-                    "Precio: $$precioFormateado",
-                    style = MaterialTheme.typography.bodyMedium
+                    text = "Precio: $$precioFormateado",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF4A148C) // Morado elegante
                 )
 
+                // ⭐ DESCRIPCIÓN MÁS LEGIBLE Y EN NEGRITA
                 producto.descripcion?.let {
-                    Text(it, maxLines = 2)
+                    Text(
+                        text = it,
+                        fontSize = 16.sp,
+                        color = Color.DarkGray,
+                        fontWeight = FontWeight.Bold,   // ← NEGRITA
+                        maxLines = 2
+                    )
                 }
+
+            }
             }
         }
     }
-}

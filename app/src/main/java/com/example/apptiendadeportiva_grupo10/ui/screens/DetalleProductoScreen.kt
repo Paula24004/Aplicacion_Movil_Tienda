@@ -13,7 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
@@ -37,7 +39,6 @@ fun DetalleProductoScreen(
     var quantity by remember { mutableStateOf(1) }
     var selectedSize by remember { mutableStateOf<String?>(null) }
 
-    // ESTADOS PARA CONVERSIÓN
     var precioUsd by remember { mutableStateOf<Double?>(null) }
     var precioEur by remember { mutableStateOf<Double?>(null) }
     var convirtiendo by remember { mutableStateOf(false) }
@@ -50,7 +51,6 @@ fun DetalleProductoScreen(
 
     Scaffold(
 
-        // ⭐ BOTÓN VOLVER ABAJO
         bottomBar = {
             Column(
                 modifier = Modifier
@@ -66,18 +66,23 @@ fun DetalleProductoScreen(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF8A2BE2), // Morado
+                        containerColor = Color(0xFF650099),
                         contentColor = Color.White
                     )
                 ) {
-                    Text("VOLVER")
+                    Text("VOLVER", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 }
             }
         },
 
         topBar = {
             TopAppBar(
-                title = { Text(producto?.nombre ?: "Detalle del Producto") }
+                title = {
+                    Text(
+                        producto?.nombre ?: "Detalle del Producto",
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             )
         }
     ) { padd ->
@@ -85,7 +90,7 @@ fun DetalleProductoScreen(
 
             val productDomain = p.toDomain()
             val stockMap = p.stockPorTalla ?: emptyMap()
-            val availableSizes = stockMap.keys.toList().sorted()
+            val availableSizes = stockMap.keys.sorted()
 
             val totalStock = stockMap.values.sum()
             val stockForSelectedSize = selectedSize?.let { stockMap[it] } ?: 0
@@ -114,27 +119,38 @@ fun DetalleProductoScreen(
                     contentDescription = p.nombre,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(220.dp)
+                        .height(240.dp)
                         .padding(bottom = 16.dp),
                     contentScale = ContentScale.Crop
                 )
 
-                Text(p.nombre ?: "Nombre desconocido", style = MaterialTheme.typography.titleLarge)
+                // ⭐ NOMBRE DEL PRODUCTO
                 Text(
-                    p.descripcion ?: "",
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = p.nombre ?: "Nombre desconocido",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+
+                // ⭐ DESCRIPCIÓN
+                Text(
+                    text = p.descripcion ?: "",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.DarkGray,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
 
-                // PRECIO CLP SIN DECIMALES
+                // ⭐ PRECIO
                 val precioFormateado = String.format("%,.0f", p.precio ?: 0.0).replace(',', '.')
                 Text(
-                    "Precio: $$precioFormateado",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    text = "Precio: $$precioFormateado",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 12.dp)
                 )
 
-                // ⭐ BOTÓN CONVERSOR
+                // ⭐ BOTÓN DE CONVERSIÓN
                 Button(
                     onClick = {
                         convirtiendo = true
@@ -148,7 +164,7 @@ fun DetalleProductoScreen(
                                 precioUsd = String.format("%.2f", usd).toDouble()
                                 precioEur = String.format("%.2f", eur).toDouble()
 
-                            } catch (e: Exception) {
+                            } catch (_: Exception) {
                                 precioUsd = null
                                 precioEur = null
                             } finally {
@@ -158,9 +174,13 @@ fun DetalleProductoScreen(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp)
+                        .padding(vertical = 8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF650099),
+                        contentColor = Color.White
+                    )
                 ) {
-                    Text("Convertir precio a USD y EUR")
+                    Text("Convertir precio a USD y EUR", fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
 
                 if (convirtiendo) {
@@ -168,26 +188,28 @@ fun DetalleProductoScreen(
                 }
 
                 precioUsd?.let {
-                    Text("USD: $${it}", style = MaterialTheme.typography.bodyLarge)
+                    Text("USD: $${it}", fontSize = 18.sp, fontWeight = FontWeight.Medium)
                 }
 
                 precioEur?.let {
-                    Text("EUR: €${it}", style = MaterialTheme.typography.bodyLarge)
+                    Text("EUR: €${it}", fontSize = 18.sp, fontWeight = FontWeight.Medium)
                 }
 
-                // STOCK TOTAL
+                // ⭐ STOCK
                 Text(
-                    "Stock total disponible: $totalStock unidades",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(top = 16.dp)
+                    text = "Stock total disponible: $totalStock unidades",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
                 )
 
-                // SELECTOR DE TALLA
+                // ⭐ SELECCIÓN DE TALLA
                 if (availableSizes.isNotEmpty()) {
                     Text(
-                        "Seleccionar Talla:",
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(top = 8.dp)
+                        text = "Seleccionar Talla:",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = 12.dp)
                     )
 
                     Row(
@@ -206,33 +228,23 @@ fun DetalleProductoScreen(
                                 enabled = isEnabled,
                                 colors = ButtonDefaults.outlinedButtonColors(
                                     containerColor = if (isSelected)
-                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                                    else Color.Transparent,
+                                        Color(0xFFE9D7FF) else Color.Transparent,
                                     contentColor = Color.Black,
                                     disabledContentColor = Color.Gray
                                 ),
                                 border = BorderStroke(
                                     1.dp,
-                                    if (isSelected) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.outline
+                                    if (isSelected) Color(0xFF650099) else Color.Gray
                                 ),
-                                shape = RoundedCornerShape(8.dp)
+                                shape = RoundedCornerShape(10.dp)
                             ) {
-                                Text(size, color = Color.Black)
+                                Text(size, fontSize = 16.sp)
                             }
                         }
                     }
-
-                    if (selectedSize != null) {
-                        Text(
-                            "Stock para talla $selectedSize: $stockForSelectedSize unidades",
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
-                    }
                 }
 
-                // SELECTOR DE CANTIDAD
+                // ⭐ SELECTOR DE CANTIDAD
                 if (stockForSelectedSize > 0) {
                     Row(
                         Modifier
@@ -240,28 +252,31 @@ fun DetalleProductoScreen(
                             .padding(vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Cantidad:", style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            text = "Cantidad:",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                         Spacer(Modifier.width(16.dp))
 
-                        Button(
-                            onClick = { if (quantity > 1) quantity-- },
-                            enabled = quantity > 1
-                        ) { Text("-") }
+                        Button(onClick = { if (quantity > 1) quantity-- }) {
+                            Text("-", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        }
 
                         Text(
                             "$quantity",
                             modifier = Modifier.padding(horizontal = 16.dp),
-                            style = MaterialTheme.typography.bodyLarge
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
                         )
 
-                        Button(
-                            onClick = { if (quantity < stockForSelectedSize) quantity++ },
-                            enabled = quantity < stockForSelectedSize
-                        ) { Text("+") }
+                        Button(onClick = { if (quantity < stockForSelectedSize) quantity++ }) {
+                            Text("+", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
 
-                // BOTÓN AGREGAR AL CARRITO
+                // ⭐ AÑADIR AL CARRITO
                 Button(
                     onClick = {
                         carritoViewModel.agregar(
@@ -272,9 +287,18 @@ fun DetalleProductoScreen(
                         navController.navigate("carrito")
                     },
                     enabled = isAddToCartEnabled,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF650099),
+                        contentColor = Color.White
+                    )
                 ) {
-                    Text("Agregar $quantity unid. (Talla $selectedSize) a Carrito")
+                    Text(
+                        "Agregar $quantity unid. (Talla $selectedSize) a Carrito",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
 
