@@ -13,7 +13,6 @@ import androidx.navigation.NavController
 import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.TextFieldDefaults
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,7 +28,7 @@ fun EditarDireccionScreen(
 
     Scaffold(
 
-        // ⭐ BOTÓN VOLVER ABAJO
+        // ⭐ BOTÓN VOLVER ABAJO (CORREGIDO)
         bottomBar = {
             Column(
                 modifier = Modifier
@@ -39,9 +38,8 @@ fun EditarDireccionScreen(
             ) {
                 Button(
                     onClick = {
-                        navController.navigate("compra_exitosa") {
-                            popUpTo("editar_direccion") { inclusive = true }
-                        }
+                        // ✅ Vuelve a la pantalla anterior (CompraExitosaScreen)
+                        navController.popBackStack()
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
@@ -108,7 +106,6 @@ fun EditarDireccionScreen(
                     authViewModel.nuevaRegion = region
                     authViewModel.nuevaComuna = comuna
                     authViewModel.nuevaDireccion = direccion
-
 
                     mensaje = "Nueva dirección añadida con éxito"
                 },

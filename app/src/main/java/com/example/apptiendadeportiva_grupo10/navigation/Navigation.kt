@@ -1,21 +1,16 @@
 package com.example.apptiendadeportiva_grupo10.navigation
 
 import android.app.Application
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.example.apptiendadeportiva_grupo10.ui.screens.*
 import com.example.apptiendadeportiva_grupo10.viewmodel.*
-import com.example.apptiendadeportiva_grupo10.repository.ProductoRepository
+import com.example.apptiendadeportiva_grupo10.repository.*
+import com.example.apptiendadeportiva_grupo10.data.remote.RetrofitClient
 import com.example.apptiendadeportiva_grupo10.model.toDomain
 
 @Composable
@@ -23,33 +18,61 @@ fun RootScreen() {
 
     val application = LocalContext.current.applicationContext as Application
 
-    // Repositorios y factories
+    // ----------------------------
+    // REPOSITORIES
+    // ----------------------------
     val productoRepository = remember { ProductoRepository() }
-    val authViewModelFactory = remember { AuthViewModelFactory(application, productoRepository) }
+    val boletaRepository = remember {
+        BoletaRepository(RetrofitClient.boletaApi)
+    }
+    val gestionEnvioRepository = remember {
+        GestionEnvioRepository(RetrofitClient.gestionEnvioApi)
+    }
 
-    // ViewModels compartidos
+    // ----------------------------
+    // VIEWMODEL FACTORIES
+    // ----------------------------
+    val authViewModelFactory = remember {
+        AuthViewModelFactory(application, productoRepository)
+    }
+
+    // ----------------------------
+    // VIEWMODELS
+    // ----------------------------
     val authViewModel: AuthViewModel = viewModel(factory = authViewModelFactory)
     val catalogoViewModel: CatalogoViewModel = viewModel()
-    val carritoViewModel: CarritoViewModel = viewModel()
     val quoteViewModel: QuoteViewModel = viewModel()
+
+    // ⚠️ ViewModels con parámetros → remember
+    val carritoViewModel = remember {
+        CarritoViewModel(boletaRepository)
+    }
+
+    val gestionEnvioViewModel = remember {
+        GestionEnvioViewModel(gestionEnvioRepository)
+    }
 
     val navController = rememberNavController()
 
+    // ----------------------------
+    // CARGA PRODUCTOS / STOCK
+    // ----------------------------
     val productos by catalogoViewModel.productos.collectAsState()
 
-    // Inicializa stock en carrito cuando catálogo se cargue
     LaunchedEffect(productos.isNotEmpty()) {
         if (productos.isNotEmpty()) {
             carritoViewModel.initStock(productos.map { it.toDomain() })
         }
     }
 
+    // ----------------------------
+    // NAVIGATION
+    // ----------------------------
     NavHost(
         navController = navController,
         startDestination = "home"
     ) {
 
-        // HOME
         composable("home") {
             HomeScreen(
                 navController = navController,
@@ -60,7 +83,6 @@ fun RootScreen() {
             )
         }
 
-        // LOGIN
         composable("iniciar_sesion") {
             LoginScreen(
                 navController = navController,
@@ -76,7 +98,6 @@ fun RootScreen() {
             )
         }
 
-        // REGISTRO
         composable("registrarse") {
             RegisterScreen(
                 navController = navController,
@@ -84,7 +105,6 @@ fun RootScreen() {
             )
         }
 
-        // CATÁLOGO
         composable("catalogo") {
             CatalogoScreen(
                 navController = navController,
@@ -94,9 +114,8 @@ fun RootScreen() {
             )
         }
 
-        // DETALLE PRODUCTO
         composable(
-            "detalle/{idProducto}",
+            route = "detalle/{idProducto}",
             arguments = listOf(navArgument("idProducto") { type = NavType.IntType })
         ) { entry ->
             val idProducto = entry.arguments?.getInt("idProducto") ?: 0
@@ -108,7 +127,6 @@ fun RootScreen() {
             )
         }
 
-        // CARRITO
         composable("carrito") {
             CarritoScreen(
                 navController = navController,
@@ -117,10 +135,9 @@ fun RootScreen() {
             )
         }
 
-        // COMPRA EXITOSA (SIN ARGUMENTOS)
         composable("compra_exitosa/{total}") { backStackEntry ->
-
-            val totalArg = backStackEntry.arguments?.getString("total")?.toDouble() ?: 0.0
+            val totalArg =
+                backStackEntry.arguments?.getString("total")?.toDouble() ?: 0.0
 
             CompraExitosaScreen(
                 navController = navController,
@@ -130,8 +147,15 @@ fun RootScreen() {
             )
         }
 
+        // ✅ PROCESO DE ENVÍO (YA CON VIEWMODEL)
+        composable("proceso_envio") {
+            ProcesoEnvioScreen(
+                navController = navController,
+                viewModel = gestionEnvioViewModel
+            )
+        }
 
-        // EDITAR DIRECCIÓN
+
         composable("editar_direccion") {
             EditarDireccionScreen(
                 navController = navController,
@@ -139,21 +163,20 @@ fun RootScreen() {
             )
         }
 
-        // FRASES
         composable("frases") {
             FraseScreen(viewModel = quoteViewModel)
         }
 
-        // ADMIN LOGIN
         composable("admin_iniciar") {
             LoginAdmin(
                 navController = navController,
                 viewModel = authViewModel,
-                onNavigateToRegister = { navController.navigate("admin_registrar") }
+                onNavigateToRegister = {
+                    navController.navigate("admin_registrar")
+                }
             )
         }
 
-        // ADMIN REGISTRO
         composable("admin_registrar") {
             RegistroAdmin(
                 viewModel = authViewModel,
@@ -170,7 +193,6 @@ fun RootScreen() {
             )
         }
 
-        // PANEL ADMIN
         composable("admin_panel") {
             HomeAdmin(
                 viewModel = authViewModel,

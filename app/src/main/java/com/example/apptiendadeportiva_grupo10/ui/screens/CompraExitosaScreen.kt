@@ -28,11 +28,32 @@ fun CompraExitosaScreen(
     val uiState = authViewModel.uiState
 
     val subtotal = totalRecibido
-
     val iva = subtotal * 0.19
     val total = subtotal + iva
 
+    // -----------------------------
+    // REGISTRO DE BOLETAS + VACIAR
+    // -----------------------------
+    LaunchedEffect(true) {
+        carritoViewModel.items.value.forEach { item ->
+            carritoViewModel.registrarBoleta(
+                idProduct = item.producto.id,
+                cantidad = item.cantidad,
+                precio = item.producto.precio.toInt()
+            )
+        }
+        carritoViewModel.vaciar()
+    }
+
     Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Compra Exitosa", color = Color.White) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFF673AB7)
+                )
+            )
+        },
         bottomBar = {
             Column(
                 modifier = Modifier
@@ -55,14 +76,6 @@ fun CompraExitosaScreen(
                     Text("VOLVER")
                 }
             }
-        },
-        topBar = {
-            TopAppBar(
-                title = { Text("Compra Exitosa", color = Color.White) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF673AB7)
-                )
-            )
         }
     ) { padding ->
 
@@ -106,11 +119,11 @@ fun CompraExitosaScreen(
 
             Button(
                 onClick = { navController.navigate("editar_direccion") },
+                modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF673AB7),
                     contentColor = Color.White
-                ),
-                modifier = Modifier.fillMaxWidth()
+                )
             ) {
                 Text("Añadir nueva dirección", fontSize = 18.sp, fontWeight = FontWeight.Bold)
             }
@@ -133,19 +146,16 @@ fun CompraExitosaScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(Modifier.padding(16.dp)) {
-
                         Text(
                             "Región: ${authViewModel.nuevaRegion}",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold
                         )
-
                         Text(
                             "Comuna: ${authViewModel.nuevaComuna}",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold
                         )
-
                         Text(
                             "Dirección: ${authViewModel.nuevaDireccion}",
                             fontSize = 20.sp,
@@ -202,6 +212,26 @@ fun CompraExitosaScreen(
                 SnackbarHost(
                     hostState = snackbarHostState,
                     modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+
+            // -----------------------------
+            // BOTÓN CONTINUAR CON EL ENVÍO
+            // -----------------------------
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Button(
+                onClick = { navController.navigate("proceso_envio") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF8A2BE2),
+                    contentColor = Color.White
+                )
+            ) {
+                Text(
+                    "Continuar con el envío",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
