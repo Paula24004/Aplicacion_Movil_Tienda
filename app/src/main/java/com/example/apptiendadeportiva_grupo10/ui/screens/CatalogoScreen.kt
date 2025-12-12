@@ -30,13 +30,13 @@ fun CatalogoScreen(
     navController: NavController,
     viewModel: CatalogoViewModel,
     carritoViewModel: CarritoViewModel,
-    authViewModel: AuthViewModel   // ⭐ AGREGADO PARA VALIDAR LOGIN
+    authViewModel: AuthViewModel
 ) {
 
     val context = LocalContext.current
     val productos by viewModel.productos.collectAsState()
-    val loading: Boolean by viewModel.loading.collectAsState(initial = false)
-    val error: String? by viewModel.error.collectAsState(initial = null)
+    val loading by viewModel.loading.collectAsState(initial = false)
+    val error by viewModel.error.collectAsState(initial = null)
 
     LaunchedEffect(Unit) {
         viewModel.cargarProductos(context)
@@ -44,7 +44,9 @@ fun CatalogoScreen(
 
     Scaffold(
 
-        // ⭐ BOTÓN VOLVER CON LÓGICA DE LOGIN
+        // -----------------------------
+        // BOTÓN VOLVER (LÓGICA CORRECTA)
+        // -----------------------------
         bottomBar = {
             Column(
                 modifier = Modifier
@@ -55,21 +57,15 @@ fun CatalogoScreen(
 
                 Button(
                     onClick = {
-
                         if (authViewModel.isLoggedIn) {
-                            // Usuarios logeados vuelven al HOME
-                            navController.navigate("home") {
-                                popUpTo("catalogo") { inclusive = true }
-                            }
-
-
-                    } else {
-                            // ⭐ Usuario NO logeado → volver al HomeScreen
+                            // ✅ Usuario logueado → volver a la pantalla anterior (DetalleProducto)
+                            navController.popBackStack()
+                        } else {
+                            // ❌ Usuario NO logueado → volver al Home
                             navController.navigate("home") {
                                 popUpTo("catalogo") { inclusive = true }
                             }
                         }
-
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
@@ -82,6 +78,9 @@ fun CatalogoScreen(
             }
         },
 
+        // -----------------------------
+        // TOP BAR
+        // -----------------------------
         topBar = {
             TopAppBar(
                 title = { Text("Catálogo", color = Color.White) },
@@ -101,29 +100,34 @@ fun CatalogoScreen(
         }
 
     ) { padding ->
+
         Box(
-            Modifier
+            modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
         ) {
             when {
                 loading -> Box(
-                    Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
-                ) { CircularProgressIndicator() }
+                ) {
+                    CircularProgressIndicator()
+                }
 
                 error != null -> Box(
-                    Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
-                ) { Text("Error: $error") }
+                ) {
+                    Text("Error: $error")
+                }
 
                 else -> LazyColumn(
                     contentPadding = PaddingValues(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(productos, key = { it.id }) { p ->
-                        ProductoCard(producto = p) {
-                            navController.navigate("detalle/${p.id}")
+                    items(productos, key = { it.id }) { producto ->
+                        ProductoCard(producto = producto) {
+                            navController.navigate("detalle/${producto.id}")
                         }
                     }
                 }
@@ -133,7 +137,6 @@ fun CatalogoScreen(
 }
 
 @Composable
-
 fun ProductoCard(
     producto: ProductoEntity,
     onClick: () -> Unit
@@ -143,13 +146,12 @@ fun ProductoCard(
             .fillMaxWidth()
             .clickable { onClick() },
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF3F1F5) // Fondo suave elegante
+            containerColor = Color(0xFFF3F1F5)
         ),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Row(
-            Modifier
-                .padding(14.dp),
+            modifier = Modifier.padding(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
 
@@ -158,16 +160,14 @@ fun ProductoCard(
             Image(
                 painter = painter,
                 contentDescription = producto.nombre,
-                modifier = Modifier
-                    .size(85.dp),
+                modifier = Modifier.size(85.dp),
                 contentScale = ContentScale.Crop
             )
 
-            Spacer(Modifier.width(14.dp))
+            Spacer(modifier = Modifier.width(14.dp))
 
-            Column(Modifier.weight(1f)) {
+            Column(modifier = Modifier.weight(1f)) {
 
-                // ⭐ NOMBRE MÁS GRANDE Y NEGRITA
                 Text(
                     text = producto.nombre ?: "Producto",
                     fontSize = 20.sp,
@@ -178,26 +178,23 @@ fun ProductoCard(
                 val precioFormateado = String.format("%,.0f", producto.precio ?: 0.0)
                     .replace(',', '.')
 
-                // ⭐ PRECIO MÁS GRANDE Y NEGRITA
                 Text(
                     text = "Precio: $$precioFormateado",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF4A148C) // Morado elegante
+                    color = Color(0xFF4A148C)
                 )
 
-                // ⭐ DESCRIPCIÓN MÁS LEGIBLE Y EN NEGRITA
                 producto.descripcion?.let {
                     Text(
                         text = it,
                         fontSize = 16.sp,
                         color = Color.DarkGray,
-                        fontWeight = FontWeight.Bold,   // ← NEGRITA
+                        fontWeight = FontWeight.Bold,
                         maxLines = 2
                     )
                 }
-
-            }
             }
         }
     }
+}

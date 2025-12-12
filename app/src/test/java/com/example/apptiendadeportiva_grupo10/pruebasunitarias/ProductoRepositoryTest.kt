@@ -1,8 +1,8 @@
 package com.example.apptiendadeportiva_grupo10.pruebasunitarias
 
+import com.example.apptiendadeportiva_grupo10.api.ProductApiService
 import com.example.apptiendadeportiva_grupo10.model.ProductoDto
 import com.example.apptiendadeportiva_grupo10.repository.ProductoRepository
-import com.example.apptiendadeportiva_grupo10.api.ProductApiService
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -15,12 +15,12 @@ class ProductoRepositoryTest {
     private val repository = ProductoRepository(api)
 
     @Test
-    fun `getProductosSoloAPI devuelve lista desde la API`() = runBlocking {
+    fun `getProductosSoloAPI devuelve lista desde API`() = runBlocking {
 
-        val dtoList = listOf(
+        val productosApi = listOf(
             ProductoDto(
                 id = 1,
-                nombre = "Prod Test",
+                nombre = "Producto Test",
                 descripcion = "Desc",
                 precio = 1000.0,
                 categoria = "Calzado",
@@ -31,11 +31,11 @@ class ProductoRepositoryTest {
             )
         )
 
-        `when`(api.getProducts()).thenReturn(dtoList)
+        `when`(api.getProducts()).thenReturn(productosApi)
 
         val result = repository.getProductosSoloAPI()
 
         assertEquals(1, result.size)
-        assertEquals("Prod Test", result[0].nombre)
+        assertEquals("Producto Test", result.first().nombre)
     }
 }
