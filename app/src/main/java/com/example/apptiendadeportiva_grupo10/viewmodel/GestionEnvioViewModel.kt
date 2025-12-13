@@ -13,14 +13,16 @@ class GestionEnvioViewModel(
     fun crearEnvio(
         agencia: String,
         fecha: String,
-        estado: String
+        estado: String,
+        direccion: String
     ) {
         viewModelScope.launch {
             try {
                 val envio = GestionEnvioDto(
                     agenciaEnvio = agencia,
                     fechaEnvio = fecha,
-                    estadoEnvio = estado
+                    estadoEnvio = estado,
+                    direccionDespacho = direccion
                 )
                 repository.guardarEnvio(envio)
             } catch (e: Exception) {
@@ -29,3 +31,5 @@ class GestionEnvioViewModel(
         }
     }
 }
+
+

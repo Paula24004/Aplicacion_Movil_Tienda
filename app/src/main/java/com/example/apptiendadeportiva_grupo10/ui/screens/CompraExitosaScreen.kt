@@ -12,7 +12,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
 import com.example.apptiendadeportiva_grupo10.viewmodel.CarritoViewModel
-import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -79,9 +78,6 @@ fun CompraExitosaScreen(
         }
     ) { padding ->
 
-        val snackbarHostState = remember { SnackbarHostState() }
-        val scope = rememberCoroutineScope()
-
         Column(
             modifier = Modifier
                 .padding(padding)
@@ -128,6 +124,9 @@ fun CompraExitosaScreen(
                 Text("Añadir nueva dirección", fontSize = 18.sp, fontWeight = FontWeight.Bold)
             }
 
+            // =========================================================
+            // CASO 1: HAY NUEVA DIRECCIÓN
+            // =========================================================
             if (authViewModel.nuevaDireccion.isNotBlank()) {
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -194,11 +193,20 @@ fun CompraExitosaScreen(
 
                 Button(
                     onClick = {
-                        scope.launch {
-                            snackbarHostState.showSnackbar(
-                                message = "Dirección seleccionada para su despacho"
-                            )
-                        }
+                        val direccionSeleccionada =
+                            if (authViewModel.usarNuevaDireccion) {
+                                "${authViewModel.nuevaRegion}, " +
+                                        "${authViewModel.nuevaComuna}, " +
+                                        authViewModel.nuevaDireccion
+                            } else {
+                                "${uiState.region}, ${uiState.comuna}, ${uiState.direccion}"
+                            }
+
+                        navController.navigate(
+                            "proceso_envio/" +
+                                    "${android.net.Uri.encode(direccionSeleccionada)}/" +
+                                    total
+                        )
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
@@ -209,30 +217,33 @@ fun CompraExitosaScreen(
                     Text("ACEPTAR", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 }
 
-                SnackbarHost(
-                    hostState = snackbarHostState,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
             }
+            // =========================================================
+            // CASO 2: NO HAY NUEVA DIRECCIÓN (ADICIÓN SOLICITADA)
+            // =========================================================
+            else {
 
-            // -----------------------------
-            // BOTÓN CONTINUAR CON EL ENVÍO
-            // -----------------------------
-            Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-            Button(
-                onClick = { navController.navigate("proceso_envio") },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF8A2BE2),
-                    contentColor = Color.White
-                )
-            ) {
-                Text(
-                    "Continuar con el envío",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Button(
+                    onClick = {
+                        val direccionSeleccionada =
+                            "${uiState.region}, ${uiState.comuna}, ${uiState.direccion}"
+
+                        navController.navigate(
+                            "proceso_envio/" +
+                                    "${android.net.Uri.encode(direccionSeleccionada)}/" +
+                                    total
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF8A2BE2),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("ACEPTAR", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                }
             }
         }
     }

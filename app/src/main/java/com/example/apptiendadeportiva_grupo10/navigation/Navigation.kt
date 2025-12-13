@@ -43,7 +43,6 @@ fun RootScreen() {
     val catalogoViewModel: CatalogoViewModel = viewModel()
     val quoteViewModel: QuoteViewModel = viewModel()
 
-    // ⚠️ ViewModels con parámetros → remember
     val carritoViewModel = remember {
         CarritoViewModel(boletaRepository)
     }
@@ -147,14 +146,25 @@ fun RootScreen() {
             )
         }
 
-        // ✅ PROCESO DE ENVÍO (YA CON VIEWMODEL)
-        composable("proceso_envio") {
+        // ✅ CORRECCIÓN: proceso_envio con dirección + total
+        composable(
+            route = "proceso_envio/{direccion}/{total}",
+            arguments = listOf(
+                navArgument("direccion") { type = NavType.StringType },
+                navArgument("total") { type = NavType.FloatType }
+            )
+        ) { backStackEntry ->
+
+            val direccion = backStackEntry.arguments?.getString("direccion") ?: ""
+            val total = backStackEntry.arguments?.getFloat("total")?.toDouble() ?: 0.0
+
             ProcesoEnvioScreen(
                 navController = navController,
-                viewModel = gestionEnvioViewModel
+                viewModel = gestionEnvioViewModel,
+                direccionDespacho = direccion,
+                total = total
             )
         }
-
 
         composable("editar_direccion") {
             EditarDireccionScreen(
@@ -201,6 +211,25 @@ fun RootScreen() {
                         popUpTo("admin_panel") { inclusive = true }
                     }
                 }
+            )
+        }
+
+        composable(
+            route = "pedido_enviado/{agencia}/{fecha}/{direccion}/{total}",
+            arguments = listOf(
+                navArgument("agencia") { type = NavType.StringType },
+                navArgument("fecha") { type = NavType.StringType },
+                navArgument("direccion") { type = NavType.StringType },
+                navArgument("total") { type = NavType.FloatType }
+            )
+        ) { backStackEntry ->
+
+            PedidoEnviadoScreen(
+                navController = navController,
+                agencia = backStackEntry.arguments?.getString("agencia") ?: "",
+                fecha = backStackEntry.arguments?.getString("fecha") ?: "",
+                direccion = backStackEntry.arguments?.getString("direccion") ?: "",
+                total = backStackEntry.arguments?.getFloat("total")?.toDouble() ?: 0.0
             )
         }
     }

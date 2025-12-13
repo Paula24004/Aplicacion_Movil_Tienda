@@ -19,7 +19,9 @@ import java.util.Locale
 @Composable
 fun ProcesoEnvioScreen(
     navController: NavController,
-    viewModel: GestionEnvioViewModel
+    viewModel: GestionEnvioViewModel,
+    direccionDespacho: String,
+    total: Double
 ) {
     val purple = Color(0xFF8A2BE2)
 
@@ -39,7 +41,14 @@ fun ProcesoEnvioScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Proceso de Envío", color = Color.White) },
+                title = {
+                    Text(
+                        "Proceso de Envío",
+                        color = Color.White,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color(0xFF673AB7)
                 )
@@ -49,39 +58,61 @@ fun ProcesoEnvioScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
 
-                // 🔴 BOTÓN CONFIRMAR ENVÍO (GUARDA EN BACKEND)
+                // ✅ CONFIRMAR ENVÍO
                 Button(
                     onClick = {
                         viewModel.crearEnvio(
                             agencia = agenciaSeleccionada,
                             fecha = formatter.format(fechaEnvio),
-                            estado = estadoEnvio
+                            estado = estadoEnvio,
+                            direccion = direccionDespacho
                         )
-                        navController.popBackStack()
+
+                        navController.navigate(
+                            "pedido_enviado/" +
+                                    "${android.net.Uri.encode(agenciaSeleccionada)}/" +
+                                    "${android.net.Uri.encode(formatter.format(fechaEnvio))}/" +
+                                    "${android.net.Uri.encode(direccionDespacho)}/" +
+                                    total
+                        )
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(64.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = purple,
                         contentColor = Color.White
                     )
                 ) {
-                    Text("CONFIRMAR ENVÍO", fontWeight = FontWeight.Bold)
+                    Text(
+                        "CONFIRMAR ENVÍO",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
 
-                // 🔙 BOTÓN VOLVER
+                // 🔙 VOLVER A COMPRA EXITOSA
                 Button(
-                    onClick = { navController.popBackStack() },
-                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        navController.popBackStack()
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = purple,
                         contentColor = Color.White
                     )
                 ) {
-                    Text("VOLVER", fontWeight = FontWeight.Bold)
+                    Text(
+                        "VOLVER",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }
@@ -90,9 +121,9 @@ fun ProcesoEnvioScreen(
         Column(
             modifier = Modifier
                 .padding(padding)
-                .padding(24.dp)
+                .padding(28.dp)
                 .fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
 
             // -------------------------
@@ -107,20 +138,24 @@ fun ProcesoEnvioScreen(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 RadioButton(
                     selected = agenciaSeleccionada == "Correos de Chile",
-                    onClick = { agenciaSeleccionada = "Correos de Chile" }
+                    onClick = { agenciaSeleccionada = "Correos de Chile" },
+                    modifier = Modifier.size(32.dp)
                 )
-                Text("Correos de Chile")
+                Spacer(modifier = Modifier.width(14.dp))
+                Text("Correos de Chile", fontSize = 20.sp)
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 RadioButton(
                     selected = agenciaSeleccionada == "Starken Envíos",
-                    onClick = { agenciaSeleccionada = "Starken Envíos" }
+                    onClick = { agenciaSeleccionada = "Starken Envíos" },
+                    modifier = Modifier.size(32.dp)
                 )
-                Text("Starken Envíos")
+                Spacer(modifier = Modifier.width(14.dp))
+                Text("Starken Envíos", fontSize = 20.sp)
             }
 
-            Divider()
+            Divider(thickness = 2.dp)
 
             // -------------------------
             // FECHA DE ENVÍO
@@ -133,44 +168,10 @@ fun ProcesoEnvioScreen(
 
             Text(
                 "Fecha seleccionada: ${formatter.format(fechaEnvio)}",
-                fontSize = 18.sp
+                fontSize = 20.sp
             )
 
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-
-                Button(
-                    onClick = {
-                        calendar.time = fechaEnvio
-                        calendar.add(Calendar.DAY_OF_MONTH, 1)
-                        fechaEnvio = calendar.time
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = purple,
-                        contentColor = Color.White
-                    )
-                ) {
-                    Text("+ Día")
-                }
-
-                Button(
-                    onClick = {
-                        val hoy = Calendar.getInstance().time
-                        calendar.time = fechaEnvio
-                        calendar.add(Calendar.DAY_OF_MONTH, -1)
-                        if (!calendar.time.before(hoy)) {
-                            fechaEnvio = calendar.time
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = purple,
-                        contentColor = Color.White
-                    )
-                ) {
-                    Text("- Día")
-                }
-            }
-
-            Divider()
+            Divider(thickness = 2.dp)
 
             // -------------------------
             // ESTADO DEL ENVÍO
@@ -184,37 +185,17 @@ fun ProcesoEnvioScreen(
             Surface(
                 color = Color(0xFFD1C4E9),
                 modifier = Modifier.fillMaxWidth(),
-                tonalElevation = 4.dp
+                tonalElevation = 6.dp
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Estado actual:", fontWeight = FontWeight.Bold)
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Text("Estado actual:", fontSize = 20.sp, fontWeight = FontWeight.Bold)
                     Text(
                         estadoEnvio,
-                        fontSize = 18.sp,
-                        color = Color(0xFF4CAF50),
+                        fontSize = 20.sp,
+                        color = Color(0xFF2E7D32),
                         fontWeight = FontWeight.Bold
                     )
                 }
-            }
-
-            // -------------------------
-            // SIMULACIÓN DE AVANCE
-            // -------------------------
-            Button(
-                onClick = {
-                    estadoEnvio = when (estadoEnvio) {
-                        "En espera de despacho" -> "En proceso"
-                        "En proceso" -> "En camino hacia tu hogar"
-                        else -> "En camino hacia tu hogar"
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = purple,
-                    contentColor = Color.White
-                )
-            ) {
-                Text("Actualizar estado", fontWeight = FontWeight.Bold)
             }
         }
     }
