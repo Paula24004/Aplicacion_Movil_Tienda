@@ -177,41 +177,12 @@ fun RootScreen() {
             FraseScreen(viewModel = quoteViewModel)
         }
 
-        composable("admin_iniciar") {
-            LoginAdmin(
-                navController = navController,
-                viewModel = authViewModel,
-                onNavigateToRegister = {
-                    navController.navigate("admin_registrar")
-                }
-            )
-        }
 
-        composable("admin_registrar") {
-            RegistroAdmin(
-                viewModel = authViewModel,
-                onRegisterSuccess = {
-                    navController.navigate("admin_iniciar") {
-                        popUpTo("admin_registrar") { inclusive = true }
-                    }
-                },
-                onNavigateToLogin = {
-                    navController.navigate("admin_iniciar") {
-                        popUpTo("admin_registrar") { inclusive = true }
-                    }
-                }
-            )
-        }
 
         composable("admin_panel") {
             HomeAdmin(
                 viewModel = authViewModel,
                 onLogout = {
-
-                    // 1️⃣ Cerrar sesión admin (estado)
-                    authViewModel.logoutAdmin()
-
-                    // 2️⃣ Volver al HomeScreen y limpiar backstack
                     navController.navigate("home") {
                         popUpTo("admin_panel") {
                             inclusive = true
@@ -220,6 +191,7 @@ fun RootScreen() {
                 }
             )
         }
+
 
 
         composable(

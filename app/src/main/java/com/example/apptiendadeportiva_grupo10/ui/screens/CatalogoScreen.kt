@@ -24,6 +24,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.ui.graphics.vector.ImageVector
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,7 +37,7 @@ fun CatalogoScreen(
     carritoViewModel: CarritoViewModel,
     authViewModel: AuthViewModel
 ) {
-
+    val uiState = authViewModel.uiState
     val context = LocalContext.current
     val productos by viewModel.productos.collectAsState()
     val loading by viewModel.loading.collectAsState(initial = false)
@@ -88,6 +92,17 @@ fun CatalogoScreen(
                     containerColor = Color(0xFF8A2BE2)
                 ),
                 actions = {
+                    if (uiState.esAdmin) {
+                        IconButton(onClick = {
+                            navController.navigate("admin_panel")
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Build,
+                                contentDescription = "Panel de Admin",
+                                tint = Color.Red // Color distintivo para el admin
+                            )
+                        }
+                    }
                     // BOTÓN DE PERFIL (Agregado)
                     IconButton(onClick = { navController.navigate("perfil") }) {
                         Icon(
