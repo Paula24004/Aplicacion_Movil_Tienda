@@ -183,14 +183,18 @@ fun RootScreen() {
             HomeAdmin(
                 viewModel = authViewModel,
                 onLogout = {
+
+                    // 1️⃣ Cerrar sesión real (usuario/admin)
+                    authViewModel.logout()
+
+                    // 2️⃣ Volver al Home principal limpiando backstack
                     navController.navigate("home") {
-                        popUpTo("admin_panel") {
-                            inclusive = true
-                        }
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )
         }
+
 
 
 

@@ -283,6 +283,14 @@ class AuthViewModel(
         }
     }
 
+    fun logout() {
+        // limpiar estado de usuario
+        isLoggedIn = false
+        usuarioActual.value = ""
+        uiState = AuthUiState()
+    }
+
+
     fun modificarProducto(producto: Producto) {
         viewModelScope.launch {
             val result = productoRepository.updateProducto(getApplication(), producto)
