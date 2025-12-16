@@ -207,12 +207,20 @@ fun RootScreen() {
             HomeAdmin(
                 viewModel = authViewModel,
                 onLogout = {
-                    navController.navigate("admin_iniciar") {
-                        popUpTo("admin_panel") { inclusive = true }
+
+                    // 1️⃣ Cerrar sesión admin (estado)
+                    authViewModel.logoutAdmin()
+
+                    // 2️⃣ Volver al HomeScreen y limpiar backstack
+                    navController.navigate("home") {
+                        popUpTo("admin_panel") {
+                            inclusive = true
+                        }
                     }
                 }
             )
         }
+
 
         composable(
             route = "pedido_enviado/{agencia}/{fecha}/{direccion}/{total}",
