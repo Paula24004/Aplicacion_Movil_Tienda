@@ -23,6 +23,7 @@ import com.example.apptiendadeportiva_grupo10.model.ProductoEntity
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.material.icons.filled.AccountCircle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,7 +44,6 @@ fun CatalogoScreen(
     }
 
     Scaffold(
-
         // -----------------------------
         // BOTÓN VOLVER (LÓGICA CORRECTA)
         // -----------------------------
@@ -88,6 +88,14 @@ fun CatalogoScreen(
                     containerColor = Color(0xFF8A2BE2)
                 ),
                 actions = {
+                    // BOTÓN DE PERFIL (Agregado)
+                    IconButton(onClick = { navController.navigate("perfil") }) {
+                        Icon(
+                            imageVector = Icons.Default.AccountCircle,
+                            contentDescription = "Mi Perfil",
+                            tint = Color.White
+                        )
+                    }
                     IconButton(onClick = { navController.navigate("carrito") }) {
                         Icon(
                             imageVector = Icons.Filled.ShoppingCart,

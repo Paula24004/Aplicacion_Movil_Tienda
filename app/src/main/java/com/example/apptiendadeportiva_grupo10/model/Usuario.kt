@@ -7,6 +7,7 @@ data class User(
     val username: String,
     val password: String,
     val email: String,
+    val rut: String?,
     val region: String,
     val comuna: String,
     val direccion: String,

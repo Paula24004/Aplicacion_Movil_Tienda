@@ -232,5 +232,13 @@ fun RootScreen() {
                 total = backStackEntry.arguments?.getFloat("total")?.toDouble() ?: 0.0
             )
         }
+
+        composable("perfil") {
+            ProfileScreen(
+                navController = navController,
+                authViewModel = authViewModel
+            )
+        }
     }
+
 }

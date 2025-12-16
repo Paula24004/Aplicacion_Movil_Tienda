@@ -1,5 +1,6 @@
 package com.example.apptiendadeportiva_grupo10.repository
 
+
 import com.example.apptiendadeportiva_grupo10.api.UserApi
 import com.example.apptiendadeportiva_grupo10.data.remote.RetrofitClient
 import com.example.apptiendadeportiva_grupo10.model.User
@@ -31,6 +32,10 @@ class UserRepository {
         } catch (e: Exception) {
             null
         }
+    }
+
+    suspend fun eliminarUsuario(id: Int): retrofit2.Response<Void> {
+        return userApi.eliminarUsuario(id)
     }
 
 
