@@ -177,31 +177,7 @@ fun RootScreen() {
             FraseScreen(viewModel = quoteViewModel)
         }
 
-        composable("admin_iniciar") {
-            LoginAdmin(
-                navController = navController,
-                viewModel = authViewModel,
-                onNavigateToRegister = {
-                    navController.navigate("admin_registrar")
-                }
-            )
-        }
 
-        composable("admin_registrar") {
-            RegistroAdmin(
-                viewModel = authViewModel,
-                onRegisterSuccess = {
-                    navController.navigate("admin_iniciar") {
-                        popUpTo("admin_registrar") { inclusive = true }
-                    }
-                },
-                onNavigateToLogin = {
-                    navController.navigate("admin_iniciar") {
-                        popUpTo("admin_registrar") { inclusive = true }
-                    }
-                }
-            )
-        }
 
         composable("admin_panel") {
             HomeAdmin(

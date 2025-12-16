@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 // ESTADO DEL FORMULARIO
 // ---------------------------------------------------
 data class AuthUiState(
-    val id: Int = 0, // <--- Agregado para identificar al usuario en el DELETE
+    val id: Int = 0,
     val username: String = "",
     val email: String = "",
     val password: String = "",
@@ -29,6 +29,7 @@ data class AuthUiState(
     val region: String = "",
     val comuna: String = "",
     val direccion: String = "",
+    val esAdmin: Boolean = false,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val registrationSuccess: Boolean = false
@@ -178,32 +179,41 @@ class AuthViewModel(
     // ---------------------------------------------------
     fun login(username: String, password: String) {
         viewModelScope.launch {
+            uiState = uiState.copy(isLoading = true) // Mostrar carga
             val ok = userRepository.login(username, password)
+
             if (ok) {
                 val userData = userRepository.getUserByUsername(username)
+
                 if (userData != null) {
                     uiState = uiState.copy(
-                        id = userData.id ?:0, //
                         username = userData.username,
                         email = userData.email,
-                        rut = userData.rut ?: "",
                         region = userData.region ?: "",
                         comuna = userData.comuna ?: "",
-                        direccion = userData.direccion ?: ""
+                        direccion = userData.direccion ?: "",
+                        esAdmin = userData.esAdmin, // 🔥 AQUÍ: Guardamos si es admin o no
+                        isLoading = false
                     )
+
+                    // Actualizamos también el StateFlow para compatibilidad con tu código anterior
+                    _esAdminLogueado.value = userData.esAdmin
                 }
+
                 usuarioActual.value = username
                 isLoggedIn = true
                 mensaje.value = "Inicio de sesión exitoso"
             } else {
                 mensaje.value = "Credenciales inválidas"
                 isLoggedIn = false
+                uiState = uiState.copy(isLoading = false)
             }
         }
     }
 
+
     // ---------------------------------------------------
-    // ELIMINAR CUENTA (NUEVO)
+    // ELIMINAR CUENTA
     // ---------------------------------------------------
     fun eliminarCuenta(onSuccess: () -> Unit) {
         val userId = uiState.id
@@ -244,19 +254,6 @@ class AuthViewModel(
     private val _esAdminLogueado = MutableStateFlow(false)
     val esAdminLogueado: StateFlow<Boolean> = _esAdminLogueado
 
-    fun registrarAdmin(username: String, rut: String, password: String, email: String): Boolean {
-        if (username != "admin" || password != "admin") {
-            mensajeadmin.value = "Solo se permite admin por defecto"; return false
-        }
-        _esAdminLogueado.value = true; return true
-    }
-
-    fun loginAdminAuth(username: String, password: String): Boolean {
-        val ok = username == "admin" && password == "admin"
-        _esAdminLogueado.value = ok; return ok
-    }
-
-    fun logoutAdmin() { _esAdminLogueado.value = false }
 
     var listaProductos = mutableStateOf<List<Producto>>(emptyList())
     fun cargarProductos() {
