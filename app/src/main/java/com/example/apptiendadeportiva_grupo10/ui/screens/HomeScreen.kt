@@ -121,25 +121,7 @@ fun HomeContent(
                         fontWeight = FontWeight.Bold
                     )
                 }
-
-                // 🔵 Botón Administrador
-                Button(
-                    onClick = onNavigationAdmin,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(65.dp),
-                    shape = MaterialTheme.shapes.large,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = purple,
-                        contentColor = Color.White
-                    )
-                ) {
-                    Text(
-                        "Acceso de Administrador",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                
             }
         }
     }
