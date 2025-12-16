@@ -81,38 +81,22 @@ class AuthViewModelTest {
     }
 
     // -----------------------------
-    // ADMIN
+    // LOGOUT GENERAL
     // -----------------------------
 
     @Test
-    fun `registrarAdmin valido retorna true`() {
-        val result = viewModel.registrarAdmin(
-            username = "admin",
-            rut = "11.111.111-1",
-            password = "admin",
-            email = "admin@mail.com"
-        )
+    fun `logout limpia estado del usuario`() {
 
-        assertTrue(result)
-        assertTrue(viewModel.esAdminLogueado.value)
-    }
+        // GIVEN
+        viewModel.updateUsername("admin")
+        viewModel.updateEmail("admin@mail.com")
 
-    @Test
-    fun `loginAdminAuth correcto retorna true`() {
-        val ok = viewModel.loginAdminAuth("admin", "admin")
-        assertTrue(ok)
-    }
+        // WHEN
+        viewModel.logout()
 
-    @Test
-    fun `loginAdminAuth incorrecto retorna false`() {
-        val ok = viewModel.loginAdminAuth("admin", "1234")
-        assertFalse(ok)
-    }
-
-    @Test
-    fun `logoutAdmin desloguea`() {
-        viewModel.loginAdminAuth("admin", "admin")
-        viewModel.logoutAdmin()
-        assertFalse(viewModel.esAdminLogueado.value)
+        // THEN
+        assertEquals("", viewModel.uiState.username)
+        assertEquals("", viewModel.uiState.email)
+        assertFalse(viewModel.isLoggedIn)
     }
 }

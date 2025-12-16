@@ -13,17 +13,20 @@ class GestionEnvioLogicTest {
         val agencia = "Correos de Chile"
         val fecha = "12-12-2025"
         val estado = "En despacho"
+        val direccion = "Av Siempre Viva 123"
 
         // WHEN
         val envio = GestionEnvioDto(
             agenciaEnvio = agencia,
             fechaEnvio = fecha,
-            estadoEnvio = estado
+            estadoEnvio = estado,
+            direccionDespacho = direccion
         )
 
         // THEN
         assertEquals("Correos de Chile", envio.agenciaEnvio)
         assertEquals("12-12-2025", envio.fechaEnvio)
         assertEquals("En despacho", envio.estadoEnvio)
+        assertEquals("Av Siempre Viva 123", envio.direccionDespacho)
     }
 }
