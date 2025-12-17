@@ -37,20 +37,21 @@ class ApiServiceTest {
     fun `getProducts parsea correctamente el JSON`() = runBlocking {
 
         val json = """
-            [
-                {
-                    "id": 1,
-                    "name": "Zapatilla",
-                    "description": "desc",
-                    "price": 1000,
-                    "category": "Calzado",
-                    "size": "M",
-                    "color": "Azul",
-                    "imageUrl": "img.png",
-                    "stockPorTalla": { "M": 5 }
-                }
-            ]
-        """.trimIndent()
+        [
+            {
+                "id": 1,
+                "name": "Zapatilla",
+                "description": "desc",
+                "price": 1000,
+                "category": "Calzado",
+                "size": "M",
+                "color": "Azul",
+                "imagenUrl": "img.png",
+                "stockPorTalla": { "M": 5 }
+             }
+        ]
+""".trimIndent()
+
 
         server.enqueue(MockResponse().setBody(json).setResponseCode(200))
 
