@@ -121,7 +121,7 @@ fun HomeContent(
                         fontWeight = FontWeight.Bold
                     )
                 }
-                
+
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.example.apptiendadeportiva_grupo10.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -66,6 +67,23 @@ fun ProfileScreen(
 
             Spacer(Modifier.weight(1f))
 
+            // 🔥 BOTÓN CERRAR SESIÓN
+            OutlinedButton(
+                onClick = {
+                    authViewModel.logout()
+                    navController.navigate("home") { // O la ruta de tu login
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+                border = BorderStroke(1.dp, Color(0xFF650099)),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF650099))
+            ) {
+                Text("CERRAR SESIÓN", fontWeight = FontWeight.Bold)
+            }
+
+            Spacer(Modifier.height(12.dp))
+
             // Botón Eliminar
             Button(
                 onClick = { showDialog = true },
@@ -79,7 +97,7 @@ fun ProfileScreen(
         }
     }
 
-    // Diálogo de Alerta para Eliminación
+    // Diálogo de Alerta para Eliminación (Se mantiene igual...)
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
@@ -104,7 +122,6 @@ fun ProfileScreen(
         )
     }
 }
-
 @Composable
 fun InfoCard(label: String, value: String) {
     Column(

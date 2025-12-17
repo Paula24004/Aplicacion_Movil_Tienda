@@ -192,7 +192,7 @@ class AuthViewModel(
                         region = userData.region ?: "",
                         comuna = userData.comuna ?: "",
                         direccion = userData.direccion ?: "",
-                        esAdmin = userData.esAdmin, // 🔥 AQUÍ: Guardamos si es admin o no
+                        esAdmin = userData.esAdmin,
                         isLoading = false
                     )
 
@@ -210,6 +210,16 @@ class AuthViewModel(
             }
         }
     }
+
+    fun logout() {
+
+        uiState = AuthUiState()
+        usuarioActual.value = ""
+        isLoggedIn = false
+        _esAdminLogueado.value = false
+    }
+
+
 
 
     // ---------------------------------------------------
@@ -282,14 +292,6 @@ class AuthViewModel(
             if (result.isSuccess) cargarProductos()
         }
     }
-
-    fun logout() {
-        // limpiar estado de usuario
-        isLoggedIn = false
-        usuarioActual.value = ""
-        uiState = AuthUiState()
-    }
-
 
     fun modificarProducto(producto: Producto) {
         viewModelScope.launch {
