@@ -34,6 +34,7 @@ fun HomeAdmin(
 
     val productosList by viewModel.listaProductos
 
+    // --- ESTADOS DEL FORMULARIO ---
     var nombre by remember { mutableStateOf("") }
     var descripcion by remember { mutableStateOf("") }
     var precioText by remember { mutableStateOf("") }
@@ -41,23 +42,23 @@ fun HomeAdmin(
     var color by remember { mutableStateOf("") }
     var imagen by remember { mutableStateOf("") }
 
+    // Control para el menú desplegable de categorías
+    var expanded by remember { mutableStateOf(false) }
+    val categoriasExistentes = remember(productosList) {
+        productosList.mapNotNull { it.categoria?.trim() }.distinct().sorted()
+    }
+
     var tipoProducto by remember { mutableStateOf("ROPA") }
     val stockPorTalla = remember { mutableStateMapOf<String, String>() }
 
+    // --- LÓGICA DE VALIDACIÓN ---
     val precio = precioText.toDoubleOrNull()
+    val stockValido = stockPorTalla.isNotEmpty() &&
+            stockPorTalla.all { it.value.isNotBlank() && it.value.toIntOrNull() != null }
 
-    val stockValido =
-        stockPorTalla.isNotEmpty() &&
-                stockPorTalla.all { it.value.isNotBlank() && it.value.toIntOrNull() != null }
-
-    val camposCompletos =
-        nombre.isNotBlank() &&
-                descripcion.isNotBlank() &&
-                categoria.isNotBlank() &&
-                color.isNotBlank() &&
-                imagen.isNotBlank() &&
-                precio != null &&
-                stockValido
+    val camposCompletos = nombre.isNotBlank() && descripcion.isNotBlank() &&
+            categoria.isNotBlank() && color.isNotBlank() &&
+            imagen.isNotBlank() && precio != null && stockValido
 
     val filePicker = rememberLauncherForActivityResult(
         ActivityResultContracts.GetContent()
@@ -70,13 +71,7 @@ fun HomeAdmin(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(
-                        "Panel Administrador",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
-                    )
-                },
+                title = { Text("Panel Administrador", fontWeight = FontWeight.Bold) },
                 actions = {
                     Button(onClick = onLogout) {
                         Text("Cerrar Sesión", fontWeight = FontWeight.Bold)
@@ -86,14 +81,13 @@ fun HomeAdmin(
         }
     ) { padding ->
 
-
-
         LazyColumn(
             modifier = Modifier
                 .padding(padding)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
+            // SECCIÓN: GESTIÓN DE PERSONAL
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -101,13 +95,11 @@ fun HomeAdmin(
                     border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF650099))
                 ) {
                     Row(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth(),
+                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column {
+                        Column(modifier = Modifier.weight(1f)) {
                             Text("Gestión de Personal", fontWeight = FontWeight.Bold, color = Color(0xFF650099))
                             Text("Registra nuevas cuentas de administrador", fontSize = 12.sp)
                         }
@@ -122,13 +114,10 @@ fun HomeAdmin(
             }
 
             item {
-                Text(
-                    "Agregar Producto",
-                    fontSize = 26.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Text("Agregar Producto", fontSize = 26.sp, fontWeight = FontWeight.Bold)
             }
 
+            // SECCIÓN: FORMULARIO DE PRODUCTO
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -138,57 +127,52 @@ fun HomeAdmin(
                         modifier = Modifier.padding(20.dp),
                         verticalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
-
-                        Text(
-                            "DATOS DEL PRODUCTO",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Text("DATOS DEL PRODUCTO", fontSize = 20.sp, fontWeight = FontWeight.Bold)
 
                         CustomInput("NOMBRE DEL PRODUCTO", nombre) { nombre = it }
                         CustomInput("DESCRIPCIÓN", descripcion) { descripcion = it }
-
-                        CustomInput(
-                            "PRECIO",
-                            precioText,
-                            KeyboardType.Decimal
-                        ) {
+                        CustomInput("PRECIO", precioText, KeyboardType.Decimal) {
                             precioText = it.filter { ch -> ch.isDigit() || ch == '.' }
                         }
 
-                        CustomInput("CATEGORÍA", categoria) { categoria = it }
+                        // --- SELECTOR DE CATEGORÍA DINÁMICO ---
+                        Column {
+                            Text("CATEGORÍA", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            ExposedDropdownMenuBox(
+                                expanded = expanded,
+                                onExpandedChange = { expanded = !expanded }
+                            ) {
+                                OutlinedTextField(
+                                    value = categoria,
+                                    onValueChange = { categoria = it },
+                                    label = { Text("Escribe o selecciona categoría") },
+                                    modifier = Modifier.fillMaxWidth().menuAnchor(),
+                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+                                )
+
+                                ExposedDropdownMenu(
+                                    expanded = expanded,
+                                    onDismissRequest = { expanded = false }
+                                ) {
+                                    categoriasExistentes.forEach { opcion ->
+                                        DropdownMenuItem(
+                                            text = { Text(opcion) },
+                                            onClick = {
+                                                categoria = opcion
+                                                expanded = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
                         CustomInput("COLOR", color) { color = it }
 
                         Divider()
 
-                        Text("TIPO DE PRODUCTO", fontWeight = FontWeight.Bold)
-
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            RadioButton(
-                                selected = tipoProducto == "ROPA",
-                                onClick = {
-                                    tipoProducto = "ROPA"
-                                    stockPorTalla.clear()
-                                }
-                            )
-                            Text("ROPA", fontWeight = FontWeight.Bold)
-
-                            Spacer(Modifier.width(16.dp))
-
-                            RadioButton(
-                                selected = tipoProducto == "CALZADO",
-                                onClick = {
-                                    tipoProducto = "CALZADO"
-                                    stockPorTalla.clear()
-                                }
-                            )
-                            Text("CALZADO", fontWeight = FontWeight.Bold)
-                        }
-
-                        Divider()
-
                         Text("STOCK POR TALLA", fontWeight = FontWeight.Bold)
-
                         tallas.forEach { talla ->
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Checkbox(
@@ -198,27 +182,14 @@ fun HomeAdmin(
                                         else stockPorTalla.remove(talla)
                                     }
                                 )
-
-                                Text(
-                                    talla,
-                                    modifier = Modifier.width(50.dp),
-                                    fontWeight = FontWeight.Bold
-                                )
-
+                                Text(talla, modifier = Modifier.width(50.dp), fontWeight = FontWeight.Bold)
                                 if (stockPorTalla.containsKey(talla)) {
                                     OutlinedTextField(
                                         value = stockPorTalla[talla] ?: "",
-                                        onValueChange = {
-                                            stockPorTalla[talla] =
-                                                it.filter { ch -> ch.isDigit() }
-                                        },
-                                        label = {
-                                            Text("CANTIDAD", fontWeight = FontWeight.Bold)
-                                        },
-                                        keyboardOptions = KeyboardOptions(
-                                            keyboardType = KeyboardType.Number
-                                        ),
-                                        modifier = Modifier.width(140.dp)
+                                        onValueChange = { stockPorTalla[talla] = it.filter { ch -> ch.isDigit() } },
+                                        label = { Text("CANT") },
+                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                        modifier = Modifier.width(100.dp)
                                     )
                                 }
                             }
@@ -227,11 +198,7 @@ fun HomeAdmin(
                         Divider()
 
                         Text("IMAGEN DEL PRODUCTO", fontWeight = FontWeight.Bold)
-
-                        Button(
-                            onClick = { filePicker.launch("image/*") },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
+                        Button(onClick = { filePicker.launch("image/*") }, modifier = Modifier.fillMaxWidth()) {
                             Text("SELECCIONAR IMAGEN", fontWeight = FontWeight.Bold)
                         }
 
@@ -239,14 +206,12 @@ fun HomeAdmin(
                             Image(
                                 painter = rememberAsyncImagePainter(imagen),
                                 contentDescription = null,
-                                modifier = Modifier
-                                    .size(140.dp)
-                                    .align(Alignment.CenterHorizontally),
+                                modifier = Modifier.size(120.dp).align(Alignment.CenterHorizontally),
                                 contentScale = ContentScale.Crop
                             )
                         }
 
-                        Spacer(Modifier.height(12.dp))
+                        Spacer(Modifier.height(10.dp))
 
                         Button(
                             onClick = {
@@ -256,49 +221,28 @@ fun HomeAdmin(
                                     descripcion = descripcion,
                                     precio = precio!!,
                                     categoria = categoria,
-                                    size = null,
                                     color = color,
                                     imagenUrl = imagen,
-                                    stockPorTalla = stockPorTalla.mapValues {
-                                        it.value.toInt()
-                                    }
+                                    stockPorTalla = stockPorTalla.mapValues { it.value.toInt() }
                                 )
-
                                 viewModel.agregarProducto(producto)
 
-                                nombre = ""
-                                descripcion = ""
-                                precioText = ""
-                                categoria = ""
-                                color = ""
-                                imagen = ""
-                                stockPorTalla.clear()
+                                // Limpiar Formulario
+                                nombre = ""; descripcion = ""; precioText = ""; categoria = ""; color = ""; imagen = ""; stockPorTalla.clear()
                             },
                             enabled = camposCompletos,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(52.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF6A1B9A),
-                                contentColor = Color.White
-                            )
+                            modifier = Modifier.fillMaxWidth().height(52.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A1B9A))
                         ) {
-                            Text(
-                                "GUARDAR PRODUCTO",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp
-                            )
+                            Text("GUARDAR PRODUCTO", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                         }
                     }
                 }
             }
 
+            // SECCIÓN: LISTADO DE PRODUCTOS EXISTENTES
             item {
-                Text(
-                    "PRODUCTOS (${productosList.size})",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Text("PRODUCTOS (${productosList.size})", fontSize = 22.sp, fontWeight = FontWeight.Bold)
             }
 
             items(productosList, key = { it.id }) { prod ->
@@ -311,63 +255,35 @@ fun HomeAdmin(
     }
 }
 
-
-
-/* ========================================================= */
-
 @Composable
-fun CustomInput(
-    label: String,
-    value: String,
-    keyboardType: KeyboardType = KeyboardType.Text,
-    onChange: (String) -> Unit
-) {
+fun CustomInput(label: String, value: String, keyboardType: KeyboardType = KeyboardType.Text, onChange: (String) -> Unit) {
     OutlinedTextField(
         value = value,
-        onValueChange = { onChange(it) },
-        label = {
-            Text(label, fontWeight = FontWeight.Bold)
-        },
+        onValueChange = onChange,
+        label = { Text(label, fontWeight = FontWeight.Bold) },
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         modifier = Modifier.fillMaxWidth()
     )
 }
 
 @Composable
-fun ProductoAdminItem(
-    producto: Producto,
-    onDelete: () -> Unit
-) {
+fun ProductoAdminItem(producto: Producto, onDelete: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Row(
-            modifier = Modifier
-                .padding(12.dp)
-                .fillMaxWidth(),
+            modifier = Modifier.padding(12.dp).fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(Modifier.weight(1f)) {
                 Text(producto.nombre, fontWeight = FontWeight.Bold)
-                Text("PRECIO: $${producto.precio}", fontWeight = FontWeight.Bold)
-                Text(
-                    "STOCK: ${
-                        producto.stockPorTalla?.entries?.joinToString {
-                            "${it.key}:${it.value}"
-                        } ?: "SIN STOCK"
-                    }",
-                    fontWeight = FontWeight.Bold
-                )
+                Text("Categoría: ${producto.categoria}", fontSize = 12.sp, color = Color.Gray)
+                Text("Precio: $${producto.precio}", fontWeight = FontWeight.Bold, color = Color(0xFF6A1B9A))
             }
-
             IconButton(onClick = onDelete) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Eliminar",
-                    tint = Color.Red
-                )
+                Icon(imageVector = Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.Red)
             }
         }
     }
