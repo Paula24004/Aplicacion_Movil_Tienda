@@ -183,15 +183,23 @@ fun RootScreen() {
             HomeAdmin(
                 viewModel = authViewModel,
                 onLogout = {
-
-                    // 1️⃣ Cerrar sesión real (usuario/admin)
                     authViewModel.logout()
-
-                    // 2️⃣ Volver al Home principal limpiando backstack
                     navController.navigate("home") {
                         popUpTo(0) { inclusive = true }
                     }
+                },
+                // ✅ Nueva lambda para ir a la pantalla de registro de admin
+                onNavigateToCrearAdmin = {
+                    navController.navigate("crear_admin_screen")
                 }
+            )
+        }
+
+        // 2. Nueva pantalla para registrar otros Admins
+        composable("crear_admin_screen") {
+            CrearAdminScreen(
+                navController = navController,
+                authViewModel = authViewModel
             )
         }
 

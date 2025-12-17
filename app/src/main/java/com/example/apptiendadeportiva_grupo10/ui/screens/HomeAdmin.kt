@@ -27,7 +27,8 @@ import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
 @Composable
 fun HomeAdmin(
     viewModel: AuthViewModel,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    onNavigateToCrearAdmin: () -> Unit
 ) {
     LaunchedEffect(Unit) { viewModel.cargarProductos() }
 
@@ -85,12 +86,40 @@ fun HomeAdmin(
         }
     ) { padding ->
 
+
+
         LazyColumn(
             modifier = Modifier
                 .padding(padding)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFF650099).copy(alpha = 0.1f)),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF650099))
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text("Gestión de Personal", fontWeight = FontWeight.Bold, color = Color(0xFF650099))
+                            Text("Registra nuevas cuentas de administrador", fontSize = 12.sp)
+                        }
+                        Button(
+                            onClick = onNavigateToCrearAdmin,
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF650099))
+                        ) {
+                            Text("CREAR ADMIN")
+                        }
+                    }
+                }
+            }
 
             item {
                 Text(
@@ -281,6 +310,8 @@ fun HomeAdmin(
         }
     }
 }
+
+
 
 /* ========================================================= */
 

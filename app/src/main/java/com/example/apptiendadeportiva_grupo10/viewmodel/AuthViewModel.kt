@@ -174,6 +174,65 @@ class AuthViewModel(
         }
     }
 
+    fun registrarNuevoAdmin(
+        usernameAdmin: String,
+        passwordAdmin: String,
+        emailAdmin: String,
+        rutAdmin: String,
+        regionAdmin: String,
+        comunaAdmin: String,
+        direccionAdmin: String,
+        onSuccess: () -> Unit
+    ) {
+        if (usernameAdmin.isBlank() || emailAdmin.isBlank() || passwordAdmin.isBlank() ||
+            rutAdmin.isBlank() || regionAdmin.isBlank() || comunaAdmin.isBlank() || direccionAdmin.isBlank()) {
+            mensaje.value = "Todos los campos son obligatorios"
+            return
+        }
+        if (!esEmailValido(emailAdmin)) {
+            mensaje.value = "Correo electrónico no válido"
+            return
+        }
+        if (!validarRut(rutAdmin)) {
+            mensaje.value = "RUT inválido"
+            return
+        }
+        if (!esPasswordSegura(passwordAdmin)) {
+            mensaje.value = "La contraseña debe tener letras, números y mín. 6 caracteres"
+            return
+        }
+
+        // 2. Ejecución
+        viewModelScope.launch {
+            try {
+                val nuevoAdmin = User(
+                    username = usernameAdmin,
+                    password = passwordAdmin,
+                    email = emailAdmin,
+                    rut = rutAdmin,
+                    region = regionAdmin,
+                    comuna = comunaAdmin,
+                    direccion = direccionAdmin,
+                    esAdmin = true,
+                    active = true
+                )
+
+                val response = userRepository.registrar(nuevoAdmin)
+
+                if (response.isSuccessful) {
+                    mensaje.value = "Administrador creado con éxito"
+                    onSuccess()
+                } else {
+                    mensaje.value = "El email o username ya existe"
+                }
+            } catch (e: Exception) {
+                mensaje.value = "Error de conexión al crear administrador"
+            }
+        }
+    }
+
+
+
     // ---------------------------------------------------
     // LOGIN (CORREGIDO PARA CAPTURAR ID)
     // ---------------------------------------------------
@@ -187,6 +246,7 @@ class AuthViewModel(
 
                 if (userData != null) {
                     uiState = uiState.copy(
+                        id = userData.id ?: 0,
                         username = userData.username,
                         email = userData.email,
                         region = userData.region ?: "",
