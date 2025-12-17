@@ -1,5 +1,10 @@
 package com.example.apptiendadeportiva_grupo10.model
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Base64
+
+
 fun ProductoDto.toEntity(): ProductoEntity {
     return ProductoEntity(
         id = this.id ?: 0,
@@ -40,4 +45,18 @@ fun Producto.toDto(): ProductoDto {
         imagenUrl = this.imagenUrl,
         stockPorTalla = this.stockPorTalla
     )
+}
+
+
+// Función de extensión para convertir el string de la DB en algo que Android entienda
+fun Producto.getBitmap(): Bitmap? {
+    if (this.imagenUrl == null || !this.imagenUrl.startsWith("data:image")) return null
+
+    return try {
+        val base64Data = this.imagenUrl.substringAfter(",")
+        val decodedBytes = Base64.decode(base64Data, Base64.DEFAULT)
+        BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+    } catch (e: Exception) {
+        null
+    }
 }

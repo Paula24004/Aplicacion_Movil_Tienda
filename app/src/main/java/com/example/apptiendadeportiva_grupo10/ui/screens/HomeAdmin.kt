@@ -1,5 +1,11 @@
 package com.example.apptiendadeportiva_grupo10.ui.screens
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
+import android.util.Base64
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -15,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -22,6 +29,35 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.apptiendadeportiva_grupo10.model.Producto
 import com.example.apptiendadeportiva_grupo10.viewmodel.AuthViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
+
+// --- FUNCIÓN DE PROCESAMIENTO DE IMAGEN ---
+fun procesarImagenParaBackend(context: Context, uri: Uri): String? {
+    return try {
+        val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
+        val bitmapOriginal = BitmapFactory.decodeStream(inputStream) ?: return null
+
+        // Redimensionar para reducir peso del Base64 (Máximo 800px)
+        val aspectRadio = bitmapOriginal.width.toFloat() / bitmapOriginal.height.toFloat()
+        val targetWidth = 800
+        val targetHeight = (targetWidth / aspectRadio).toInt()
+        val bitmapReducido = Bitmap.createScaledBitmap(bitmapOriginal, targetWidth, targetHeight, true)
+
+        val outputStream = ByteArrayOutputStream()
+        bitmapReducido.compress(Bitmap.CompressFormat.JPEG, 70, outputStream)
+        val bytes = outputStream.toByteArray()
+
+        val base64String = Base64.encodeToString(bytes, Base64.NO_WRAP)
+        "data:image/jpeg;base64,$base64String"
+    } catch (e: Exception) {
+        Log.e("IMAGEN_ERROR", "Error procesando imagen: ${e.message}")
+        null
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,6 +66,9 @@ fun HomeAdmin(
     onLogout: () -> Unit,
     onNavigateToCrearAdmin: () -> Unit
 ) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
     LaunchedEffect(Unit) { viewModel.cargarProductos() }
 
     val productosList by viewModel.listaProductos
@@ -40,9 +79,9 @@ fun HomeAdmin(
     var precioText by remember { mutableStateOf("") }
     var categoria by remember { mutableStateOf("") }
     var color by remember { mutableStateOf("") }
-    var imagen by remember { mutableStateOf("") }
+    var imagenBase64 by remember { mutableStateOf("") }
+    var procesandoImagen by remember { mutableStateOf(false) }
 
-    // Control para el menú desplegable de categorías
     var expanded by remember { mutableStateOf(false) }
     val categoriasExistentes = remember(productosList) {
         productosList.mapNotNull { it.categoria?.trim() }.distinct().sorted()
@@ -51,22 +90,34 @@ fun HomeAdmin(
     var tipoProducto by remember { mutableStateOf("ROPA") }
     val stockPorTalla = remember { mutableStateMapOf<String, String>() }
 
-    // --- LÓGICA DE VALIDACIÓN ---
+    // --- VALIDACIONES ---
     val precio = precioText.toDoubleOrNull()
     val stockValido = stockPorTalla.isNotEmpty() &&
             stockPorTalla.all { it.value.isNotBlank() && it.value.toIntOrNull() != null }
 
     val camposCompletos = nombre.isNotBlank() && descripcion.isNotBlank() &&
             categoria.isNotBlank() && color.isNotBlank() &&
-            imagen.isNotBlank() && precio != null && stockValido
+            imagenBase64.isNotBlank() && precio != null && stockValido && !procesandoImagen
 
     val filePicker = rememberLauncherForActivityResult(
         ActivityResultContracts.GetContent()
-    ) { uri -> uri?.let { imagen = it.toString() } }
+    ) { uri ->
+        uri?.let {
+            procesandoImagen = true
+            scope.launch {
+                val resultado = withContext(Dispatchers.IO) {
+                    procesarImagenParaBackend(context, it)
+                }
+                if (resultado != null) {
+                    imagenBase64 = resultado
+                }
+                procesandoImagen = false
+            }
+        }
+    }
 
-    val tallasRopa = listOf("S", "M", "L", "XL", "XXL")
-    val tallasCalzado = (36..42).map { it.toString() }
-    val tallas = if (tipoProducto == "ROPA") tallasRopa else tallasCalzado
+    val tallas = if (tipoProducto == "ROPA") listOf("S", "M", "L", "XL", "XXL")
+    else (36..42).map { it.toString() }
 
     Scaffold(
         topBar = {
@@ -74,182 +125,134 @@ fun HomeAdmin(
                 title = { Text("Panel Administrador", fontWeight = FontWeight.Bold) },
                 actions = {
                     Button(onClick = onLogout) {
-                        Text("Cerrar Sesión", fontWeight = FontWeight.Bold)
+                        Text("Cerrar Sesión")
                     }
                 }
             )
         }
     ) { padding ->
-
         LazyColumn(
-            modifier = Modifier
-                .padding(padding)
-                .padding(16.dp),
+            modifier = Modifier.padding(padding).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            // SECCIÓN: GESTIÓN DE PERSONAL
+            // GESTIÓN DE PERSONAL
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = Color(0xFF650099).copy(alpha = 0.1f)),
                     border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF650099))
                 ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text("Gestión de Personal", fontWeight = FontWeight.Bold, color = Color(0xFF650099))
-                            Text("Registra nuevas cuentas de administrador", fontSize = 12.sp)
+                            Text("Cuentas de administrador", fontSize = 12.sp)
                         }
-                        Button(
-                            onClick = onNavigateToCrearAdmin,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF650099))
-                        ) {
+                        Button(onClick = onNavigateToCrearAdmin, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF650099))) {
                             Text("CREAR ADMIN")
                         }
                     }
                 }
             }
 
-            item {
-                Text("Agregar Producto", fontSize = 26.sp, fontWeight = FontWeight.Bold)
-            }
+            item { Text("Agregar Producto", fontSize = 26.sp, fontWeight = FontWeight.Bold) }
 
-            // SECCIÓN: FORMULARIO DE PRODUCTO
+            // FORMULARIO
             item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    elevation = CardDefaults.cardElevation(6.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(14.dp)
-                    ) {
-                        Text("DATOS DEL PRODUCTO", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-
-                        CustomInput("NOMBRE DEL PRODUCTO", nombre) { nombre = it }
+                Card(modifier = Modifier.fillMaxWidth(), elevation = CardDefaults.cardElevation(6.dp)) {
+                    Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                        CustomInput("NOMBRE", nombre) { nombre = it }
                         CustomInput("DESCRIPCIÓN", descripcion) { descripcion = it }
-                        CustomInput("PRECIO", precioText, KeyboardType.Decimal) {
-                            precioText = it.filter { ch -> ch.isDigit() || ch == '.' }
-                        }
+                        CustomInput("PRECIO", precioText, KeyboardType.Decimal) { precioText = it }
 
-                        // --- SELECTOR DE CATEGORÍA DINÁMICO ---
-                        Column {
-                            Text("CATEGORÍA", fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                            ExposedDropdownMenuBox(
-                                expanded = expanded,
-                                onExpandedChange = { expanded = !expanded }
-                            ) {
-                                OutlinedTextField(
-                                    value = categoria,
-                                    onValueChange = { categoria = it },
-                                    label = { Text("Escribe o selecciona categoría") },
-                                    modifier = Modifier.fillMaxWidth().menuAnchor(),
-                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
-                                )
-
-                                ExposedDropdownMenu(
-                                    expanded = expanded,
-                                    onDismissRequest = { expanded = false }
-                                ) {
-                                    categoriasExistentes.forEach { opcion ->
-                                        DropdownMenuItem(
-                                            text = { Text(opcion) },
-                                            onClick = {
-                                                categoria = opcion
-                                                expanded = false
-                                            }
-                                        )
-                                    }
+                        // DROPDOWN CATEGORIA
+                        ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
+                            OutlinedTextField(
+                                value = categoria,
+                                onValueChange = { categoria = it },
+                                label = { Text("Categoría") },
+                                modifier = Modifier.fillMaxWidth().menuAnchor(),
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
+                            )
+                            ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                                categoriasExistentes.forEach { op ->
+                                    DropdownMenuItem(text = { Text(op) }, onClick = { categoria = op; expanded = false })
                                 }
                             }
                         }
 
                         CustomInput("COLOR", color) { color = it }
 
-                        Divider()
+                        Text("TIPO Y STOCK", fontWeight = FontWeight.Bold)
+                        Row {
+                            RadioButton(selected = tipoProducto == "ROPA", onClick = { tipoProducto = "ROPA"; stockPorTalla.clear() })
+                            Text("ROPA", Modifier.align(Alignment.CenterVertically))
+                            Spacer(Modifier.width(8.dp))
+                            RadioButton(selected = tipoProducto == "CALZADO", onClick = { tipoProducto = "CALZADO"; stockPorTalla.clear() })
+                            Text("CALZADO", Modifier.align(Alignment.CenterVertically))
+                        }
 
-                        Text("STOCK POR TALLA", fontWeight = FontWeight.Bold)
                         tallas.forEach { talla ->
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Checkbox(
-                                    checked = stockPorTalla.containsKey(talla),
-                                    onCheckedChange = { checked ->
-                                        if (checked) stockPorTalla[talla] = ""
-                                        else stockPorTalla.remove(talla)
-                                    }
-                                )
-                                Text(talla, modifier = Modifier.width(50.dp), fontWeight = FontWeight.Bold)
+                                Checkbox(checked = stockPorTalla.containsKey(talla), onCheckedChange = { if (it) stockPorTalla[talla] = "" else stockPorTalla.remove(talla) })
+                                Text(talla, modifier = Modifier.width(40.dp))
                                 if (stockPorTalla.containsKey(talla)) {
                                     OutlinedTextField(
                                         value = stockPorTalla[talla] ?: "",
-                                        onValueChange = { stockPorTalla[talla] = it.filter { ch -> ch.isDigit() } },
-                                        label = { Text("CANT") },
-                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                        modifier = Modifier.width(100.dp)
+                                        onValueChange = { stockPorTalla[talla] = it.filter { c -> c.isDigit() } },
+                                        modifier = Modifier.width(90.dp),
+                                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                                     )
                                 }
                             }
                         }
 
-                        Divider()
-
-                        Text("IMAGEN DEL PRODUCTO", fontWeight = FontWeight.Bold)
-                        Button(onClick = { filePicker.launch("image/*") }, modifier = Modifier.fillMaxWidth()) {
-                            Text("SELECCIONAR IMAGEN", fontWeight = FontWeight.Bold)
+                        // IMAGEN
+                        Button(
+                            onClick = { filePicker.launch("image/*") },
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = !procesandoImagen
+                        ) {
+                            Text(if (procesandoImagen) "PROCESANDO..." else if (imagenBase64.isEmpty()) "SELECCIONAR IMAGEN" else "IMAGEN LISTA ✅")
                         }
 
-                        if (imagen.isNotBlank()) {
+                        if (imagenBase64.isNotBlank()) {
                             Image(
-                                painter = rememberAsyncImagePainter(imagen),
+                                painter = rememberAsyncImagePainter(imagenBase64),
                                 contentDescription = null,
                                 modifier = Modifier.size(120.dp).align(Alignment.CenterHorizontally),
                                 contentScale = ContentScale.Crop
                             )
                         }
 
-                        Spacer(Modifier.height(10.dp))
-
                         Button(
                             onClick = {
                                 val producto = Producto(
-                                    id = 0,
-                                    nombre = nombre,
-                                    descripcion = descripcion,
-                                    precio = precio!!,
-                                    categoria = categoria,
+                                    id = 0, nombre = nombre, descripcion = descripcion,
+                                    precio = precio!!, categoria = categoria,
                                     color = color,
-                                    imagenUrl = imagen,
-                                    stockPorTalla = stockPorTalla.mapValues { it.value.toInt() }
+                                    imagenUrl = imagenBase64, // ENVIANDO EL BASE64 REAL
+                                    stockPorTalla = stockPorTalla.mapValues { it.value.toIntOrNull() ?: 0 }
                                 )
+                                Log.d("ENVIO", "Enviando producto con imagen de largo: ${imagenBase64.length}")
                                 viewModel.agregarProducto(producto)
 
-                                // Limpiar Formulario
-                                nombre = ""; descripcion = ""; precioText = ""; categoria = ""; color = ""; imagen = ""; stockPorTalla.clear()
+                                // Reset
+                                nombre = ""; descripcion = ""; precioText = ""; categoria = ""; color = ""; imagenBase64 = ""; stockPorTalla.clear()
                             },
                             enabled = camposCompletos,
                             modifier = Modifier.fillMaxWidth().height(52.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A1B9A))
                         ) {
-                            Text("GUARDAR PRODUCTO", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            Text("GUARDAR PRODUCTO", fontWeight = FontWeight.Bold)
                         }
                     }
                 }
             }
 
-            // SECCIÓN: LISTADO DE PRODUCTOS EXISTENTES
-            item {
-                Text("PRODUCTOS (${productosList.size})", fontSize = 22.sp, fontWeight = FontWeight.Bold)
-            }
-
+            // LISTADO
+            item { Text("PRODUCTOS (${productosList.size})", fontSize = 22.sp, fontWeight = FontWeight.Bold) }
             items(productosList, key = { it.id }) { prod ->
-                ProductoAdminItem(
-                    producto = prod,
-                    onDelete = { viewModel.eliminarProducto(prod.id) }
-                )
+                ProductoAdminItem(producto = prod, onDelete = { viewModel.eliminarProducto(prod.id) })
             }
         }
     }
@@ -260,7 +263,7 @@ fun CustomInput(label: String, value: String, keyboardType: KeyboardType = Keybo
     OutlinedTextField(
         value = value,
         onValueChange = onChange,
-        label = { Text(label, fontWeight = FontWeight.Bold) },
+        label = { Text(label) },
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         modifier = Modifier.fillMaxWidth()
     )
@@ -268,22 +271,14 @@ fun CustomInput(label: String, value: String, keyboardType: KeyboardType = Keybo
 
 @Composable
 fun ProductoAdminItem(producto: Producto, onDelete: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(4.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(12.dp).fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+    Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), elevation = CardDefaults.cardElevation(2.dp)) {
+        Row(modifier = Modifier.padding(12.dp).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text(producto.nombre, fontWeight = FontWeight.Bold)
-                Text("Categoría: ${producto.categoria}", fontSize = 12.sp, color = Color.Gray)
-                Text("Precio: $${producto.precio}", fontWeight = FontWeight.Bold, color = Color(0xFF6A1B9A))
+                Text("$${producto.precio}", color = Color(0xFF6A1B9A))
             }
             IconButton(onClick = onDelete) {
-                Icon(imageVector = Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.Red)
+                Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.Red)
             }
         }
     }

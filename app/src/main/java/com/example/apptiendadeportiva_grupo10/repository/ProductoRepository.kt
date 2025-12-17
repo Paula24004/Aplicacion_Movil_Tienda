@@ -50,22 +50,24 @@ class ProductoRepository(
         val db = AppDatabase.getInstance(context)
         val dao = db.productoDao()
 
-        val productoDtoParaEnvio = producto.toDto()
-
         return try {
-            val response = api.createProduct(productoDtoParaEnvio)
+            // Log para verificar el tamaño antes de disparar la petición
+            val base64Length = producto.imagenUrl?.length ?: 0
+            android.util.Log.d("REPO_DEBUG", "Enviando imagen de tamaño: $base64Length caracteres")
+
+            val response = api.createProduct(producto.toDto())
 
             if (response.isSuccessful && response.body() != null) {
-                // ÉXITO: Guarda en Room
-                val productoDtoCreado = response.body()!!
-                val productoEntity = productoDtoCreado.toEntity()
+                val productoEntity = response.body()!!.toEntity()
                 dao.insert(productoEntity)
                 Result.success(Unit)
             } else {
-                Result.failure(Exception("Error al crear producto en el API: ${response.code()}. Respuesta: ${response.errorBody()?.string()}"))
+                val errorMsg = response.errorBody()?.string() ?: "Error desconocido"
+                // Si el error contiene "Large" o "413", es por el tamaño de la imagen en application.properties
+                Result.failure(Exception("Servidor rechazó la petición: $errorMsg"))
             }
         } catch (e: Exception) {
-            Result.failure(Exception("Error de red al crear producto: ${e.message}"))
+            Result.failure(Exception("Error de red: ${e.message}"))
         }
     }
 

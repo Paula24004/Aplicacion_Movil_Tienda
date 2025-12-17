@@ -336,13 +336,18 @@ class AuthViewModel(
 
     fun agregarProducto(producto: Producto) {
         viewModelScope.launch {
+            uiState = uiState.copy(isLoading = true) // Reutilizamos el estado de carga
             val result = productoRepository.insertProducto(getApplication(), producto)
+
             if (result.isSuccess) {
-                mensajeadmin.value = "Producto agregado correctamente"
+                mensajeadmin.value = "✅ Producto guardado con éxito"
                 cargarProductos()
             } else {
-                mensajeadmin.value = result.exceptionOrNull()?.message ?: "Error desconocido"
+                val error = result.exceptionOrNull()?.message ?: "Error desconocido"
+                mensajeadmin.value = " Error: $error"
+                android.util.Log.e("VIEWMODEL_ERROR", error)
             }
+            uiState = uiState.copy(isLoading = false)
         }
     }
 
